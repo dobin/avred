@@ -138,9 +138,7 @@ def parse_strings(strings_data):
             str_ref.section = data[5]
             str_ref.encoding = data[6]
             str_ref.content = content
-            
-            if "Kerberos name" in content:
-                print(str_ref)
+
             string_refs += [str_ref]
 
     return string_refs
@@ -256,8 +254,6 @@ def explore(sample_file):
 
         # patch the binary (mask the string)
         binary = patch_binary(binary, string, "", True)
-        if "mimidrv" in string.content:
-            print(f"Found {string.content}, index = {string.index}")
 
     dump_path = "/tmp/goat_0.bin"
     with open(dump_path, "wb") as f:
@@ -320,15 +316,28 @@ def explore(sample_file):
     bad_strings = list(filter(lambda x: x.is_bad, str_refs))
     print(bad_strings)
 
+def is_all_blacklisted(string_refs, blacklist):
+
+    for i in string_refs:
+        if not i.index in blacklist:
+            return False
+    return True
+
 """
     todo: once a string is found, remember its index, black-list it, and continue.
+    todo: update the progress bar.
+    todo: use a threadpool.
+    @binary: binary blob currently edited.
+    @string_refs: list of StringRefs objects.
+    @blacklist: list of strings' index to never unmask.
 """
-def rec_bissect(binary, string_refs):
+def rec_bissect(binary, string_refs, blacklist):
 
     if len(string_refs) < 2:
         for i in string_refs:
             print_dbg(repr(i), 2, False)
-        return False
+            blacklist.append(i.index)
+        return blacklist
 
     half_nb_strings = len(string_refs) // 2
     half1 = string_refs[:half_nb_strings]
@@ -337,12 +346,14 @@ def rec_bissect(binary, string_refs):
     binary2 = binary
 
     for string in half1:
-        binary1 = patch_binary(binary1, string, "", False)
+        if string.index not in blacklist:
+            binary1 = patch_binary(binary1, string, "", False)
         binary2 = patch_binary(binary2, string, "", True)
 
     for string in half2:
         binary1 = patch_binary(binary1, string, "", True)
-        binary2 = patch_binary(binary2, string, "", False)
+        if string.index not in blacklist:
+            binary2 = patch_binary(binary2, string, "", False)
 
     dump_path1 = f"/tmp/goat_{half1[0].index}_{str(random.randint(10000,20000))}.bin"
     dump_path2 = f"/tmp/goat_{half2[0].index}_{str(random.randint(10000,20000))}.bin"
@@ -358,16 +369,38 @@ def rec_bissect(binary, string_refs):
     with open(dump_path1, "wb") as f:
         f.write(binary1)
     res = False
+    res3 = False
 
     if detection_result1:
         print_dbg(f"Found signature between between {half1[0].index} and {half1[-1].index}", 2, True)
-        res = res or rec_bissect(binary1, half1)
+        blacklist1 = rec_bissect(binary1, half1, blacklist)
+        res = res or len(blacklist1) > len(blacklist)
+        if res:
+            c = set(blacklist + blacklist1)
+            blacklist = list(c)
+            res2 = True
+            while res2 is True and not is_all_blacklisted(half1, blacklist):
+                print("Half1")
+                for i in blacklist1:
+                    print(i, end=' ')
+                blacklist11 = rec_bissect(binary1, half1, blacklist)                
+                res2 = res2 and len(blacklist11) > len(blacklist1)
 
     if detection_result2:
         print_dbg(f"Found signature between between {half2[0].index} and {half2[-1].index}", 2, True)
-        res = res or rec_bissect(binary2, half2)
+        blacklist2 = rec_bissect(binary2, half2, blacklist)
+        if res:
+            res3 = True
+            c = set(blacklist + blacklist2)
+            blacklist = list(c)
+            while res3 is True and not is_all_blacklisted(half2, blacklist):
+                print("Half2")
+                for i in blacklist2:
+                    print(i, end=' ')
+                blacklist22 = rec_bissect(binary2, half2, blacklist)
+                res3 = res3 and len(blacklist22) > len(blacklist2)
 
-    return res
+    return blacklist
 
 def bissect(sample_file):
     # mpengine looks for signatures definitions in the current directory.
@@ -405,7 +438,8 @@ def bissect(sample_file):
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
     progress = tqdm(total=len(str_refs), leave=False)
 
-    rec_bissect(binary, str_refs)
+    blacklist = []
+    rec_bissect(binary, str_refs, blacklist)
 
 if __name__ == "__main__":
 
