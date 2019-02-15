@@ -7,24 +7,37 @@ import dataclasses
 import re
 from tqdm import tqdm
 
-BINARY = "/home/vladimir/dev/research/find_detected_strings/ext_server_kiwi.x64.dll"
+BINARY = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
-DEBUG_LEVEL = 3
+DEBUG_LEVEL = 2
+LVL_ALL_DETAILS = 3
+LVL_DETAILS = 2
+LVL_RES_ONLY = 1
+LVL_SILENT = 0
 
 @dataclasses.dataclass
 class StringRef:
-    index: int = 0  # index of the string
-    paddr: int = 0  # offset from the beginning of the file
-    vaddr: int = 0  # virtual address in the binary
-    length: int = 0  # number of characters of the string
-    size: int = 0  # size of the memory taken by the string
-    section: str = ""  # segment where the string is located
-    encoding: str = ""  # encoding of the string (utf-8, utf-16, utf-32, etc)
-    content: str = ""  # actual string
+    index      : int  = 0  # index of the string
+    paddr      : int  = 0  # offset from the beginning of the file
+    vaddr      : int  = 0  # virtual address in the binary
+    length     : int  = 0  # number of characters of the string
+    size       : int  = 0  # size of the memory taken by the string
+    section    : str  = ""  # segment where the string is located
+    encoding   : str  = ""  # encoding of the string (utf-8, utf-16, utf-32, etc)
+    content    : str  = ""  # actual string
     is_replaced: bool = False  # has this string already been patched?
-    is_bad: bool = False  # does this string has a signifcant impact on the AV's verdict?
+    is_bad     : bool = False  # does this string has a signifcant impact on the AV's verdict?
 
-def print_dbg(msg, level=3):
+"""
+    Wrapper to print text to stdout, either for concurrent access to
+    the file descriptor, or because we need to enrich the text before.
+"""
+def print_dbg(msg, level=3, decorate=True):
+
+    toprint = msg
+
+    if decorate:
+        toprint = "[*] " + toprint
 
     if level <= DEBUG_LEVEL:
         tqdm.write(msg)
@@ -53,6 +66,10 @@ def strings(binary, min=4):
     if len(result) >= min:  # catch result at EOF
         yield result 
 
+"""
+    Loads an entire binary to memory.
+    Warning: don't use on huge files.
+"""
 def get_binary(path):
 
     data = []
@@ -62,7 +79,10 @@ def get_binary(path):
 
     return data
 
-# todo deleteme
+"""
+    Todo: delete.
+    Extracts strings from a binary blob.
+"""
 def handle_string(data, offset, length):
 
     blob = data[0xa0210:0xa0210+120]
@@ -71,6 +91,11 @@ def handle_string(data, offset, length):
     for s in strings(blob):
         print_dbg(f"> {s}",1)
 
+"""
+    Executes rabin2 to get all the strings from a binary.
+    @filepath: the path to the file to be analyzed.
+    @return: the raw output from rabin2
+"""
 def get_all_strings(file_path):
 
     command = ['rabin2', "-z", file_path]
@@ -88,6 +113,12 @@ def get_all_strings(file_path):
 
     return rout 
 
+"""
+    Used to process the raw output of rabin2.
+    Populates a collection of StringRefs objects from the collected data.
+    @strings_data: the raw output of rabin2
+    @return: a collection of StringRefs
+"""
 def parse_strings(strings_data):
     #columns: Num, Paddr, Vaddr, Len, Size, Section, Type, String
     string_refs = []
@@ -128,7 +159,7 @@ def scan(file_path):
         m = re.search('Threat', out)
 
         if m:
-            print_dbg("[!] Threat found\n",2)
+            print_dbg("Threat found\n", LVL_ALL_DETAILS, True)
             return True
        
         if(retcode is not None):
@@ -136,7 +167,13 @@ def scan(file_path):
 
     return False 
 
-
+"""
+    @description: patch a binary blob at the location pointed by "str_ref"
+    @binary: binary blob of data
+    @str_ref: StringRef object, must hold size, length and content.
+    @filepath: if non empty, the function will write the resulting binary to the specified location on disk.
+    @mask: if true, patches with junk data, or else path with str_ref.content (revert to original content)
+"""
 def patch_binary(binary, str_ref, filepath, mask=True):
     
     patch = bytes(chr(0)* str_ref.size,'ascii')
@@ -156,8 +193,7 @@ def patch_binary(binary, str_ref, filepath, mask=True):
         patch = bytes(str_ref.content, encoding)
 
     new_bin = binary[:str_ref.paddr] + patch + binary[str_ref.paddr+str_ref.size:]    
-    #binary[str_ref.paddr:str_ref.paddr+str_ref.size] = new_bytes
-
+  
     # write the patched binary to disk
     if len(filepath) > 0:
         with open(filepath, "wb") as f:
@@ -165,9 +201,9 @@ def patch_binary(binary, str_ref, filepath, mask=True):
 
     return new_bin
 
-def explore(sample_file):
+"""
+    Find signatures in the string tables by repeatedly querying WD's engine.
 
-    """
     ALGORITHM:
     assert that the AV detects the binary or else abort
     replaces all strings with 'AAAA...'
@@ -177,14 +213,29 @@ def explore(sample_file):
         string is bad, re-mask it, continue
     else
         continue to un-mask
+"""
+def explore(sample_file):
 
-    corner cases:
-        what if a lot of low score strings trigger detection and we miss the more
-        important strings ?
+    known_strings = ["Pass-the-ccache [NT6]",
+                    "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
+                    "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
+                    "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
+                    "lsasrv.dll",
+                    "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
+                    "SamIFree_SAMPR_USER_INFO_BUFFER",
+                    "KiwiAndRegistryTools",
+                    "wdigest.dll",
+                    "multirdp",
+                    "logonPasswords",
+                    "credman",
+                    "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
+                    "n.e. (KIWI_MSV1_0_CREDENTIALS KO)",
+                    "\\.\mimidrv"]
 
-        --> i don't know!
-    """
+    # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
+
+    # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 
     # use rabin2 from radare2 to extract all the strings from the binary
@@ -195,6 +246,7 @@ def explore(sample_file):
 
     print(f"We got {len(str_refs)} string objects")
 
+    # read the binary.
     binary = get_binary(sample_file)
 
     # mask all strings
@@ -203,6 +255,8 @@ def explore(sample_file):
 
         # patch the binary (mask the string)
         binary = patch_binary(binary, string, "", True)
+        if "mimidrv" in string.content:
+            print(f"Found {string.content}, index = {string.index}")
 
     dump_path = "/tmp/goat_0.bin"
     with open(dump_path, "wb") as f:
@@ -210,19 +264,38 @@ def explore(sample_file):
         
     detection_result = scan(dump_path)
 
+    # no point in continuing if Windows Defender detects something else than strings.
     assert(detection_result is False)
 
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
     progress = tqdm(total=len(str_refs), leave=False)
+
     for string in str_refs:
+  
         string.is_replaced = False
         dump_path = f"/tmp/goat_{string.index}.bin"
+
+        if string.content in known_strings:
+            print("Skipped string " + string.content)
+            with open("current_state.txt", 'a+') as d:
+                d.write(repr(string))
+            progress.update(1)
+            continue
+        
         binary = patch_binary(binary, string, dump_path, False)
+
+        if string.index < 2936:
+            progress.update(1)
+            os.remove(dump_path)
+            continue
+            
         detection_result = scan(dump_path)
         
         if detection_result:
             print_dbg("Found a bad string, re-masking it", 1)
-            print_dbg(string.content)
+            with open("current_state.txt", 'a+') as d:
+                d.write(repr(string))
+            print_dbg(string.content, 2, False)
             string.is_replaced = True
             string.is_bad = True
             binary = patch_binary(binary, string, "", True)
