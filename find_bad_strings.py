@@ -6,6 +6,7 @@ import subprocess
 import dataclasses
 import re
 from tqdm import tqdm
+import random
 
 BINARY = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
@@ -272,16 +273,22 @@ def explore(sample_file):
 
     for string in str_refs:
   
-        string.is_replaced = False
-        dump_path = f"/tmp/goat_{string.index}.bin"
-
-        if string.content in known_strings:
-            print("Skipped string " + string.content)
-            with open("current_state.txt", 'a+') as d:
-                d.write(repr(string))
+        if string.index < 1500:
             progress.update(1)
             continue
         
+        string.is_replaced = False
+        dump_path = f"/tmp/goat_{string.index}.bin"
+
+        banned_words = ["mimi", "password", "Kerb", "Ticket", "LsaCallAuthenticationPackage", "ntlm", "hash"]
+        if string.index < 2936:
+            if string.content in known_strings or any(word in string.content for word in banned_words):
+                print("Skipped string " + string.content)
+                with open("current_state.txt", 'a+') as d:
+                    d.write(repr(string))
+                progress.update(1)
+                continue
+            
         binary = patch_binary(binary, string, dump_path, False)
 
         if string.index < 2936:
@@ -293,12 +300,14 @@ def explore(sample_file):
         
         if detection_result:
             print_dbg("Found a bad string, re-masking it", 1)
+
             with open("current_state.txt", 'a+') as d:
                 d.write(repr(string))
-            print_dbg(string.content, 2, False)
+
+            print_dbg(repr(string), 2, False)
             string.is_replaced = True
             string.is_bad = True
-            binary = patch_binary(binary, string, "", True)
+            binary = patch_binary(binary, string, dump_path, True)
         else:
             os.remove(dump_path)
             
@@ -311,8 +320,92 @@ def explore(sample_file):
     bad_strings = list(filter(lambda x: x.is_bad, str_refs))
     print(bad_strings)
 
+"""
+    todo: once a string is found, remember its index, black-list it, and continue.
+"""
+def rec_bissect(binary, string_refs):
 
+    if len(string_refs) < 2:
+        for i in string_refs:
+            print_dbg(repr(i), 2, False)
+        return False
 
+    half_nb_strings = len(string_refs) // 2
+    half1 = string_refs[:half_nb_strings]
+    half2 = string_refs[half_nb_strings:]
+    binary1 = binary
+    binary2 = binary
+
+    for string in half1:
+        binary1 = patch_binary(binary1, string, "", False)
+        binary2 = patch_binary(binary2, string, "", True)
+
+    for string in half2:
+        binary1 = patch_binary(binary1, string, "", True)
+        binary2 = patch_binary(binary2, string, "", False)
+
+    dump_path1 = f"/tmp/goat_{half1[0].index}_{str(random.randint(10000,20000))}.bin"
+    dump_path2 = f"/tmp/goat_{half2[0].index}_{str(random.randint(10000,20000))}.bin"
+    
+    with open(dump_path1, "wb") as f:
+        f.write(binary1)
+
+    with open(dump_path2, "wb") as f:
+        f.write(binary2)
+        
+    detection_result1 = scan(dump_path1)
+    detection_result2 = scan(dump_path2)
+    with open(dump_path1, "wb") as f:
+        f.write(binary1)
+    res = False
+
+    if detection_result1:
+        print_dbg(f"Found signature between between {half1[0].index} and {half1[-1].index}", 2, True)
+        res = res or rec_bissect(binary1, half1)
+
+    if detection_result2:
+        print_dbg(f"Found signature between between {half2[0].index} and {half2[-1].index}", 2, True)
+        res = res or rec_bissect(binary2, half2)
+
+    return res
+
+def bissect(sample_file):
+    # mpengine looks for signatures definitions in the current directory.
+    os.chdir(WDEFENDER_INSTALL_PATH)
+
+    # no point in continuing if the binary is not detected as malicious already.
+    assert(scan(sample_file) is True)
+
+    # use rabin2 from radare2 to extract all the strings from the binary
+    strings_data = get_all_strings(sample_file)
+
+    # parse rabin2 output
+    str_refs = parse_strings(strings_data)
+
+    print(f"We got {len(str_refs)} string objects")
+
+    # read the binary.
+    binary = get_binary(sample_file)
+
+    # mask all strings
+    for string in str_refs:
+        string.is_replaced = True
+
+        # patch the binary (mask the string)
+        binary = patch_binary(binary, string, "", True)
+ 
+    dump_path = "/tmp/goat_0.bin"
+    with open(dump_path, "wb") as f:
+        f.write(binary)
+        
+    detection_result = scan(dump_path)
+    # no point in continuing if Windows Defender detects something else than strings.
+    assert(detection_result is False)
+
+    print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
+    progress = tqdm(total=len(str_refs), leave=False)
+
+    rec_bissect(binary, str_refs)
 
 if __name__ == "__main__":
 
@@ -322,7 +415,8 @@ if __name__ == "__main__":
         sample_file = sys.argv[1]
 
     try:
-        explore(sample_file)
+        #explore(sample_file)
+        bissect(sample_file)
         print_dbg("[*] Done ! Press any to exit...", 0)
 
     except KeyboardInterrupt:
