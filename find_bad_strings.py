@@ -127,7 +127,7 @@ def parse_strings(strings_data):
     for string in strings_data.split('\n'):
         data = string.split()
 
-        if len(data) >= 7 and data[0] != "Num":
+        if len(data) >= 7 and data[0].isnumeric():
             content = " ".join(data[7:])
             str_ref = StringRef()
             str_ref.index = int(data[0])
@@ -370,7 +370,7 @@ def rec_bissect(binary, string_refs, blacklist):
         f.write(binary1)
     res = False
     res3 = False
-
+    # problem: other branches are not explored.
     if detection_result1:
         print_dbg(f"Found signature between between {half1[0].index} and {half1[-1].index}", 2, True)
         blacklist1 = rec_bissect(binary1, half1, blacklist)
