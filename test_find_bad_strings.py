@@ -87,11 +87,11 @@ def mock_scan(filepath):
     all_strings = fbs.get_all_strings(filepath)
     all_strings_ref = fbs.parse_strings(all_strings)
     known_strings = ["Pass-the-ccache [NT6]",
-                "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
-                "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
-                "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
+                "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)\\n",
+                "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)\\n",
+                "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)\\n",
                 "lsasrv.dll",
-                "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
+                "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)\\n",
                 "SamIFree_SAMPR_USER_INFO_BUFFER",
                 "KiwiAndRegistryTools",
                 "wdigest.dll",
@@ -106,17 +106,19 @@ def mock_scan(filepath):
         if i.content in known_strings:
             print(f"---> Found bad string {i.content} at index {i.index}, address = {i.paddr}")
             return True
+        elif "kuhl_m_crypto_l_certificates" in i.content:
+            print(f"Look found it: {repr(i)}")
     return False
 
 @unittest.mock.patch("find_bad_strings.scan", side_effect=mock_scan)
 @unittest.mock.patch("find_bad_strings.os.chdir")
 def test_bissection(mock_scan, mock_chdir):
     known_strings = ["Pass-the-ccache [NT6]",
-            "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
-            "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
-            "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
+            "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)\\n",
+            "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)\\n",
+            "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)\\n",
             "lsasrv.dll",
-            "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
+            "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)\\n",
             "SamIFree_SAMPR_USER_INFO_BUFFER",
             "KiwiAndRegistryTools",
             "wdigest.dll",
@@ -129,14 +131,35 @@ def test_bissection(mock_scan, mock_chdir):
     assert len(blacklist) > 0
     all_strings = fbs.get_all_strings("test_cases/ext_server_kiwi.x64.dll")
     all_strings_ref = fbs.parse_strings(all_strings)
-    for i in blacklist:
-        assert all_strings_ref[i].index == i
-        assert all_strings_ref[i].content in known_strings
-    
+
     try:
+        for i in blacklist:
+            assert all_strings_ref[i].index == i
+            assert all_strings_ref[i].content in known_strings
+
         assert len(blacklist) == len(known_strings)
+    
     except AssertionError:
         print(blacklist)
         for i in blacklist:
             print(list(filter(lambda x: x.index == i, all_strings_ref)))
         raise AssertionError
+
+
+@pytest.mark.parametrize('list1,list2,output', [
+    ([], [1], [1]),
+    ([1], [1], [1]),
+    ([2,3], [4], [2,3,4]),
+    ([2,3,34,3], [1,0,3,1,1,1], [0,1,2,3,34])])
+def test_merge_unique(list1, list2, output):
+    assert fbs.merge_unique(list1, list2) == output
+
+
+@pytest.mark.parametrize('list1,list2,output', [
+    ([], [1], False),
+    ([1], [1], True),
+    ([2, 3], [4], False),
+    ([2, 3, 34, 3], [1, 0, 3, 1, 1, 1], False),
+    ([4,3,2], [2,3,4], True)])
+def test_is_equal_unordered(list1, list2, output):
+    assert fbs.is_equal_unordered(list1, list2) == output
