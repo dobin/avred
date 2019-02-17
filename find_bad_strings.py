@@ -8,35 +8,33 @@ import re
 import random
 from tqdm import tqdm
 
-BINARY = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
+BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
-DEBUG_LEVEL = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
-LVL_ALL_DETAILS = 3  # everything
-LVL_DETAILS = 2  # only    important  details
-LVL_RES_ONLY = 1  # only    results
-LVL_SILENT = 0  # quiet
+DEBUG_LEVEL            = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
+LVL_ALL_DETAILS        = 3  # everything
+LVL_DETAILS            = 2  # only    important  details
+LVL_RES_ONLY           = 1  # only    results
+LVL_SILENT             = 0  # quiet
 
 
 @dataclasses.dataclass
-class StringRef:
-    index: int = 0  # index of the string
-    paddr: int = 0  # offset from the beginning of the file
-    vaddr: int = 0  # virtual address in the binary
-    length: int = 0  # number of characters of the string
-    size: int = 0  # size of the memory taken by the string
-    section: str = ""  # segment where the string is located
-    encoding: str = ""  # encoding of the string (utf-8, utf-16, utf-32, etc)
-    content: str = ""  # actual string
+class StringRef: 
+    index      : int = 0  # index of the string
+    paddr      : int = 0  # offset from the beginning of the file
+    vaddr      : int = 0  # virtual address in the binary
+    length     : int = 0  # number of characters of the string
+    size       : int = 0  # size of the memory taken by the string
+    section    : str = ""  # segment where the string is located
+    encoding   : str = ""  # encoding of the string (utf-8, utf-16, utf-32, etc)
+    content    : str = ""  # actual string
     is_replaced: bool = False  # has this string already been patched?
-    is_bad: bool = False  # does this string has a signifcant impact on the AV's verdict?
+    is_bad     : bool = False  # does this string has a signifcant impact on the AV's verdict?
 
 
 """
     Wrapper to print text to stdout, either for concurrent access to
     the file descriptor, or because we need to enrich the text before.
 """
-
-
 def print_dbg(msg, level=3, decorate=True):
 
     toprint = msg
@@ -52,8 +50,6 @@ def print_dbg(msg, level=3, decorate=True):
     TODO deleteme
     get strings from binary blob
 """
-
-
 def strings(binary, min=4):
     result = ""
     for c in binary:
@@ -79,8 +75,6 @@ def strings(binary, min=4):
     Loads an entire binary to memory.
     Warning: don't use on huge files.
 """
-
-
 def get_binary(path):
 
     data = []
@@ -95,8 +89,6 @@ def get_binary(path):
     TODO: delete.
     Extracts strings from a binary blob.
 """
-
-
 def handle_string(data, offset, length):
 
     blob = data[0xa0210:0xa0210+120]
@@ -111,8 +103,6 @@ def handle_string(data, offset, length):
     @param filepath: the path to the file to be analyzed.
     @return: the raw output from rabin2
 """
-
-
 def get_all_strings(file_path):
 
     command = ['rabin2', "-z", file_path]
@@ -137,8 +127,6 @@ def get_all_strings(file_path):
     @param encoding the requested encoding (string)
     @return the correct encoding as string
 """
-
-
 def convert_encoding(encoding):
     table = {
         "ascii": "ascii",
@@ -157,8 +145,6 @@ def convert_encoding(encoding):
     @param strings_data: the raw output of rabin2
     @return: a collection of StringRefs
 """
-
-
 def parse_strings(strings_data):
     # columns: Num, Paddr, Vaddr, Len, Size, Section, Type, String
     string_refs = []
@@ -188,8 +174,6 @@ def parse_strings(strings_data):
     Scans a file with Windows Defender and returns True if the file
     is detected as a threat.
 """
-
-
 def scan(file_path):
     command = ['/home/vladimir/tools/loadlibrary/mpclient', file_path]
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -218,8 +202,6 @@ def scan(file_path):
     @param filepath if non empty, the function will write the resulting binary to the specified location on disk.
     @param mask if true, patches with junk data, or else path with str_ref.content (revert to original content)
 """
-
-
 def patch_binary(binary, str_ref, filepath, mask=True):
 
     encoding = convert_encoding(str_ref.encoding)
@@ -273,8 +255,6 @@ def patch_binary(binary, str_ref, filepath, mask=True):
     else
         continue to un-mask
 """
-
-
 def explore(sample_file):
 
     known_strings = ["Pass-the-ccache [NT6]",
@@ -412,16 +392,12 @@ def is_equal_unordered(list1, list2):
     return set1 == set2
 
 """
-    TODO: pass the test "test_bissection", I think it fails because some branches are left un-explored.
-    TODO once a string is found, remember its index, black-list it, and continue.
     TODO: update the progress bar.
     TODO: use a threadpool.
     @param binary binary blob currently edited.
     @param string_refs list of StringRefs objects.
     @param blacklist list of strings' index to never unmask.
 """
-
-
 def rec_bissect(binary, string_refs, blacklist):
 
     if len(string_refs) < 2:
@@ -468,49 +444,22 @@ def rec_bissect(binary, string_refs, blacklist):
     detection_result2 = scan(dump_path2)
 
     res = detection_result1 or detection_result2
-    #res3 = False
-    blacklist1 = []
-    blacklist2 = []
-    # problem: other branches are not explored.
+
     if detection_result1:
         print_dbg(f"Signature between half1 {half1[0].index} and {half1[-1].index}", LVL_DETAILS)
         blacklist1 = rec_bissect(binary1, half1, blacklist)
         blacklist = merge_unique(blacklist, blacklist1)
-        #res = res or is_equal_unordered(blacklist1, blacklist)
-        """
-        if res:
-            c = set(blacklist + blacklist1)
-            blacklist = list(c)
-            res2 = True
-            while res2 is True and not is_all_blacklisted(half1, blacklist):
-                print("Half1")
-                for i in blacklist1:
-                    print(i, end=' ')
-                blacklist11 = rec_bissect(binary1, half1, blacklist)
-                res2 = res2 and len(blacklist11) > len(blacklist1)"""
-    else:
-        print_dbg("Half 1 is not detected", LVL_ALL_DETAILS, True)
 
-    """
-        if a branch is detected:
-            patch the new discovered strings
-            try again on the same part
-    """
+    else:
+        print_dbg("Half 1 is not detected", LVL_ALL_DETAILS)
+
     if detection_result2:
         print_dbg(f"Signature between half2 {half2[0].index} and {half2[-1].index}", LVL_DETAILS)
         blacklist2 = rec_bissect(binary2, half2, blacklist)
         blacklist = merge_unique(blacklist, blacklist2)
-        #res = res or is_equal_unordered(blacklist, blacklist2)
-        """if not is_equal_unordered(blacklist, blacklist2):
-            res3 = True
-            blacklist = merge_unique(blacklist, blacklist2)
-            while res3 is True and not is_all_blacklisted(half2, blacklist):
-                tmp_list = rec_bissect(binary2, half2, blacklist)
-                blacklist = merge_unique(blacklist, )
-                res3 = res3 and len(blacklist22) > len(blacklist2)"""
-
     else:
-        print_dbg("Half 2 is not detected", LVL_ALL_DETAILS, True)
+        print_dbg("Half 2 is not detected", LVL_ALL_DETAILS)
+
     if not res:
         print("Both halves aren't detected")
 
