@@ -1,0 +1,15 @@
+Pass-the-ccache [NT6]
+ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)
+ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)
+ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)
+lsasrv.dll
+ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)
+SamIFree_SAMPR_USER_INFO_BUFFER
+KiwiAndRegistryTools
+wdigest.dll
+multirdp
+logonPasswords
+credman
+[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s
+n.e. (KIWI_MSV1_0_CREDENTIALS KO)
+\\.\mimidrv
