@@ -5,16 +5,22 @@ This project aims at automatically inferring these signatures.
 
 # Project status
 
-Tested and actually working.
+Tested and able to automatically find and remove the strings that have the most impact on the AV's verdict.
+
+However, this won't work when there artifacts in the .text section or when a function export is known by the AV (such as "ReflectiveLoader") => TODO.
 
 # Setup and usage
 
+Here are the instructions to use this tool.
+
 ## Dependencies (Python 3)
-python-tqdm
-python-hexdump
-pytest
+
+* python-tqdm
+* python-hexdump
+* pytest
 
 ## Dependencies (other)
+
 * loadlibrary: Windows Defender scanner ported to Linux by taviso (3 minutes setup, instructions at https://github.com/taviso/loadlibrary)
 
 ## Usage
