@@ -6,7 +6,9 @@ import subprocess
 import dataclasses
 import re
 import random
+import tempfile
 from tqdm import tqdm
+from itertools import islice
 
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
@@ -43,7 +45,7 @@ def print_dbg(msg, level=3, decorate=True):
         toprint = "[*] " + toprint
 
     if level <= DEBUG_LEVEL:
-        tqdm.write(msg)
+        tqdm.write(toprint)
 
 
 """
@@ -128,6 +130,7 @@ def get_all_strings(file_path):
     @return the correct encoding as string
 """
 def convert_encoding(encoding):
+    
     table = {
         "ascii": "ascii",
         "utf16le": "utf_16_le",
@@ -186,7 +189,7 @@ def scan(file_path):
         m = re.search('Threat', out)
 
         if m:
-            print_dbg("Threat found\n", LVL_ALL_DETAILS, True)
+            print_dbg("Threat found\n", LVL_ALL_DETAILS)
             return True
 
         if(retcode is not None):
@@ -209,14 +212,14 @@ def patch_binary(binary, str_ref, filepath, mask=True):
 
     # tricky part, the original string must be put back in the binary.
     # however, several encodings and null bytes make that a pain to realize.
-    # In case of failures, the original binary is used insteand of str_ref.content
+    # In case of failures, the original binary is used instead of str_ref.content
     if not mask:
         cnt = str_ref.content + '\x00'  # why already ??
         cnt = str_ref.content.replace("\\n", '\x0a')
         cnt = cnt.replace("\\t", '\x09')
         patch = bytes(cnt+chr(0), encoding)
 
-        if len(patch) != str_ref.size:
+        if len(patch) != str_ref.size or True: # TODO remove this
             print_dbg(
                 "Oops, parsing error, will recover bytes from the original file...", LVL_ALL_DETAILS)
             with open(BINARY, "rb") as tmp_fd:
@@ -226,12 +229,8 @@ def patch_binary(binary, str_ref, filepath, mask=True):
     new_bin = binary[:str_ref.paddr] + patch + \
         binary[str_ref.paddr+str_ref.size:]
 
-    try:
-        assert(len(new_bin) == len(binary))
-    except AssertionError:
-        print(
-            f"len new bin is {len(new_bin)} and len old bin is {len(binary)}")
-        raise AssertionError
+    # binary's size is expected to change.
+    assert(len(new_bin) == len(binary))
 
     # write the patched binary to disk
     if len(filepath) > 0:
@@ -391,19 +390,32 @@ def is_equal_unordered(list1, list2):
     set2 = set(list2)
     return set1 == set2
 
+
+def chunk(it, size):
+    it = iter(it)
+    return iter(lambda: tuple(islice(it, size)), ())
+
 """
     TODO: update the progress bar.
     TODO: use a threadpool.
-    @param binary binary blob currently edited.
+    @param binary binary blob currently edited, all strings hidden
     @param string_refs list of StringRefs objects.
     @param blacklist list of strings' index to never unmask.
 """
 def rec_bissect(binary, string_refs, blacklist):
 
-    if len(string_refs) < 2:
+    if type(string_refs) is list and len(string_refs) < 2:
         i = string_refs[0]
-        print_dbg(repr(i), 2, False)
+        print_dbg(repr(i), LVL_RES_ONLY, False)
         blacklist.append(i.index)
+        print("-----> Here is the blacklist")
+        print(blacklist)
+        return blacklist
+    elif type(string_refs) is StringRef:
+        print_dbg(repr(string_refs), LVL_RES_ONLY, False)
+        blacklist.append(string_refs.index)
+        print("-----> Here is the blacklist")
+        print(blacklist)
         return blacklist
 
     half_nb_strings = len(string_refs) // 2
@@ -413,24 +425,31 @@ def rec_bissect(binary, string_refs, blacklist):
     binary2 = binary
 
     for string in half1:
-        if string.index not in blacklist:
-            binary1 = patch_binary(binary1, string, "", False)
-        else:
-            binary1 = patch_binary(binary1, string, "", True)
-            pass
 
-        binary2 = patch_binary(binary2, string, "", True)
-        pass
+        # hide all upper half of binary2
+        binary2 = patch_binary(binary2, string, "", mask=True) 
+
+        if string.index in blacklist:
+            # hide the blacklisted string
+            binary1 = patch_binary(binary1, string, "", mask=True)
+            
+        else:
+            # put the string back
+            binary1 = patch_binary(binary1, string, "", mask=False)
 
     for string in half2:
-        binary1 = patch_binary(binary1, string, "", True)
-        if string.index not in blacklist:
-            binary2 = patch_binary(binary2, string, "", False)
+
+        #hide all lower half of binary1
+        binary1 = patch_binary(binary1, string, "", mask=True)
+
+        if string.index in blacklist:
+            # hide blacklisted strings in lower half
+            binary2 = patch_binary(binary2, string, "", mask=True)
         else:
-            binary2 = patch_binary(binary2, string, "", True)
+            # unhide all lower half of binary2
+            binary2 = patch_binary(binary2, string, "", mask=False)
             pass
 
-    # TODO use tempfile instead.
     dump_path1 = f"/tmp/goat_{half1[0].index}_{str(random.randint(10000,20000))}.bin"
     dump_path2 = f"/tmp/goat_{half2[0].index}_{str(random.randint(10000,20000))}.bin"
 
@@ -442,9 +461,10 @@ def rec_bissect(binary, string_refs, blacklist):
 
     detection_result1 = scan(dump_path1)
     detection_result2 = scan(dump_path2)
-
+    
     res = detection_result1 or detection_result2
 
+    # the upper half triggers the detection
     if detection_result1:
         print_dbg(f"Signature between half1 {half1[0].index} and {half1[-1].index}", LVL_DETAILS)
         blacklist1 = rec_bissect(binary1, half1, blacklist)
@@ -461,9 +481,43 @@ def rec_bissect(binary, string_refs, blacklist):
         print_dbg("Half 2 is not detected", LVL_ALL_DETAILS)
 
     if not res:
-        print("Both halves aren't detected")
+        print("Both halves are not detected, len = " + str(len(string_refs)))
+        """chunks = chunk(string_refs, 4)
+        for i in chunks:
+            merge_unique(blacklist, rec_bissect(binary, i, blacklist))"""
+        half1 = string_refs[:len(string_refs)//4]
+        half2 = string_refs[len(string_refs)//4]
+        blacklist = merge_unique(
+            blacklist, rec_bissect(binary, half1, blacklist))
+        blacklist = merge_unique(
+            blacklist, rec_bissect(binary, half2, blacklist))
 
     return blacklist
+
+
+def validate_results(sample_file, blacklist, all_strings):
+
+   # mpengine looks for signatures definitions in the current directory.
+    os.chdir(WDEFENDER_INSTALL_PATH)
+
+    # read the binary.
+    binary = get_binary(sample_file)
+
+    for b in blacklist:
+        string = next(filter(lambda x : x.index == b, all_strings))
+        print_dbg(f"Removing bad string {repr(string)}", LVL_DETAILS, True)
+        binary = patch_binary(binary, string, "", True)
+
+    tmp = tempfile.NamedTemporaryFile()
+
+    with open(tmp.name, "wb") as fd:
+        fd.write(binary)
+
+    detection = scan(tmp.name)
+
+    assert(detection is False)
+    print_dbg("Validation is ok !", LVL_DETAILS, True)
+    
 
 
 def bissect(sample_file):
@@ -483,25 +537,33 @@ def bissect(sample_file):
 
     # read the binary.
     binary = get_binary(sample_file)
-
+    binary1 = binary
     # mask all strings
     for string in str_refs:
         # patch the binary (mask the string)
         binary = patch_binary(binary, string, "", True)
 
-    dump_path = "/tmp/goat_0.bin"
-    with open(dump_path, "wb") as f:
+    dump_path = tempfile.NamedTemporaryFile()
+
+    with open(dump_path.name, "wb") as f:
         f.write(binary)
 
-    detection_result = scan(dump_path)
+    detection_result = scan(dump_path.name)
+    dump_path.close()
     # no point in continuing if Windows Defender detects something else than strings.
     assert(detection_result is False)
 
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
-    progress = tqdm(total=len(str_refs), leave=False)
+    #progress = tqdm(total=len(str_refs), leave=False)
 
     blacklist = []
-    blacklist = rec_bissect(binary, str_refs, blacklist)
+    blacklist = rec_bissect(binary1, str_refs, blacklist)
+
+    if len(blacklist) > 0:
+        print_dbg(f"Found {len(blacklist)} signatures", LVL_DETAILS, True)
+        validate_results(sample_file, blacklist, str_refs)
+    else:
+        print_dbg("No signatures found...", LVL_DETAILS, True)
     return blacklist
 
 

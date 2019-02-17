@@ -58,8 +58,7 @@ def test_patch_binary():
     md5_before = md5("test_cases/ext_server_kiwi.x64.dll")
     tmp_bin = tempfile.NamedTemporaryFile()
     print("tmp file name = " + tmp_bin.name)
-    #filename = tmp_bin.name
-    filename="/tmp/tototototot"
+    filename = tmp_bin.name
     new_binary = fbs.patch_binary(binary, string_ref[0], filename, True)
     all_strings = fbs.get_all_strings(filename)
     all_strings_ref = fbs.parse_strings(all_strings)
@@ -73,7 +72,7 @@ def test_patch_binary():
     assert all_strings_ref[0].content == string_ref[0].content
     new_md5 = md5(filename)
     assert md5_before == new_md5
-    #tmp_bin.close()
+    tmp_bin.close()
     pass
 
 
@@ -154,6 +153,13 @@ def test_bissection(mock_scan, mock_chdir):
 def test_merge_unique(list1, list2, output):
     assert fbs.merge_unique(list1, list2) == output
 
+def test_merge_unique_param_return():
+    toto = [1,2,3,4,5,6]
+    res = []
+    for i in toto:
+        res = fbs.merge_unique(res, [i])
+    assert res == toto
+
 
 @pytest.mark.parametrize('list1,list2,output', [
     ([], [1], False),
@@ -163,3 +169,11 @@ def test_merge_unique(list1, list2, output):
     ([4,3,2], [2,3,4], True)])
 def test_is_equal_unordered(list1, list2, output):
     assert fbs.is_equal_unordered(list1, list2) == output
+
+def test_validate_results():
+    all_strings = fbs.get_all_strings("test_cases/ext_server_kiwi.x64.dll")
+    all_strings_ref = fbs.parse_strings(all_strings)
+
+    blacklist = [x.index for x in all_strings_ref]
+
+    fbs.validate_results(fbs.BINARY, blacklist, all_strings_ref)
