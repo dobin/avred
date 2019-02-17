@@ -98,20 +98,20 @@ def mock_scan(filepath):
                 "logonPasswords",
                 "credman",
                 "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
-                "n.e. (KIWI_MSV1_0_CREDENTIALS KO)"]
+                "n.e. (KIWI_MSV1_0_CREDENTIALS KO)",
+                ]
 
     ##return any(s.content in known_strings for s in all_strings_ref)
     for i in all_strings_ref:
         if i.content in known_strings:
             print(f"---> Found bad string {i.content} at index {i.index}, address = {i.paddr}")
             return True
-        elif "kuhl_m_crypto_l_certificates" in i.content:
-            print(f"Look found it: {repr(i)}")
     return False
 
 @unittest.mock.patch("find_bad_strings.scan", side_effect=mock_scan)
 @unittest.mock.patch("find_bad_strings.os.chdir")
-def test_bissection(mock_scan, mock_chdir):
+@unittest.mock.patch("find_bad_strings.validate_results")
+def test_bissection(mock_scan, mock_chdir, mock_validate):
     known_strings = ["Pass-the-ccache [NT6]",
             "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)\\n",
             "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)\\n",
@@ -126,6 +126,7 @@ def test_bissection(mock_scan, mock_chdir):
             "credman",
             "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
             "n.e. (KIWI_MSV1_0_CREDENTIALS KO)"]
+
     blacklist = fbs.bissect("test_cases/ext_server_kiwi.x64.dll")
     assert len(blacklist) > 0
     all_strings = fbs.get_all_strings("test_cases/ext_server_kiwi.x64.dll")

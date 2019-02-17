@@ -47,32 +47,6 @@ def print_dbg(msg, level=3, decorate=True):
     if level <= DEBUG_LEVEL:
         tqdm.write(toprint)
 
-
-"""
-    TODO deleteme
-    get strings from binary blob
-"""
-def strings(binary, min=4):
-    result = ""
-    for c in binary:
-        c = chr(c)
-
-        if c in string.printable[:-5]:
-            result += c
-            continue
-
-        if c == '\x00':
-            continue
-
-        if len(result) >= min:
-            yield result
-
-        result = ""
-
-    if len(result) >= min:  # catch result at EOF
-        yield result
-
-
 """
     Loads an entire binary to memory.
     Warning: don't use on huge files.
@@ -85,19 +59,6 @@ def get_binary(path):
         data = f.read()
 
     return data
-
-
-"""
-    TODO: delete.
-    Extracts strings from a binary blob.
-"""
-def handle_string(data, offset, length):
-
-    blob = data[0xa0210:0xa0210+120]
-
-    print_dbg("[*] Strings:", 1)
-    for s in strings(blob):
-        print_dbg(f"> {s}", 1)
 
 
 """
@@ -219,7 +180,7 @@ def patch_binary(binary, str_ref, filepath, mask=True):
         cnt = cnt.replace("\\t", '\x09')
         patch = bytes(cnt+chr(0), encoding)
 
-        if len(patch) != str_ref.size or True: # TODO remove this
+        if len(patch) != str_ref.size or "\\" in str_ref.content:
             print_dbg(
                 "Oops, parsing error, will recover bytes from the original file...", LVL_ALL_DETAILS)
             with open(BINARY, "rb") as tmp_fd:
@@ -229,7 +190,7 @@ def patch_binary(binary, str_ref, filepath, mask=True):
     new_bin = binary[:str_ref.paddr] + patch + \
         binary[str_ref.paddr+str_ref.size:]
 
-    # binary's size is expected to change.
+    # binary's size is not expected to change.
     assert(len(new_bin) == len(binary))
 
     # write the patched binary to disk
@@ -241,126 +202,6 @@ def patch_binary(binary, str_ref, filepath, mask=True):
 
 
 """
-    Find signatures in the string tables by repeatedly querying WD's engine.
-    --> too slow
-    --> gets stuck halfway through
-    ALGORITHM:
-    assert that the AV detects the binary or else abort
-    replaces all strings with 'AAAA...'
-    assert that the AV doesn't flag the binary anymore or else abort
-    unmask a string, scan
-    if detected:
-        string is bad, re-mask it, continue
-    else
-        continue to un-mask
-"""
-def explore(sample_file):
-
-    known_strings = ["Pass-the-ccache [NT6]",
-                     "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
-                     "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
-                     "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
-                     "lsasrv.dll",
-                     "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
-                     "SamIFree_SAMPR_USER_INFO_BUFFER",
-                     "KiwiAndRegistryTools",
-                     "wdigest.dll",
-                     "multirdp",
-                     "logonPasswords",
-                     "credman",
-                     "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
-                     "n.e. (KIWI_MSV1_0_CREDENTIALS KO)",
-                     "\\\\.\\mimidrv"]
-
-    # mpengine looks for signatures definitions in the current directory.
-    os.chdir(WDEFENDER_INSTALL_PATH)
-
-    # no point in continuing if the binary is not detected as malicious already.
-    assert(scan(sample_file) is True)
-
-    # use rabin2 from radare2 to extract all the strings from the binary
-    strings_data = get_all_strings(sample_file)
-
-    # parse rabin2 output
-    str_refs = parse_strings(strings_data)
-
-    print(f"We got {len(str_refs)} string objects")
-
-    # read the binary.
-    binary = get_binary(sample_file)
-
-    # mask all strings
-    for string in str_refs:
-        string.is_replaced = True
-
-        # patch the binary (mask the string)
-        binary = patch_binary(binary, string, "", True)
-
-    dump_path = "/tmp/goat_0.bin"
-    os.remove(dump_path)
-    with open(dump_path, "wb") as f:
-        f.write(binary)
-
-    detection_result = scan(dump_path)
-
-    # no point in continuing if Windows Defender detects something else than strings.
-    assert(detection_result is False)
-
-    print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
-    progress = tqdm(total=len(str_refs), leave=False)
-
-    for string in str_refs:
-
-        if string.index < 1500:
-            progress.update(1)
-            continue
-
-        string.is_replaced = False
-        dump_path = f"/tmp/goat_{string.index}.bin"
-
-        banned_words = ["mimi", "password", "Kerb", "Ticket",
-            "LsaCallAuthenticationPackage", "ntlm", "hash"]
-        if string.index < 2936:
-            if string.content in known_strings or any(word in string.content for word in banned_words):
-                print("Skipped string " + string.content)
-                with open("current_state.txt", 'a+') as d:
-                    d.write(repr(string))
-                progress.update(1)
-                continue
-
-        binary = patch_binary(binary, string, dump_path, False)
-
-        if string.index < 2936:
-            progress.update(1)
-            os.remove(dump_path)
-            continue
-
-        detection_result = scan(dump_path)
-
-        if detection_result:
-            print_dbg("Found a bad string, re-masking it", 1)
-
-            with open("current_state.txt", 'a+') as d:
-                d.write(repr(string))
-
-            print_dbg(repr(string), 2, False)
-            string.is_replaced = True
-            string.is_bad = True
-            binary = patch_binary(binary, string, dump_path, True)
-        else:
-            os.remove(dump_path)
-
-        progress.update(1)
-
-    progress.clear()
-    progress.close()
-
-    # done, now print results
-    bad_strings = list(filter(lambda x: x.is_bad, str_refs))
-    print(bad_strings)
-
-
-"""
     returns true if all string_refs are in the blacklist
     tested: true
     @param string_refs a collection of StringRef objects
@@ -368,6 +209,7 @@ def explore(sample_file):
 """
 def is_all_blacklisted(string_refs, blacklist):
     return all(s.index in blacklist for s in string_refs)
+
 
 """
     merges two lists without duplicates
@@ -380,6 +222,7 @@ def merge_unique(list1, list2):
     unique_set = set(list3)
     return list(unique_set)
 
+
 """
     returns true if both lists are equal and order doesn't matter
     @param list1 some list
@@ -391,9 +234,35 @@ def is_equal_unordered(list1, list2):
     return set1 == set2
 
 
-def chunk(it, size):
-    it = iter(it)
-    return iter(lambda: tuple(islice(it, size)), ())
+"""
+    Takes the original binary, patches the strings whose
+    indexes are in "blacklist" and re-scan with the AV.
+    Asserts that the binary isn't detected with the patches.
+"""
+def validate_results(sample_file, blacklist, all_strings):
+
+   # mpengine looks for signatures definitions in the current directory.
+    os.chdir(WDEFENDER_INSTALL_PATH)
+
+    # read the binary.
+    binary = get_binary(sample_file)
+
+    for b in blacklist:
+        string = next(filter(lambda x: x.index == b, all_strings))
+        print_dbg(f"Removing bad string {repr(string)}", LVL_DETAILS, True)
+        binary = patch_binary(binary, string, "", True)
+
+    tmp = tempfile.NamedTemporaryFile()
+
+    with open(tmp.name, "wb") as fd:
+        fd.write(binary)
+
+    detection = scan(tmp.name)
+    tmp.close()
+
+    assert(detection is False)
+    print_dbg("Validation is ok !", LVL_DETAILS, True)
+
 
 """
     TODO: update the progress bar.
@@ -405,18 +274,17 @@ def chunk(it, size):
 def rec_bissect(binary, string_refs, blacklist):
 
     if type(string_refs) is list and len(string_refs) < 2:
-        i = string_refs[0]
-        print_dbg(repr(i), LVL_RES_ONLY, False)
-        blacklist.append(i.index)
-        print("-----> Here is the blacklist")
-        print(blacklist)
+        if len(string_refs) > 0:
+            i = string_refs[0]
+            print_dbg(f"Found it: {repr(i)}", LVL_RES_ONLY, False)
+            blacklist.append(i.index)
         return blacklist
+
     elif type(string_refs) is StringRef:
-        print_dbg(repr(string_refs), LVL_RES_ONLY, False)
+        print_dbg(f"Found it: f{repr(string_refs)}", LVL_RES_ONLY, False)
         blacklist.append(string_refs.index)
-        print("-----> Here is the blacklist")
-        print(blacklist)
         return blacklist
+
 
     half_nb_strings = len(string_refs) // 2
     half1 = string_refs[:half_nb_strings]
@@ -450,17 +318,20 @@ def rec_bissect(binary, string_refs, blacklist):
             binary2 = patch_binary(binary2, string, "", mask=False)
             pass
 
-    dump_path1 = f"/tmp/goat_{half1[0].index}_{str(random.randint(10000,20000))}.bin"
-    dump_path2 = f"/tmp/goat_{half2[0].index}_{str(random.randint(10000,20000))}.bin"
+    dump_path1 = tempfile.NamedTemporaryFile()
+    dump_path2 = tempfile.NamedTemporaryFile()
 
-    with open(dump_path1, "wb") as f:
+    with open(dump_path1.name, "wb") as f:
         f.write(binary1)
 
-    with open(dump_path2, "wb") as fd:
+    with open(dump_path2.name, "wb") as fd:
         fd.write(binary2)
 
-    detection_result1 = scan(dump_path1)
-    detection_result2 = scan(dump_path2)
+    detection_result1 = scan(dump_path1.name)
+    detection_result2 = scan(dump_path2.name)
+
+    dump_path1.close()
+    dump_path2.close()
     
     res = detection_result1 or detection_result2
 
@@ -470,21 +341,15 @@ def rec_bissect(binary, string_refs, blacklist):
         blacklist1 = rec_bissect(binary1, half1, blacklist)
         blacklist = merge_unique(blacklist, blacklist1)
 
-    else:
-        print_dbg("Half 1 is not detected", LVL_ALL_DETAILS)
-
     if detection_result2:
         print_dbg(f"Signature between half2 {half2[0].index} and {half2[-1].index}", LVL_DETAILS)
         blacklist2 = rec_bissect(binary2, half2, blacklist)
         blacklist = merge_unique(blacklist, blacklist2)
-    else:
-        print_dbg("Half 2 is not detected", LVL_ALL_DETAILS)
 
     if not res:
-        print("Both halves are not detected, len = " + str(len(string_refs)))
-        """chunks = chunk(string_refs, 4)
-        for i in chunks:
-            merge_unique(blacklist, rec_bissect(binary, i, blacklist))"""
+        print_dbg("Both halves are not detected", LVL_DETAILS)
+ 
+        # TODO: rather hazardous, but works for mimikatz. In case of failures, fix this.
         half1 = string_refs[:len(string_refs)//4]
         half2 = string_refs[len(string_refs)//4]
         blacklist = merge_unique(
@@ -494,32 +359,11 @@ def rec_bissect(binary, string_refs, blacklist):
 
     return blacklist
 
-
-def validate_results(sample_file, blacklist, all_strings):
-
-   # mpengine looks for signatures definitions in the current directory.
-    os.chdir(WDEFENDER_INSTALL_PATH)
-
-    # read the binary.
-    binary = get_binary(sample_file)
-
-    for b in blacklist:
-        string = next(filter(lambda x : x.index == b, all_strings))
-        print_dbg(f"Removing bad string {repr(string)}", LVL_DETAILS, True)
-        binary = patch_binary(binary, string, "", True)
-
-    tmp = tempfile.NamedTemporaryFile()
-
-    with open(tmp.name, "wb") as fd:
-        fd.write(binary)
-
-    detection = scan(tmp.name)
-
-    assert(detection is False)
-    print_dbg("Validation is ok !", LVL_DETAILS, True)
-    
-
-
+"""
+    Amorce function for the bissection algorithm.
+    Expects a path to a binary detected by the AV engine.
+    Returns a list of signatures or crashes.
+"""
 def bissect(sample_file):
     # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
@@ -533,7 +377,7 @@ def bissect(sample_file):
     # parse rabin2 output
     str_refs = parse_strings(strings_data)
 
-    print(f"We got {len(str_refs)} string objects")
+    print_dbg(f"Got {len(str_refs)} string objects", LVL_DETAILS, True)
 
     # read the binary.
     binary = get_binary(sample_file)
