@@ -7,7 +7,7 @@ This project aims at automatically inferring these signatures.
 
 Tested and able to automatically find and remove the strings that have the most impact on the AV's verdict.
 
-However, this won't work when there artifacts in the .text section or when a function export is known by the AV (such as "ReflectiveLoader") => TODO.
+However, this won't work when there are artifacts in the .text section or when a function export is known by the AV (such as "ReflectiveLoader") => TODO.
 
 # Setup and usage
 
