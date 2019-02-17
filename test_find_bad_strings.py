@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import pytest
+import unittest.mock
 import tempfile
-from find_bad_strings import is_all_blacklisted, StringRef, parse_strings, BINARY, get_binary, patch_binary, get_all_strings
+import find_bad_strings as fbs
+import hashlib
 
 import random
 
@@ -10,7 +12,7 @@ def test_is_all_blacklisted():
     strings_refs = []
 
     for i in range(100):
-        tmp = StringRef()
+        tmp = fbs.StringRef()
         tmp.index = i
         strings_refs += [tmp]
     
@@ -18,9 +20,9 @@ def test_is_all_blacklisted():
 
     rnd_blacklist = random.choices(available_idx, k=random.randint(0,len(available_idx)//2))
 
-    assert not (is_all_blacklisted(strings_refs, rnd_blacklist))
+    assert not (fbs.is_all_blacklisted(strings_refs, rnd_blacklist))
 
-    assert is_all_blacklisted(strings_refs, available_idx)
+    assert fbs.is_all_blacklisted(strings_refs, available_idx)
 
 def test_parse_strings():
     data_blob = """[Strings]
@@ -33,28 +35,108 @@ Num Paddr      Vaddr      Len Size Section  Type  String
 005 0x00099708 0x18009a308   4  10 (.rdata) utf16le INIT
 006 0x00099718 0x18009a318   5  12 (.rdata) utf16le CLEAN
 007 0x00099730 0x18009a330  36  74 (.rdata) utf16le >>> %s of '%s' module failed : %08x\n"""
-    strings_refs = parse_strings(data_blob)
+    strings_refs = fbs.parse_strings(data_blob)
 
     assert len(strings_refs) == 8
     assert strings_refs[-1].index == 7
     assert strings_refs[0].index == 0
     assert strings_refs[7].length == 36
 
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
 def test_patch_binary():
-    string = "000 0x00099640 0x18009a240  13  14 (.rdata) ascii kiwi_exec_cmd"    
-    string_ref = parse_strings(string)
+    string = "000 0x00099640 0x18009a240  13  14 (.rdata) ascii kiwi_exec_cmd"
+    string_ref = fbs.parse_strings(string)
     assert string_ref[0].index == 0
     assert string_ref[0].content == "kiwi_exec_cmd"
-    binary = get_binary("test_cases/ext_server_kiwi.x64.dll")
+    binary = fbs.get_binary("test_cases/ext_server_kiwi.x64.dll")
+    md5_before = md5("test_cases/ext_server_kiwi.x64.dll")
     tmp_bin = tempfile.NamedTemporaryFile()
-    new_binary = patch_binary(binary, string_ref[0], tmp_bin.name, True)
-    all_strings = get_all_strings(tmp_bin.name)
-    all_strings_ref = parse_strings(all_strings)
+    print("tmp file name = " + tmp_bin.name)
+    #filename = tmp_bin.name
+    filename="/tmp/tototototot"
+    new_binary = fbs.patch_binary(binary, string_ref[0], filename, True)
+    all_strings = fbs.get_all_strings(filename)
+    all_strings_ref = fbs.parse_strings(all_strings)
     assert all_strings_ref[0].content != string_ref[0].content
+    print(f"Replaced by : {all_strings_ref[0].content}")
     assert not(any(string_ref[0].content in string.content for string in all_strings_ref))
     
-    patch_binary(binary, string_ref[0], tmp_bin.name, False)
-    all_strings = get_all_strings(tmp_bin.name)
-    all_strings_ref = parse_strings(all_strings)
-    tmp_bin.close()
+    fbs.patch_binary(binary, string_ref[0], filename, False)
+    all_strings = fbs.get_all_strings(filename)
+    all_strings_ref = fbs.parse_strings(all_strings)
     assert all_strings_ref[0].content == string_ref[0].content
+    new_md5 = md5(filename)
+    assert md5_before == new_md5
+    #tmp_bin.close()
+    pass
+
+
+"""
+    replace the actual scan with Windows Defender by a
+    fake one, so as to check if the bissection algorithm works
+    as expected.
+"""
+def mock_scan(filepath):
+    #return True
+    all_strings = fbs.get_all_strings(filepath)
+    all_strings_ref = fbs.parse_strings(all_strings)
+    known_strings = ["Pass-the-ccache [NT6]",
+                "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
+                "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
+                "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
+                "lsasrv.dll",
+                "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
+                "SamIFree_SAMPR_USER_INFO_BUFFER",
+                "KiwiAndRegistryTools",
+                "wdigest.dll",
+                "multirdp",
+                "logonPasswords",
+                "credman",
+                "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
+                "n.e. (KIWI_MSV1_0_CREDENTIALS KO)"]
+
+    ##return any(s.content in known_strings for s in all_strings_ref)
+    for i in all_strings_ref:
+        if i.content in known_strings:
+            print(f"---> Found bad string {i.content} at index {i.index}, address = {i.paddr}")
+            return True
+    return False
+
+@unittest.mock.patch("find_bad_strings.scan", side_effect=mock_scan)
+@unittest.mock.patch("find_bad_strings.os.chdir")
+def test_bissection(mock_scan, mock_chdir):
+    known_strings = ["Pass-the-ccache [NT6]",
+            "ERROR kuhl_m_crypto_l_certificates ; CryptAcquireCertificatePrivateKey (0x%08x)",
+            "ERROR kuhl_m_crypto_l_certificates ; CertGetCertificateContextProperty (0x%08x)",
+            "ERROR kuhl_m_crypto_l_certificates ; CertGetNameString (0x%08x)",
+            "lsasrv.dll",
+            "ERROR kuhl_m_lsadump_sam ; CreateFile (SYSTEM hive) (0x%08x)",
+            "SamIFree_SAMPR_USER_INFO_BUFFER",
+            "KiwiAndRegistryTools",
+            "wdigest.dll",
+            "multirdp",
+            "logonPasswords",
+            "credman",
+            "[%x;%x]-%1u-%u-%08x-%wZ@%wZ-%wZ.%s",
+            "n.e. (KIWI_MSV1_0_CREDENTIALS KO)"]
+    blacklist = fbs.bissect("test_cases/ext_server_kiwi.x64.dll")
+    assert len(blacklist) > 0
+    all_strings = fbs.get_all_strings("test_cases/ext_server_kiwi.x64.dll")
+    all_strings_ref = fbs.parse_strings(all_strings)
+    for i in blacklist:
+        assert all_strings_ref[i].index == i
+        assert all_strings_ref[i].content in known_strings
+    
+    try:
+        assert len(blacklist) == len(known_strings)
+    except AssertionError:
+        print(blacklist)
+        for i in blacklist:
+            print(list(filter(lambda x: x.index == i, all_strings_ref)))
+        raise AssertionError
