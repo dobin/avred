@@ -21,6 +21,7 @@ Here are the instructions to use this tool.
 
 ## Dependencies (other)
 
+* rabin2 (from radare2)
 * loadlibrary: Windows Defender scanner ported to Linux by taviso (3 minutes setup, instructions at https://github.com/taviso/loadlibrary)
 
 ## Usage
