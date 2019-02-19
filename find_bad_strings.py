@@ -66,9 +66,12 @@ def get_binary(path):
     @param filepath: the path to the file to be analyzed.
     @return: the raw output from rabin2
 """
-def get_all_strings(file_path):
+def get_all_strings(file_path, extensive=False):
 
     command = ['rabin2', "-z", file_path]
+    if extensive:
+        command = ['rabin2', "-zz", file_path]
+
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     rout = ""
@@ -84,6 +87,69 @@ def get_all_strings(file_path):
 
     return rout
 
+
+"""
+    Executes rabin2 to enumerate the binary's sections information
+    @param filepath: the path to the file to be analyzed.
+    @return: the raw output from rabin2
+"""
+def get_sections(file_path):
+
+    command = ['rabin2', "-S", file_path]
+
+    p = subprocess.Popen(command, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    rout = ""
+    iterations = 0
+    while(True):
+
+        retcode = p.poll()  # returns None while subprocess is running
+        out = p.stdout.readline().decode('utf-8')
+        iterations += 1
+        rout += out
+        if(retcode is not None):
+            break
+
+    return rout
+
+
+"""
+    Hides an entire section of a binary
+    rabin2 output:
+        [Sections]
+        Nm Paddr       Size Vaddr      Memsz Perms Name
+        00 0x00000400 619008 0x180001000 622592 -r-x .text
+"""
+def hide_section(section, filepath, binary):
+    
+    section_size = 0
+    section_addr = 0
+
+    strings_data = get_sections(filepath)
+
+    for string in strings_data.split('\n'):
+
+        # to preserve some whitespaces
+        data = string.split()
+
+        if len(data) >= 4 and data[0].isnumeric():
+
+            if data[6] == section:
+                print_dbg(f"Found {section} section, hiding it...", LVL_DETAILS, True)
+                section_size = int(data[2])
+                section_addr = int(data[1],16)
+                break
+
+    assert(section_size > 0)
+    assert(section_addr > 0)
+
+    patch = bytes('\x41' * section_size, 'ascii')
+    new_bin = binary[:section_addr] + patch + binary[section_addr+section_size:]
+
+    # binary's size is not expected to change.
+    assert(len(new_bin) == len(binary))
+
+    return new_bin
 
 """
     converts rabin2 encoding to python3
@@ -106,6 +172,7 @@ def convert_encoding(encoding):
 """
     Used to process the raw output of rabin2.
     Populates a collection of StringRefs objects from the collected data.
+    TODO: parse output of -zz
     @param strings_data: the raw output of rabin2
     @return: a collection of StringRefs
 """
@@ -394,8 +461,19 @@ def bissect(sample_file):
 
     detection_result = scan(dump_path.name)
     dump_path.close()
-    # no point in continuing if Windows Defender detects something else than strings.
-    assert(detection_result is False)
+    
+    # sometimes there are signatures in the .txt sections
+    if detection_result is True:
+        print_dbg("Hiding all the strings doesn't seem to impact the AV's verdict.\
+             Retrying after masking the .text section", LVL_DETAILS, True)
+        global BINARY
+        binary = hide_section(".text", sample_file, binary1)
+        tmp = tempfile.NamedTemporaryFile()
+        with open("/tmp/toto", "wb") as f:
+            f.write(binary)
+        bissect("/tmp/toto")
+        exit(0)
+
 
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
     #progress = tqdm(total=len(str_refs), leave=False)
@@ -417,6 +495,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         sample_file = sys.argv[1]
+        BINARY = sample_file
 
     try:
         # explore(sample_file)
