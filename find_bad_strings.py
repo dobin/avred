@@ -11,6 +11,7 @@ from tqdm import tqdm
 from itertools import islice
 
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
+ORIGINAL_BINARY        = ""
 WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
 DEBUG_LEVEL            = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
 LVL_ALL_DETAILS        = 3  # everything
@@ -304,9 +305,8 @@ def is_equal_unordered(list1, list2):
 """
     Takes the original binary, patches the strings whose
     indexes are in "blacklist" and re-scan with the AV.
-    Asserts that the binary isn't detected with the patches.
 """
-def validate_results(sample_file, blacklist, all_strings):
+def validate_results(sample_file, tmpfile, blacklist, all_strings):
 
    # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
@@ -319,16 +319,12 @@ def validate_results(sample_file, blacklist, all_strings):
         print_dbg(f"Removing bad string {repr(string)}", LVL_DETAILS, True)
         binary = patch_binary(binary, string, "", True)
 
-    tmp = tempfile.NamedTemporaryFile()
-
-    with open(tmp.name, "wb") as fd:
+    with open(tmpfile, "wb") as fd:
         fd.write(binary)
 
-    detection = scan(tmp.name)
-    tmp.close()
+    detection = scan(tmpfile)
 
-    assert(detection is False)
-    print_dbg("Validation is ok !", LVL_DETAILS, True)
+    return detection
 
 
 """
@@ -367,6 +363,7 @@ def rec_bissect(binary, string_refs, blacklist):
         if string.index in blacklist:
             # hide the blacklisted string
             binary1 = patch_binary(binary1, string, "", mask=True)
+            binary2 = patch_binary(binary2, string, "", mask=True)
             
         else:
             # put the string back
@@ -378,7 +375,8 @@ def rec_bissect(binary, string_refs, blacklist):
         binary1 = patch_binary(binary1, string, "", mask=True)
 
         if string.index in blacklist:
-            # hide blacklisted strings in lower half
+            # hide blacklisted strings in both halves
+            binary1 = patch_binary(binary1, string, "", mask=True)
             binary2 = patch_binary(binary2, string, "", mask=True)
         else:
             # unhide all lower half of binary2
@@ -431,7 +429,7 @@ def rec_bissect(binary, string_refs, blacklist):
     Expects a path to a binary detected by the AV engine.
     Returns a list of signatures or crashes.
 """
-def bissect(sample_file):
+def bissect(sample_file, blacklist = []):
     # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
 
@@ -478,12 +476,16 @@ def bissect(sample_file):
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
     #progress = tqdm(total=len(str_refs), leave=False)
 
-    blacklist = []
     blacklist = rec_bissect(binary1, str_refs, blacklist)
 
     if len(blacklist) > 0:
         print_dbg(f"Found {len(blacklist)} signatures", LVL_DETAILS, True)
-        validate_results(sample_file, blacklist, str_refs)
+        tmpfile = "/tmp/newbin"
+        if not validate_results(ORIGINAL_BINARY, tmpfile, blacklist, str_refs):
+            print_dbg("Validation is ok !", LVL_DETAILS, True)
+        else:
+            print_dbg("Patched binary is still detected, retrying.", LVL_DETAILS, True)
+            bissect("/tmp/newbin", blacklist)
     else:
         print_dbg("No signatures found...", LVL_DETAILS, True)
     return blacklist
@@ -496,6 +498,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         sample_file = sys.argv[1]
         BINARY = sample_file
+
+    ORIGINAL_BINARY = BINARY
 
     try:
         # explore(sample_file)
