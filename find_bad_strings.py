@@ -12,7 +12,7 @@ from itertools import islice
 
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 ORIGINAL_BINARY        = ""
-WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
+WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/new_loadlibrary/loadlibrary/'
 DEBUG_LEVEL            = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
 LVL_ALL_DETAILS        = 3  # everything
 LVL_DETAILS            = 2  # only    important  details
@@ -21,7 +21,7 @@ LVL_SILENT             = 0  # quiet
 
 
 @dataclasses.dataclass
-class StringRef: 
+class StringRef:
     index      : int = 0  # index of the string
     paddr      : int = 0  # offset from the beginning of the file
     vaddr      : int = 0  # virtual address in the binary
@@ -122,7 +122,7 @@ def get_sections(file_path):
         00 0x00000400 619008 0x180001000 622592 -r-x .text
 """
 def hide_section(section, filepath, binary):
-    
+
     section_size = 0
     section_addr = 0
 
@@ -158,7 +158,7 @@ def hide_section(section, filepath, binary):
     @return the correct encoding as string
 """
 def convert_encoding(encoding):
-    
+
     table = {
         "ascii": "ascii",
         "utf16le": "utf_16_le",
@@ -207,7 +207,7 @@ def parse_strings(strings_data):
     is detected as a threat.
 """
 def scan(file_path):
-    command = ['/home/vladimir/tools/loadlibrary/mpclient', file_path]
+    command = ['/home/vladimir/tools/new_loadlibrary/loadlibrary/mpclient', file_path]
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
 
@@ -358,13 +358,13 @@ def rec_bissect(binary, string_refs, blacklist):
     for string in half1:
 
         # hide all upper half of binary2
-        binary2 = patch_binary(binary2, string, "", mask=True) 
+        binary2 = patch_binary(binary2, string, "", mask=True)
 
         if string.index in blacklist:
             # hide the blacklisted string
             binary1 = patch_binary(binary1, string, "", mask=True)
             binary2 = patch_binary(binary2, string, "", mask=True)
-            
+
         else:
             # put the string back
             binary1 = patch_binary(binary1, string, "", mask=False)
@@ -397,7 +397,7 @@ def rec_bissect(binary, string_refs, blacklist):
 
     dump_path1.close()
     dump_path2.close()
-    
+
     res = detection_result1 or detection_result2
 
     # the upper half triggers the detection
@@ -413,7 +413,7 @@ def rec_bissect(binary, string_refs, blacklist):
 
     if not res:
         print_dbg("Both halves are not detected", LVL_DETAILS)
- 
+
         # TODO: rather hazardous, but works for mimikatz. In case of failures, fix this.
         half1 = string_refs[:len(string_refs)//4]
         half2 = string_refs[len(string_refs)//4]
@@ -459,7 +459,7 @@ def bissect(sample_file, blacklist = []):
 
     detection_result = scan(dump_path.name)
     dump_path.close()
-    
+
     # sometimes there are signatures in the .txt sections
     if detection_result is True:
         print_dbg("Hiding all the strings doesn't seem to impact the AV's verdict.\
