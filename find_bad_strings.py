@@ -11,7 +11,8 @@ from tqdm import tqdm
 from itertools import islice
 
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
-WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
+ORIGINAL_BINARY        = ""
+WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/new_loadlibrary/loadlibrary/'
 DEBUG_LEVEL            = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
 LVL_ALL_DETAILS        = 3  # everything
 LVL_DETAILS            = 2  # only    important  details
@@ -20,7 +21,7 @@ LVL_SILENT             = 0  # quiet
 
 
 @dataclasses.dataclass
-class StringRef: 
+class StringRef:
     index      : int = 0  # index of the string
     paddr      : int = 0  # offset from the beginning of the file
     vaddr      : int = 0  # virtual address in the binary
@@ -66,9 +67,12 @@ def get_binary(path):
     @param filepath: the path to the file to be analyzed.
     @return: the raw output from rabin2
 """
-def get_all_strings(file_path):
+def get_all_strings(file_path, extensive=False):
 
     command = ['rabin2', "-z", file_path]
+    if extensive:
+        command = ['rabin2', "-zz", file_path]
+
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     rout = ""
@@ -86,12 +90,75 @@ def get_all_strings(file_path):
 
 
 """
+    Executes rabin2 to enumerate the binary's sections information
+    @param filepath: the path to the file to be analyzed.
+    @return: the raw output from rabin2
+"""
+def get_sections(file_path):
+
+    command = ['rabin2', "-S", file_path]
+
+    p = subprocess.Popen(command, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    rout = ""
+    iterations = 0
+    while(True):
+
+        retcode = p.poll()  # returns None while subprocess is running
+        out = p.stdout.readline().decode('utf-8')
+        iterations += 1
+        rout += out
+        if(retcode is not None):
+            break
+
+    return rout
+
+
+"""
+    Hides an entire section of a binary
+    rabin2 output:
+        [Sections]
+        Nm Paddr       Size Vaddr      Memsz Perms Name
+        00 0x00000400 619008 0x180001000 622592 -r-x .text
+"""
+def hide_section(section, filepath, binary):
+
+    section_size = 0
+    section_addr = 0
+
+    strings_data = get_sections(filepath)
+
+    for string in strings_data.split('\n'):
+
+        # to preserve some whitespaces
+        data = string.split()
+
+        if len(data) >= 4 and data[0].isnumeric():
+
+            if data[6] == section:
+                print_dbg(f"Found {section} section, hiding it...", LVL_DETAILS, True)
+                section_size = int(data[2])
+                section_addr = int(data[1],16)
+                break
+
+    assert(section_size > 0)
+    assert(section_addr > 0)
+
+    patch = bytes('\x41' * section_size, 'ascii')
+    new_bin = binary[:section_addr] + patch + binary[section_addr+section_size:]
+
+    # binary's size is not expected to change.
+    assert(len(new_bin) == len(binary))
+
+    return new_bin
+
+"""
     converts rabin2 encoding to python3
     @param encoding the requested encoding (string)
     @return the correct encoding as string
 """
 def convert_encoding(encoding):
-    
+
     table = {
         "ascii": "ascii",
         "utf16le": "utf_16_le",
@@ -106,6 +173,7 @@ def convert_encoding(encoding):
 """
     Used to process the raw output of rabin2.
     Populates a collection of StringRefs objects from the collected data.
+    TODO: parse output of -zz
     @param strings_data: the raw output of rabin2
     @return: a collection of StringRefs
 """
@@ -139,7 +207,7 @@ def parse_strings(strings_data):
     is detected as a threat.
 """
 def scan(file_path):
-    command = ['/home/vladimir/tools/loadlibrary/mpclient', file_path]
+    command = ['/home/vladimir/tools/new_loadlibrary/loadlibrary/mpclient', file_path]
     p = subprocess.Popen(command, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
 
@@ -237,9 +305,8 @@ def is_equal_unordered(list1, list2):
 """
     Takes the original binary, patches the strings whose
     indexes are in "blacklist" and re-scan with the AV.
-    Asserts that the binary isn't detected with the patches.
 """
-def validate_results(sample_file, blacklist, all_strings):
+def validate_results(sample_file, tmpfile, blacklist, all_strings):
 
    # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
@@ -252,16 +319,12 @@ def validate_results(sample_file, blacklist, all_strings):
         print_dbg(f"Removing bad string {repr(string)}", LVL_DETAILS, True)
         binary = patch_binary(binary, string, "", True)
 
-    tmp = tempfile.NamedTemporaryFile()
-
-    with open(tmp.name, "wb") as fd:
+    with open(tmpfile, "wb") as fd:
         fd.write(binary)
 
-    detection = scan(tmp.name)
-    tmp.close()
+    detection = scan(tmpfile)
 
-    assert(detection is False)
-    print_dbg("Validation is ok !", LVL_DETAILS, True)
+    return detection
 
 
 """
@@ -295,12 +358,13 @@ def rec_bissect(binary, string_refs, blacklist):
     for string in half1:
 
         # hide all upper half of binary2
-        binary2 = patch_binary(binary2, string, "", mask=True) 
+        binary2 = patch_binary(binary2, string, "", mask=True)
 
         if string.index in blacklist:
             # hide the blacklisted string
             binary1 = patch_binary(binary1, string, "", mask=True)
-            
+            binary2 = patch_binary(binary2, string, "", mask=True)
+
         else:
             # put the string back
             binary1 = patch_binary(binary1, string, "", mask=False)
@@ -311,7 +375,8 @@ def rec_bissect(binary, string_refs, blacklist):
         binary1 = patch_binary(binary1, string, "", mask=True)
 
         if string.index in blacklist:
-            # hide blacklisted strings in lower half
+            # hide blacklisted strings in both halves
+            binary1 = patch_binary(binary1, string, "", mask=True)
             binary2 = patch_binary(binary2, string, "", mask=True)
         else:
             # unhide all lower half of binary2
@@ -332,7 +397,7 @@ def rec_bissect(binary, string_refs, blacklist):
 
     dump_path1.close()
     dump_path2.close()
-    
+
     res = detection_result1 or detection_result2
 
     # the upper half triggers the detection
@@ -348,7 +413,7 @@ def rec_bissect(binary, string_refs, blacklist):
 
     if not res:
         print_dbg("Both halves are not detected", LVL_DETAILS)
- 
+
         # TODO: rather hazardous, but works for mimikatz. In case of failures, fix this.
         half1 = string_refs[:len(string_refs)//4]
         half2 = string_refs[len(string_refs)//4]
@@ -364,7 +429,7 @@ def rec_bissect(binary, string_refs, blacklist):
     Expects a path to a binary detected by the AV engine.
     Returns a list of signatures or crashes.
 """
-def bissect(sample_file):
+def bissect(sample_file, blacklist = []):
     # mpengine looks for signatures definitions in the current directory.
     os.chdir(WDEFENDER_INSTALL_PATH)
 
@@ -394,18 +459,33 @@ def bissect(sample_file):
 
     detection_result = scan(dump_path.name)
     dump_path.close()
-    # no point in continuing if Windows Defender detects something else than strings.
-    assert(detection_result is False)
+
+    # sometimes there are signatures in the .txt sections
+    if detection_result is True:
+        print_dbg("Hiding all the strings doesn't seem to impact the AV's verdict.\
+             Retrying after masking the .text section", LVL_DETAILS, True)
+        global BINARY
+        binary = hide_section(".text", sample_file, binary1)
+        tmp = tempfile.NamedTemporaryFile()
+        with open("/tmp/toto", "wb") as f:
+            f.write(binary)
+        bissect("/tmp/toto")
+        exit(0)
+
 
     print_dbg("Good, masking all the strings has an impact on the AV's verdict", 0)
     #progress = tqdm(total=len(str_refs), leave=False)
 
-    blacklist = []
     blacklist = rec_bissect(binary1, str_refs, blacklist)
 
     if len(blacklist) > 0:
         print_dbg(f"Found {len(blacklist)} signatures", LVL_DETAILS, True)
-        validate_results(sample_file, blacklist, str_refs)
+        tmpfile = "/tmp/newbin"
+        if not validate_results(ORIGINAL_BINARY, tmpfile, blacklist, str_refs):
+            print_dbg("Validation is ok !", LVL_DETAILS, True)
+        else:
+            print_dbg("Patched binary is still detected, retrying.", LVL_DETAILS, True)
+            bissect("/tmp/newbin", blacklist)
     else:
         print_dbg("No signatures found...", LVL_DETAILS, True)
     return blacklist
@@ -417,6 +497,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         sample_file = sys.argv[1]
+        BINARY = sample_file
+
+    ORIGINAL_BINARY = BINARY
 
     try:
         # explore(sample_file)

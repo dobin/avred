@@ -5,6 +5,7 @@ import unittest.mock
 import tempfile
 import find_bad_strings as fbs
 import hashlib
+import os
 
 import random
 
@@ -178,3 +179,9 @@ def test_validate_results():
     blacklist = [x.index for x in all_strings_ref]
 
     fbs.validate_results(fbs.BINARY, blacklist, all_strings_ref)
+
+def test_hide_section():
+    filepath = os.path.abspath("test_cases/ext_server_kiwi.x64.dll")
+
+    binary = fbs.get_binary(filepath)
+    fbs.hide_section(".text", filepath, binary)
