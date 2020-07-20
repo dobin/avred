@@ -2,8 +2,9 @@ FROM archlinux/base
 RUN echo "root:root" | chpasswd
 RUN useradd -m -G wheel -s /bin/bash toto \
 	&& echo "toto:toto" | chpasswd
-RUN pacman -Syu --noconfirm && pacman -Sy --noconfirm git sudo vim base-devel cabextract cmake lib32-glibc lib32-gcc-libs gcc-multilib
+RUN pacman -Syu --noconfirm && pacman -Sy --noconfirm git sudo vim base-devel cabextract python3 cmake lib32-glibc lib32-gcc-libs gcc-multilib python-pip radare2
 RUN echo -e "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99_wheel
+RUN python3 -m pip install tqdm r2pipe
 
 #RUN cd /tmp \
 #	&& git clone https://aur.archlinux.org/yay.git \
