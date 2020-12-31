@@ -20,7 +20,6 @@ from scanner import WindowsDefender, DockerWindowsDefender
 
 logging.basicConfig(level=logging.DEBUG)
 
-
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 ORIGINAL_BINARY        = ""
 
