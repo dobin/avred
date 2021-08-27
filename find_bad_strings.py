@@ -9,6 +9,14 @@ import random
 import tempfile
 from tqdm import tqdm
 from itertools import islice
+from scanner import WindowsDefender, DockerWindowsDefender
+import logging
+
+logging.basicConfig(filename='debug.log',
+                    filemode='a',
+                    format='[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s',
+                    datefmt='%Y/%m/%d %H:%M',
+                    level=logging.DEBUG)
 
 BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
 ORIGINAL_BINARY        = ""
@@ -18,7 +26,7 @@ LVL_ALL_DETAILS        = 3  # everything
 LVL_DETAILS            = 2  # only    important  details
 LVL_RES_ONLY           = 1  # only    results
 LVL_SILENT             = 0  # quiet
-
+g_scanner = None
 
 @dataclasses.dataclass
 class StringRef:
@@ -137,7 +145,7 @@ def hide_section(section, filepath, binary):
 
             if data[6] == section:
                 print_dbg(f"Found {section} section, hiding it...", LVL_DETAILS, True)
-                section_size = int(data[2])
+                section_size = int(data[2],16)
                 section_addr = int(data[1],16)
                 break
 
@@ -206,25 +214,10 @@ def parse_strings(strings_data):
     Scans a file with Windows Defender and returns True if the file
     is detected as a threat.
 """
-def scan(file_path):
-    command = ['/home/vladimir/tools/new_loadlibrary/loadlibrary/mpclient', file_path]
-    p = subprocess.Popen(command, stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
+def scan(path):
 
-    while(True):
+    return g_scanner.scan(path)
 
-        retcode = p.poll()  # returns None while subprocess is running
-        out = p.stdout.readline().decode('utf-8')
-        m = re.search('Threat', out)
-
-        if m:
-            print_dbg("Threat found\n", LVL_ALL_DETAILS)
-            return True
-
-        if(retcode is not None):
-            break
-
-    return False
 
 
 """
@@ -308,8 +301,6 @@ def is_equal_unordered(list1, list2):
 """
 def validate_results(sample_file, tmpfile, blacklist, all_strings):
 
-   # mpengine looks for signatures definitions in the current directory.
-    os.chdir(WDEFENDER_INSTALL_PATH)
 
     # read the binary.
     binary = get_binary(sample_file)
@@ -430,9 +421,10 @@ def rec_bissect(binary, string_refs, blacklist):
     Returns a list of signatures or crashes.
 """
 def bissect(sample_file, blacklist = []):
-    # mpengine looks for signatures definitions in the current directory.
-    os.chdir(WDEFENDER_INSTALL_PATH)
 
+    global g_scanner
+    if g_scanner is None:
+        g_scanner = DockerWindowsDefender()
     # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 
@@ -492,6 +484,9 @@ def bissect(sample_file, blacklist = []):
 
 
 if __name__ == "__main__":
+
+    g_scanner = DockerWindowsDefender()
+
 
     sample_file = BINARY
 
