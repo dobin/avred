@@ -68,7 +68,7 @@ class DockerWindowsDefender(Scanner):
         Scans a file with Windows Defender and returns True if the file
         is detected as a threat.
     """
-    def scan(self, file_path):
+    def scan(self, file_path, with_name=False):
         #file_path = "/home/toto/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
         tmp_file_name = tempfile.NamedTemporaryFile().name
         #tmp_file_name = f"/tmp/{os.path.basename(file_path)}"
@@ -81,15 +81,17 @@ class DockerWindowsDefender(Scanner):
         p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         ret_value = False
-
+        threat_name = "Nothing"
         while(True):
 
             retcode = p.poll()  # returns None while subprocess is running
             out = p.stdout.readline().decode('utf-8', errors='ignore').strip()
             #print(out)
-            m = re.search('Threat', out)
+            m = re.search('identified', out)
 
             if m:
+
+                threat_name = out.split("Threat")[1].split("identified")[0]
                 ret_value = True
 
 
@@ -100,4 +102,8 @@ class DockerWindowsDefender(Scanner):
                 break
 
         os.unlink(tmp_file_name)
+
+        if with_name:
+           return ret_value, threat_name
+
         return ret_value

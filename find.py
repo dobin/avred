@@ -218,8 +218,11 @@ def clean_results(filename):
         for s in strings(sig):
             logging.info(f"> {s}")
 
-        logging.info("[*] Disassembly (x64):")
-        print_disass(i.begin, leap, sig)
+        try:
+            logging.info("[*] Disassembly (x64):")
+            print_disass(i.begin, leap, sig)
+        except:
+            logging.error("Disassembly failed")
 
     logging.info("[*] Done")
 
