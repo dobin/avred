@@ -10,7 +10,7 @@ import argparse
 
 from copy import deepcopy
 from dataclasses import dataclass
-from scanner import DockerWindowsDefender
+from scanner import DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky
 from find import bytes_detection
 from find_bad_strings import bissect
 from pe_utils import *
@@ -113,11 +113,13 @@ def strings_analysis(pe):
 
     # patch the binary (mask the string)
     for str_ref in str_refs:
-        str_ref.should_mask = True
+        if str_ref.length > 500:
+            str_ref.should_mask = True
 
         # copy the binary
     new_name = NamedTemporaryFile().name
     shutil.copyfile(pe.filename, new_name)
+    logging.info(new_name)
 
     # hide the byzes
     new_pe = deepcopy(pe)
@@ -269,7 +271,8 @@ def parse_pe(sample_file):
 
 if __name__ == "__main__":
 
-    g_scanner = DockerWindowsDefender()
+    g_scanner = VMWareKaspersky()
+    #g_scanner = VMWareDeepInstinct()
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-s", '--skip-strings', help="Skip strings analysis", action="store_true")

@@ -254,7 +254,9 @@ def patch_binary_mass(filename, str_refs, pipe=None, unmask_only=False):
     if pipe is None:
         pipe = r2pipe.open(filename, flags=["-w"])
 
-    for str_ref in str_refs:
+    nstr = [x for x in str_refs if x.length==29 and x.size==30]
+    for str_ref in nstr[len(nstr)//4:-len(nstr)//4]:
+        #if 28 < str_ref.length <= 29:
         patch_string(filename, str_ref, pipe, unmask_only=unmask_only)
 
 

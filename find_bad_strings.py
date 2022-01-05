@@ -9,7 +9,7 @@ import random
 import tempfile
 from tqdm import tqdm
 from itertools import islice
-from scanner import WindowsDefender, DockerWindowsDefender
+from scanner import WindowsDefender, DockerWindowsDefender, VMWareKaspersky
 import logging
 
 logging.basicConfig(filename='debug.log',
@@ -423,8 +423,12 @@ def rec_bissect(binary, string_refs, blacklist):
 def bissect(sample_file, blacklist = []):
 
     global g_scanner
+    global BINARY
+
+    BINARY = sample_file
     if g_scanner is None:
-        g_scanner = DockerWindowsDefender()
+        #g_scanner = DockerWindowsDefender()
+        g_scanner = VMWareKaspersky()
     # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 
@@ -456,7 +460,6 @@ def bissect(sample_file, blacklist = []):
     if detection_result is True:
         print_dbg("Hiding all the strings doesn't seem to impact the AV's verdict.\
              Retrying after masking the .text section", LVL_DETAILS, True)
-        global BINARY
         binary = hide_section(".text", sample_file, binary1)
         tmp = tempfile.NamedTemporaryFile()
         with open("/tmp/toto", "wb") as f:
@@ -472,6 +475,7 @@ def bissect(sample_file, blacklist = []):
 
     if len(blacklist) > 0:
         print_dbg(f"Found {len(blacklist)} signatures", LVL_DETAILS, True)
+        print(blacklist)
         tmpfile = "/tmp/newbin"
         if not validate_results(ORIGINAL_BINARY, tmpfile, blacklist, str_refs):
             print_dbg("Validation is ok !", LVL_DETAILS, True)
