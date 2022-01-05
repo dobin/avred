@@ -9,7 +9,7 @@ import random
 import tempfile
 from tqdm import tqdm
 from itertools import islice
-from scanner import WindowsDefender, DockerWindowsDefender, VMWareKaspersky
+from scanner import WindowsDefender, DockerWindowsDefender, VMWareKaspersky, VMWareAvast
 import logging
 
 logging.basicConfig(filename='debug.log',
@@ -88,7 +88,7 @@ def get_all_strings(file_path, extensive=False):
     while(True):
 
         retcode = p.poll()  # returns None while subprocess is running
-        out = p.stdout.readline().decode('utf-8')
+        out = p.stdout.readline().decode('utf-8', errors="ignore")
         iterations += 1
         rout += out
         if(retcode is not None):
@@ -113,7 +113,7 @@ def get_sections(file_path):
     while(True):
 
         retcode = p.poll()  # returns None while subprocess is running
-        out = p.stdout.readline().decode('utf-8')
+        out = p.stdout.readline().decode('utf-8', errors="ignore")
         iterations += 1
         rout += out
         if(retcode is not None):
@@ -428,15 +428,16 @@ def bissect(sample_file, blacklist = []):
     BINARY = sample_file
     if g_scanner is None:
         #g_scanner = DockerWindowsDefender()
-        g_scanner = VMWareKaspersky()
+        g_scanner = VMWareAvast()
     # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 
     # use rabin2 from radare2 to extract all the strings from the binary
-    strings_data = get_all_strings(sample_file)
+    #strings_data = get_all_strings(sample_file, extensive=True)
 
     # parse rabin2 output
-    str_refs = parse_strings(strings_data)
+    import pe_utils
+    str_refs = pe_utils.parse_strings(sample_file)
 
     print_dbg(f"Got {len(str_refs)} string objects", LVL_DETAILS, True)
 

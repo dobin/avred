@@ -10,7 +10,7 @@ import argparse
 
 from copy import deepcopy
 from dataclasses import dataclass
-from scanner import DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky
+from scanner import DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky, VMWareAvast
 from find import bytes_detection
 from find_bad_strings import bissect
 from pe_utils import *
@@ -113,8 +113,8 @@ def strings_analysis(pe):
 
     # patch the binary (mask the string)
     for str_ref in str_refs:
-        if str_ref.length > 500:
-            str_ref.should_mask = True
+        # if str_ref.length > 500:
+        str_ref.should_mask = True
 
         # copy the binary
     new_name = NamedTemporaryFile().name
@@ -210,6 +210,9 @@ def investigate(pe):
         logging.error(f"{pe.filename} is not detected by {g_scanner.scanner_name}")
         return
 
+    if g_args.virus:
+        logging.info(status)
+        return
 
     if g_args.globals:
 
@@ -271,7 +274,7 @@ def parse_pe(sample_file):
 
 if __name__ == "__main__":
 
-    g_scanner = VMWareKaspersky()
+    g_scanner = VMWareAvast()
     #g_scanner = VMWareDeepInstinct()
     parser = argparse.ArgumentParser()
 
@@ -282,6 +285,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--length", help="minimum length of strings", type=int, default=5)
     parser.add_argument('-c', '--section', help="Analyze provided section")
     parser.add_argument('-g', '--globals', help="Analyze global variables in .data section", action="store_true")
+    parser.add_argument('-V', '--virus', help="Virus scan", action="store_true")
     g_args = parser.parse_args()
 
     pe = parse_pe(g_args.file)

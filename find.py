@@ -11,7 +11,7 @@ from concurrent import futures
 from collections import deque
 from intervaltree import Interval, IntervalTree
 from capstone import *
-from scanner import WindowsDefender, DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky
+from scanner import WindowsDefender, DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky, VMWareAvast
 import logging
 import pe_utils
 
@@ -292,7 +292,7 @@ def bytes_detection(filename, start=0, end=-1):
     global g_scanner
 
     #g_scanner = DockerWindowsDefender()
-    g_scanner = VMWareKaspersky()
+    g_scanner = VMWareAvast()
     sample_file = filename
 
     try:

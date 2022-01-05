@@ -201,16 +201,15 @@ class VMWareKaspersky(Scanner):
         file_exists_cmd = f"vmrun  -T  ws  -gu  toto  -gp  $crt1234!  fileExistsInGuest  {vmx_path}  C:\\Users\\toto\\Desktop\\{basename}.exe"
         exec_cmd = f"vmrun  -T  ws  -gu  toto  -gp  $crt1234!  runProgramInGuest  {vmx_path}  C:\\Users\\toto\\Desktop\\{basename}.exe"
         scan_cmd = ["vmrun",  "-T",  "ws",  "-gu",  "toto",  "-gp",  '$crt1234!',  "runProgramInGuest", f"{vmx_path}", "C:\\Program Files (x86)\\Kaspersky Lab\\Kaspersky Anti-Virus 21.3\\avp.exe", "SCAN", f"C:\\Users\\toto\\Desktop\\{basename}.exe", "/i0"]
-        print(copy_file_cmd)
         # print(f"Copy file result: {subprocess.Popen(scan_cmd.split('  '), stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout.readline().decode('utf-8', errors='ignore').strip()}")
         p = subprocess.Popen(copy_file_cmd.split("  "), stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        print(f"Copy file result: {p.stdout.readline().decode('utf-8', errors='ignore').strip()}")
+        #print(f"Copy file result: {p.stdout.readline().decode('utf-8', errors='ignore').strip()}")
 
         p = subprocess.Popen(file_exists_cmd.split("  "), stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
 
-        print(f"File exists 1 result: {p.stdout.readline().decode('utf-8', errors='ignore').strip()}")
+        #print(f"File exists 1 result: {p.stdout.readline().decode('utf-8', errors='ignore').strip()}")
 
         #execp = subprocess.Popen(exec_cmd.split("  "), stdout=subprocess.PIPE,
         #                     stderr=subprocess.STDOUT)
@@ -218,7 +217,7 @@ class VMWareKaspersky(Scanner):
         #print(f"File exec result: {out2}")
 
         #time.sleep(1)
-        print(scan_cmd)
+        #print(scan_cmd)
         p = subprocess.Popen(scan_cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
 
@@ -229,18 +228,21 @@ class VMWareKaspersky(Scanner):
 
             retcode = p.poll()  # returns None while subprocess is running
             out = p.stdout.readline().decode('utf-8', errors='ignore').strip()
-            #out2 += execp.stdout.readline().decode('utf-8', errors='ignore').strip()
-            #print(out)
+            # out2 += execp.stdout.readline().decode('utf-8', errors='ignore').strip()
+            # print(out)
             m = re.search('suspicion', out)
-            #n = re.search("A program could not run", out2)
+            # n = re.search("A program could not run", out2)
             if m:
 
                 threat_name = out
+                logging.debug("Detected")
                 ret_value = True
 
 
 
             if retcode == 3:
+                logging.debug("Detected")
+
                 ret_value = True
                 break
 
@@ -253,12 +255,83 @@ class VMWareKaspersky(Scanner):
             else:
                 logging.debug(out2)
             """
+
+            # logging.debug(f"Retcode:{retcode}")
+
+            if retcode is not None:
+                break
+
+        os.unlink(tmp_file_name)
+
+        if with_name:
+            return ret_value, threat_name
+
+        return ret_value
+
+class VMWareAvast(Scanner):
+
+    def __init__(self):
+        self.scanner_path = WDEFENDER_INSTALL_PATH
+        self.scanner_name = "Avast"
+
+    """
+        Scans a file with Kaspersky and returns True if the file
+        is detected as a threat.
+    """
+    def scan(self, file_path, with_name=False):
+        #file_path = "/home/toto/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
+        tmp_file_name = tempfile.NamedTemporaryFile().name
+        #tmp_file_name = f"/tmp/{os.path.basename(file_path)}"
+        shutil.copyfile(file_path, tmp_file_name)
+        #file_path = f"/home/toto/av-signatures-finder/test_cases/{os.path.basename(file_path)}"
+        file_path = tmp_file_name
+        basename = os.path.basename(tmp_file_name)
+        vmx_path = "/Users/vladimir/Virtual Machines.localized/Windows_10_Avast.vmwarevm/Windows_10_Avast.vmx"
+        copy_file_cmd = f"vmrun  -T  ws  -gu  toto  -gp  $crt1234!  CopyFileFromHostToGuest  {vmx_path}  {tmp_file_name}  C:\\Users\\toto\\Desktop\\{basename}.exe"
+        file_exists_cmd = f"vmrun  -T  ws  -gu  toto  -gp  $crt1234!  fileExistsInGuest  {vmx_path}  C:\\Users\\toto\\Desktop\\{basename}.exe"
+        exec_cmd = f"vmrun  -T  ws  -gu  toto  -gp  $crt1234!  runProgramInGuest  {vmx_path}  C:\\Users\\toto\\Desktop\\{basename}.exe"
+        # print(f"Copy file result: {subprocess.Popen(scan_cmd.split('  '), stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout.readline().decode('utf-8', errors='ignore').strip()}")
+        p = subprocess.Popen(copy_file_cmd.split("  "), stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+        #print(f"Copy file result: {p.stdout.readline().decode('utf-8', errors='ignore').strip()}")
+
+        out = p.stdout.readline().decode('utf-8', errors='ignore').strip()
+        logging.debug(out)
+        #execp = subprocess.Popen(exec_cmd.split("  "), stdout=subprocess.PIPE,
+        #                     stderr=subprocess.STDOUT)
+        #out2 = execp.stdout.readline().decode('utf-8', errors='ignore').strip()
+        #print(f"File exec result: {out2}")
+
+        #time.sleep(1)
+        #print(scan_cmd)
+        p = subprocess.Popen(exec_cmd.split("  "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        out = p.stdout.readline().decode('utf-8', errors='ignore').strip()
+        logging.debug(out)
+        if re.search("could not run", out):
+            return True, "toto"
+        logging.debug(file_exists_cmd)
+        p = subprocess.Popen(file_exists_cmd.split("  "), stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+
+        ret_value = False
+        threat_name = "Nothing"
+        while True:
+
+            retcode = p.poll()  # returns None while subprocess is running
+            out = p.stdout.readline().decode('utf-8', errors='ignore').strip()
+            #print(out)
+            m = re.search('does not exist', out)
+
+            if m:
+
+                threat_name = out
+                ret_value = True
+
+
             if len(out) > 0:
                 logging.debug(out)
 
-            logging.debug(f"Retcode:{retcode}")
-
-            if(retcode is not None):
+            if retcode is not None:
                 break
 
         os.unlink(tmp_file_name)
