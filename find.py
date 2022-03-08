@@ -70,15 +70,15 @@ def print_disass(base, code_size, raw_code):
     Problem: if [0:5][6:10], it is not correct to delete interval [0:10]
 """
 def filter_matches(good_res):
-    filtered = good_res.copy()
+    filtered = IntervalTree() # good_res.copy()
 
     for match in good_res:
 
-        if not filtered.containsi(*match):
-            continue
+        # if not filtered.containsi(*match):
+        #    continue
 
         try:
-            #filtered.remove_overlap(match)
+            # filtered.remove_overlap(match)
             if len(good_res.envelop(match.begin, match.end)) <= 1:
                 filtered.add(match)
         except Exception as e:
@@ -193,8 +193,10 @@ def clean_results(filename):
     global buffer
 
     logging.info(f"[*] Got {len(interval_tree)} signatures, filtering...")
-    locate_found_signatures(filename, interval_tree)
     good_res = filter_matches(interval_tree)
+    logging.info(f"[*] Filtered {len(interval_tree) - len(good_res)} signatures...")
+    locate_found_signatures(filename, good_res)
+
     logging.info(f"[*] Got {len(good_res)} signatures...")
 
     logging.info("[+] Here are the potential findings:")
