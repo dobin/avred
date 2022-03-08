@@ -89,9 +89,10 @@ def bytes_analysis(pe, start_address, end_address):
     status = g_scanner.scan(new_pe.filename)
 
     if status:
+        logging.warning("No idea. Your binary is indeed detected but hiding everything but the PE header results in detection anyways. Check PE header.")
         logging.debug(new_pe.filename)
         spwn_dbg()
-        raise Exception("No idea. Your binary is indeed detected but hiding everything but the PE header results in detection anyways. Check PE header.")
+        raise Exception("")
 
 
     # a signature is present in these bystes, let's binary search
@@ -274,8 +275,9 @@ def parse_pe(sample_file):
 
 if __name__ == "__main__":
 
-    g_scanner = VMWareAvast()
+    #g_scanner = VMWareAvast()
     #g_scanner = VMWareDeepInstinct()
+    g_scanner = DockerWindowsDefender()
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-s", '--skip-strings', help="Skip strings analysis", action="store_true")

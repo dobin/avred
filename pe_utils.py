@@ -88,6 +88,7 @@ class Patch:
 def spwn_dbg():
     import sys
     if not "IPython" in sys.modules:
+        logging.warning(f"Spawning IPython shell to debug...")
         import IPython
         IPython.embed()
 

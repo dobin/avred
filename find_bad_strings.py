@@ -427,8 +427,8 @@ def bissect(sample_file, blacklist = []):
 
     BINARY = sample_file
     if g_scanner is None:
-        #g_scanner = DockerWindowsDefender()
-        g_scanner = VMWareAvast()
+        g_scanner = DockerWindowsDefender()
+        # g_scanner = VMWareAvast()
     # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 

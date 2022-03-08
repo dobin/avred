@@ -78,8 +78,13 @@ def filter_matches(good_res):
             continue
 
         try:
-            filtered.remove_overlap(match)
-        except:
+            #filtered.remove_overlap(match)
+            if len(good_res.envelop(match.begin, match.end)) <= 1:
+                filtered.add(match)
+        except Exception as e:
+            logging.warning(f"Exception encountered ({e.args}). Spawning IPython shell to debug...")
+            import traceback
+            traceback.format_exc()
             if not "IPython" in sys.modules:
                 import IPython
                 IPython.embed()
@@ -291,8 +296,8 @@ def process_file(sample_file, start = 0, end=-1):
 def bytes_detection(filename, start=0, end=-1):
     global g_scanner
 
-    #g_scanner = DockerWindowsDefender()
-    g_scanner = VMWareAvast()
+    g_scanner = DockerWindowsDefender()
+    # g_scanner = VMWareAvast()
     sample_file = filename
 
     try:
