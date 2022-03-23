@@ -6,5 +6,5 @@
   "kaspersky_vmx": "../../kasp.vmx",
   "deepinstinct_vmx": "../../Virtual Machines.localized/Windows_10_AV_DeepInstinct.vmwarevm/Windows_10_AV_DeepInstinct.vmx",
   "vmware_user": "toto",
-  "vmware_passwd": "$crt1234!"
+  "vmware_passwd": "$crt1234!" /*wow, such strong hardcoded password*/
 }
