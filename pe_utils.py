@@ -221,17 +221,23 @@ def parse_strings_old(strings_data):
     return string_refs
 
 
-def parse_strings(filename, all_sections=False, min_length=5):
+def parse_strings(filename, all_sections=False, min_length=12):
     pipe = r2pipe.open(filename)
     pipe.cmd("aaa")
     # pipe.cmd("aaa")
-    strings = pipe.cmdj("izzj")
+    if all_sections:
+        strings = pipe.cmdj("izzj")
+    else:
+        strings = pipe.cmdj("izj")
 
     string_refs = []
 
     for string in strings:
 
-        if string.get("size") < min_length:
+        if string.get("length") < min_length:
+            continue
+
+        if not string.get("section").startswith("."):
             continue
 
         str_ref = StringRef()

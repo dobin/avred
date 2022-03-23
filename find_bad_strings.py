@@ -1,16 +1,14 @@
 #!/usr/bin/python3
-import sys
-import string
-import os
-import subprocess
 import dataclasses
-import re
-import random
-import tempfile
-from tqdm import tqdm
-from itertools import islice
-from scanner import WindowsDefender, DockerWindowsDefender, VMWareKaspersky, VMWareAvast
 import logging
+import re
+import subprocess
+import sys
+import tempfile
+
+from tqdm import tqdm
+
+from scanner import g_scanner
 
 logging.basicConfig(filename='debug.log',
                     filemode='a',
@@ -18,15 +16,14 @@ logging.basicConfig(filename='debug.log',
                     datefmt='%Y/%m/%d %H:%M',
                     level=logging.DEBUG)
 
-BINARY                 = "/home/vladimir/dev/av-signatures-finder/test_cases/ext_server_kiwi.x64.dll"
+BINARY                 = "test_cases/ext_server_kiwi.x64.dll"
 ORIGINAL_BINARY        = ""
-WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/new_loadlibrary/loadlibrary/'
 DEBUG_LEVEL            = 2  # setting supporting levels 0-3, incrementing the verbosity of log msgs
 LVL_ALL_DETAILS        = 3  # everything
 LVL_DETAILS            = 2  # only    important  details
 LVL_RES_ONLY           = 1  # only    results
 LVL_SILENT             = 0  # quiet
-g_scanner = None
+
 
 @dataclasses.dataclass
 class StringRef:
@@ -340,7 +337,12 @@ def rec_bissect(binary, string_refs, blacklist):
         return blacklist
 
 
-    half_nb_strings = len(string_refs) // 2
+    try:
+        half_nb_strings = len(string_refs) // 2
+    except:
+        print_dbg(f"Found it: f{repr(string_refs)}", LVL_RES_ONLY, False)
+        blacklist.append(string_refs.index)
+        return blacklist
     half1 = string_refs[:half_nb_strings]
     half2 = string_refs[half_nb_strings:]
     binary1 = binary
@@ -422,13 +424,10 @@ def rec_bissect(binary, string_refs, blacklist):
 """
 def bissect(sample_file, blacklist = []):
 
-    global g_scanner
     global BINARY
 
     BINARY = sample_file
-    if g_scanner is None:
-        g_scanner = DockerWindowsDefender()
-        # g_scanner = VMWareAvast()
+
     # no point in continuing if the binary is not detected as malicious already.
     assert(scan(sample_file) is True)
 
@@ -477,12 +476,18 @@ def bissect(sample_file, blacklist = []):
     if len(blacklist) > 0:
         print_dbg(f"Found {len(blacklist)} signatures", LVL_DETAILS, True)
         print(blacklist)
+
+        for b in blacklist:
+            string = next(filter(lambda x: x.index == b, str_refs))
+            logging.info(f"String @ {hex(string.paddr)} should be patched: ")
+            logging.info(string.content)
         tmpfile = "/tmp/newbin"
-        if not validate_results(ORIGINAL_BINARY, tmpfile, blacklist, str_refs):
-            print_dbg("Validation is ok !", LVL_DETAILS, True)
-        else:
-            print_dbg("Patched binary is still detected, retrying.", LVL_DETAILS, True)
-            bissect("/tmp/newbin", blacklist)
+        if ORIGINAL_BINARY != "":
+            if not validate_results(ORIGINAL_BINARY, tmpfile, blacklist, str_refs):
+                print_dbg("Validation is ok !", LVL_DETAILS, True)
+            else:
+                print_dbg("Patched binary is still detected, retrying.", LVL_DETAILS, True)
+                bissect("/tmp/newbin", blacklist)
     else:
         print_dbg("No signatures found...", LVL_DETAILS, True)
     return blacklist
@@ -490,7 +495,7 @@ def bissect(sample_file, blacklist = []):
 
 if __name__ == "__main__":
 
-    g_scanner = DockerWindowsDefender()
+    #g_scanner = DockerWindowsDefender()
 
 
     sample_file = BINARY

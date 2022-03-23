@@ -1,19 +1,19 @@
 #!/usr/bin/python
 
-import os
-import subprocess
-import re
-import sys
-import hexdump
-import string
-from tqdm import tqdm
-from concurrent import futures
-from collections import deque
-from intervaltree import Interval, IntervalTree
-from capstone import *
-from scanner import WindowsDefender, DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky, VMWareAvast
 import logging
+import string
+import sys
+from collections import deque
+from concurrent import futures
+
+import hexdump
+from capstone import *
+from intervaltree import Interval, IntervalTree
+from tqdm import tqdm
+
+import config
 import pe_utils
+from scanner import g_scanner
 
 logging.basicConfig(filename='debug.log',
                     filemode='a',
@@ -36,7 +36,7 @@ MIN_LEAP = 100
 IGNORE_START = 0
 IGNORE_END = 0x256 #todo use pefile to find the start of code
 GOAT_FILE = '/tmp/metsrv.x64.dll'
-WDEFENDER_INSTALL_PATH = '/home/vladimir/tools/loadlibrary/'
+WDEFENDER_INSTALL_PATH = config.get_value("loadlibrary_path_dir")
 MAX_THREADS = 10
 DEBUG_LEVEL = 1
 buffer = []
@@ -47,7 +47,6 @@ progress = 0
 cs = Cs(CS_ARCH_X86, CS_MODE_64)
 cs.detail = True
 cs.skipdata = True
-g_scanner = None
 
 
 
@@ -296,9 +295,7 @@ def process_file(sample_file, start = 0, end=-1):
 
 
 def bytes_detection(filename, start=0, end=-1):
-    global g_scanner
 
-    g_scanner = DockerWindowsDefender()
     # g_scanner = VMWareAvast()
     sample_file = filename
 

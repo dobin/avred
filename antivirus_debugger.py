@@ -1,20 +1,12 @@
-import logging
-import os
-import sys
-import random
-import base64
-import r2pipe
-import string
-import shutil
 import argparse
+import sys
+from tempfile import NamedTemporaryFile
 
-from copy import deepcopy
-from dataclasses import dataclass
-from scanner import DockerWindowsDefender, VMWareDeepInstinct, VMWareKaspersky, VMWareAvast
 from find import bytes_detection
 from find_bad_strings import bissect
 from pe_utils import *
-from tempfile import NamedTemporaryFile
+from scanner import DockerWindowsDefender
+from scanner import g_scanner
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 logging.basicConfig(filename='debug.log',
@@ -32,7 +24,6 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 
-g_scanner = None
 BINARY = ""
 
 g_args = None
@@ -136,7 +127,7 @@ def strings_analysis(pe):
     if detection_result:
         logging.info(f"{g_scanner.scanner_name} seems to only detect strings in this binary.")
     else:
-        logging.warn(f"Patching all the strings does not evade detection.")
+        logging.warning(f"Patching all the strings does not evade detection.")
 
     return detection_result
 
@@ -275,9 +266,6 @@ def parse_pe(sample_file):
 
 if __name__ == "__main__":
 
-    #g_scanner = VMWareAvast()
-    #g_scanner = VMWareDeepInstinct()
-    g_scanner = DockerWindowsDefender()
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-s", '--skip-strings', help="Skip strings analysis", action="store_true")
@@ -288,7 +276,22 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--section', help="Analyze provided section")
     parser.add_argument('-g', '--globals', help="Analyze global variables in .data section", action="store_true")
     parser.add_argument('-V', '--virus', help="Virus scan", action="store_true")
+    parser.add_argument('-H', '--hide-section', help="Hide a section", type=str)
+    parser.add_argument('-S', "--scanner", help="Antivirus engine", default="DockerWindowsDefender")
     g_args = parser.parse_args()
 
+    if g_args.scanner == "DockerWindowsDefender":
+        g_scanner = DockerWindowsDefender()
+
     pe = parse_pe(g_args.file)
+
+    if g_args.hide_section:
+        copy_file = NamedTemporaryFile(delete=False)
+        shutil.copy(pe.filename, copy_file.name)
+        pe.filename = copy_file.name
+        hide_section(pe, g_args.hide_section)
+        logging.info(f"Dumped patched file @ {copy_file.name}")
+        sys.exit(0)
+
+
     investigate(pe)
