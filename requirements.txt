@@ -1,0 +1,4 @@
+tqdm
+hexdump
+pytest
+r2pipe
