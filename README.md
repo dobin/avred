@@ -1,7 +1,26 @@
-# Description
+# avred
+
+Based on: https://github.com/scrt/avdebugger
 
 Most antivirus engines rely on strings or other bytes sequences, function exports and big integers to recognize malware.
 This project helps to automatically recover these signatures.
+
+## Setup
+
+On a VM: 
+* Deploy a avred-server onto a VM with the AV you want to test
+* Configured the config.json on the avred-server directory
+* Test it: TODO
+
+On another VM: 
+* checkout avred 
+* Configure your servers in config.json
+* Start with: `./avred --server defender`
+
+## Architecture
+
+
+# OLD OLD OLD
 
 # Project status
 
