@@ -1,10 +1,4 @@
 {
-  "loadlibrary_path": "/home/toto/loadlibrary/mpclient",
-  "loadlibrary_path_dir": "/home/toto/loadlibrary",
-  "docker_loadlibrary_name": "loadlibrary",
-  "avast_vmx": "/Users/vladimir/Virtual Machines.localized/Windows_10_Avast.vmwarevm/Windows_10_Avast.vmx",
-  "kaspersky_vmx": "../../kasp.vmx",
-  "deepinstinct_vmx": "../../Virtual Machines.localized/Windows_10_AV_DeepInstinct.vmwarevm/Windows_10_AV_DeepInstinct.vmx",
-  "vmware_user": "toto",
-  "vmware_passwd": "totally-not-hardcoded.TM"
+	"server": "http://10.10.107:9001"
+
 }
