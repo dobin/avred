@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 from find import bytes_detection
 from find_bad_strings import bissect
 from pe_utils import *
-from scanner import DockerWindowsDefender
+from scanner import VMWindowsDefender
 from scanner import g_scanner
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
@@ -265,7 +265,7 @@ def parse_pe(sample_file):
 
 
 if __name__ == "__main__":
-
+    default_scanner = "VMWindowsDefender"
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-s", '--skip-strings', help="Skip strings analysis", action="store_true")
@@ -277,11 +277,12 @@ if __name__ == "__main__":
     parser.add_argument('-g', '--globals', help="Analyze global variables in .data section", action="store_true")
     parser.add_argument('-V', '--virus', help="Virus scan", action="store_true")
     parser.add_argument('-H', '--hide-section', help="Hide a section", type=str)
-    parser.add_argument('-S', "--scanner", help="Antivirus engine", default="DockerWindowsDefender")
+    parser.add_argument('-S', "--scanner", help="Antivirus engine", default=default_scanner)
     g_args = parser.parse_args()
 
-    if g_args.scanner == "DockerWindowsDefender":
-        g_scanner = DockerWindowsDefender()
+    if g_args.scanner == default_scanner:
+        logging.info("Using Default Scanner.")
+        g_scanner = VMWindowsDefender()
 
     pe = parse_pe(g_args.file)
 
