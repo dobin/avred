@@ -45,10 +45,10 @@ class VMWindowsDefender(Scanner):
             data = f.read()
 
         res = req.post(f"{self.scanner_path}/scan?method={method}", data=data)
-        ret_value = "Yay" in res.text
+        jsonRes = res.json()
+
+        ret_value = jsonRes['detected']
         threat_name = "undef"
-        if ":" in res.text:
-            threat_name = res.text.split(":")[1]
 
         if with_name:
             return ret_value, threat_name
