@@ -10,16 +10,13 @@ logging.basicConfig(filename='debug.log',
                             datefmt='%Y/%m/%d %H:%M',
                             level=logging.DEBUG
                     )
-
-
 rootLogger = logging.getLogger()
 logFormatter = logging.Formatter(log_format)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 
-BINARY = ""
-g_args = None
+args = None
 
 
 """
@@ -60,7 +57,7 @@ def investigate(pe, scanner):
     matches = []
     for section in detected_sections:
         logging.info(f"Launching bytes analysis on section {section.name}")
-        match = bytes_detection(pe.filename, scanner, section.addr, section.addr+section.size)
+        match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
         matches.append(match)
 
     return matches
@@ -75,7 +72,7 @@ def parse_pe(path):
         for section in pe.sections:
             print(f"Section {section.name}  addr: {section.addr}   size: {section.size} ")
 
-    #pe.strings = parse_strings(sample_file, g_args.extensive, g_args.length)
+    #pe.strings = parse_strings(sample_file, args.extensive, args.length)
     with open(path, "rb") as f:
         pe.data = f.read()
     return pe
@@ -90,10 +87,11 @@ def test():
     #pe, matches = test1()
     pe, matches = test2()
     for match in matches:
-            for i in sorted(match):
-                print(f"[*] Signature between {i.begin} and {i.end}: ")
-                data = pe.data[i.begin:i.end]
-                print(hexdump.hexdump(data, result='return'))
+        print("Matches: ")
+        for i in sorted(match):
+            print(f"[*] Signature between {i.begin} and {i.end}: ")
+            data = pe.data[i.begin:i.end]
+            print(hexdump.hexdump(data, result='return'))
                 
 
 def test1():
@@ -114,10 +112,10 @@ def test2():
     detections = []
     # .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
-
     # .text
     detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
     scanner = ScannerTest(detections)
+
     pe = parse_pe(filename)
     matches = investigate(pe, scanner)
     return pe, matches
@@ -131,14 +129,14 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--file", help="path to file")
     parser.add_argument('-c', '--section', help="Analyze provided section")
     parser.add_argument('-S', "--scanner", help="Antivirus engine", default=default_scanner)
-    g_args = parser.parse_args()
+    args = parser.parse_args()
 
-    if g_args.scanner == default_scanner:
+    if args.scanner == default_scanner:
         scanner = ScannerRest()
 
-    if g_args.test:
+    if args.test:
         test()
     else:
-        pe = parse_pe(g_args.file)
+        pe = parse_pe(args.file)
         investigate(pe, scanner)
 

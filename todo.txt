@@ -1,0 +1,5 @@
+
+* MIN_LEAP = 4
+  * merge adjectant matches
+  * remove duplicate matches
+
