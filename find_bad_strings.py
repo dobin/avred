@@ -8,7 +8,6 @@ import tempfile
 
 from tqdm import tqdm
 
-from scanner import g_scanner
 
 logging.basicConfig(filename='debug.log',
                     filemode='a',

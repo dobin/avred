@@ -132,7 +132,7 @@ def get_sections(pe):
             pe.sections += [
                 Section(section.get("name"), section.get("size"), section.get("vsize"), section.get("paddr"),
                         section.get("vaddr"))]
-            logging.debug(f"Found section: {pe.sections[-1]}")
+            #logging.debug(f"Found section: {pe.sections[-1]}")
 
     return pe.sections
 
@@ -155,7 +155,7 @@ def hide_all_sections_except(pe, exception=".text"):
 
 
 def hide_bytes(pe, start, length):
-    logging.debug(f"Hiding {length} bytes @ {start}")
+    #logging.debug(f"Hiding {length} bytes @ {start}")
     """
     pipe = r2pipe.open(pe.filename, flags=["-w"])
     replacement = ''.join(random.choice(string.ascii_letters) for i in range(length))
@@ -224,7 +224,6 @@ def parse_strings_old(strings_data):
 def parse_strings(filename, all_sections=False, min_length=12):
     pipe = r2pipe.open(filename)
     pipe.cmd("aaa")
-    # pipe.cmd("aaa")
     if all_sections:
         strings = pipe.cmdj("izzj")
     else:
@@ -233,7 +232,6 @@ def parse_strings(filename, all_sections=False, min_length=12):
     string_refs = []
 
     for string in strings:
-
         if string.get("length") < min_length:
             continue
 

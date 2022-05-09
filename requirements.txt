@@ -2,3 +2,6 @@ tqdm
 hexdump
 pytest
 r2pipe
+capstone
+intervaltree
+requests
