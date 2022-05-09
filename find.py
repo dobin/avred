@@ -19,7 +19,7 @@ todo:
 #ResultQueue = deque()
 interval_tree = IntervalTree()
 START_LEAP = 2048
-MIN_LEAP = 16
+MIN_LEAP = 8
 MAX_THREADS = 10
 
 
@@ -135,4 +135,6 @@ def bytes_detection(data, scanner, start=0, end=-1):
     process_file(data, scanner, start, end)
 
     good_res = filter_matches(interval_tree)
+    good_res.merge_overlaps(strict=False)
+
     return good_res
