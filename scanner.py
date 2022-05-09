@@ -1,12 +1,6 @@
 
 from dataclasses import dataclass
-import subprocess
 import logging
-import re
-import os
-import shutil
-import tempfile
-import config
 import requests as req
 
 logging.basicConfig(filename='debug.log',

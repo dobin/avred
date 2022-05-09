@@ -1,9 +1,5 @@
 import argparse
-import sys
-from tempfile import NamedTemporaryFile
-
 from find import bytes_detection
-from find_bad_strings import bissect
 from pe_utils import *
 from scanner import ScannerRest, ScannerTest
 
