@@ -30,47 +30,35 @@ g_args = None
 attempts to locate the part in a PE file that causes the antivirus detection
 """
 def findDetectedSections(pe, scanner):
-    nb_section_detected = 0
     detected_sections = []
 
     for section in pe.sections:
-        # copy the binary
-        new_name = NamedTemporaryFile().name
-        shutil.copyfile(pe.filename, new_name)
-
-        # hide the section
         new_pe = deepcopy(pe)
-        new_pe.filename = new_name
         hide_section(new_pe, section.name)
-        new_pe.md5 = md5(new_name)
 
-        #logging.debug(f"Scanning {new_name} md5 = {new_pe.md5}")
-        # scan it
-        status = not scanner.scan(new_pe.filename)
+        status = scanner.scan(new_pe.data)
+        section.detected =  status
 
-        # record the result
-        section.detected = not status
-
-        if status:
+        if not status:
             logging.info(f"Section {section.name} triggers the antivirus")
-            nb_section_detected += 1
             detected_sections += [section]
 
-    print(f"{nb_section_detected} section(s) trigger the antivirus")
+    sectionCount = len(detected_sections)
+    print(f"{sectionCount} section(s) trigger the antivirus")
     for section in detected_sections:
         print(f"  section: {section.name}")
 
-    return nb_section_detected, detected_sections
+    return detected_sections
 
 
 def investigate(pe, scanner):
-    detected = scanner.scan(pe.filename)
+    detected = scanner.scan(pe.data)
     if not detected:
         logging.error(f"{pe.filename} is not detected by {scanner.scanner_name}")
         return
 
     # identify which sections get detected
-    _, detected_sections = findDetectedSections(pe, scanner)
+    detected_sections = findDetectedSections(pe, scanner)
 
     # analyze each section
     matches = []
@@ -82,12 +70,18 @@ def investigate(pe, scanner):
     return matches
 
 
-def parse_pe(sample_file):
+def parse_pe(path):
     pe = PE()
-    pe.filename = sample_file
+    pe.filename = path
     pe.sections = get_sections(pe)
+
+    if False:
+        for section in pe.sections:
+            print(f"Section {section.name}  addr: {section.addr}   size: {section.size} ")
+
     #pe.strings = parse_strings(sample_file, g_args.extensive, g_args.length)
-    pe.md5 = md5(sample_file)
+    with open(path, "rb") as f:
+        pe.data = f.read()
     return pe
 
 
@@ -97,34 +91,40 @@ class TestDetection():
         self.refData = refData
 
 def test():
-    test1()
-    #test2()
+    #pe, matches = test1()
+    pe, matches = test2()
+    for match in matches:
+            for i in sorted(match):
+                print(f"[*] Signature between {i.begin} and {i.end}: ")
+                data = pe.data[i.begin:i.end]
+                print(hexdump.hexdump(data, result='return'))
+                
 
 def test1():
-    # one string in .rodata
     filename = "files/test.exe"
     detections = []
+
+    # one string in .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
     scanner = ScannerTest(detections)
     pe = parse_pe(filename)
 
     matches = investigate(pe, scanner)
-    for match in matches:
-        for i in sorted(match):
-            print(f"[*] Signature between {i.begin} and {i.end}: ")
-            data = b"AAAA"
-            print(hexdump.hexdump(data, result='return'))
+    return pe, matches
 
 
 def test2():
-    # one string in .rodata
     filename = "files/test.exe"
     detections = []
+    # .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
-    detections.append( TestDetection(29824, b"Unknown error") )
+
+    # .text
+    detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
     scanner = ScannerTest(detections)
     pe = parse_pe(filename)
-    investigate(pe, scanner)
+    matches = investigate(pe, scanner)
+    return pe, matches
 
 
 if __name__ == "__main__":

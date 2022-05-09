@@ -35,7 +35,7 @@ class PE:
     filename = ""
     sections = []
     strings = []
-    md5 = ""
+    data = b""
     patches = []
 
 
@@ -72,7 +72,6 @@ class Variable:
 
 @dataclass
 class Patch:
-
     addr:int
     size:int
 
@@ -85,19 +84,13 @@ class Patch:
             bf = f.read(min(self.size,128))
         logging.info("\n"+hexdump.hexdump(bf, result="return"))
 
+
 def spwn_dbg():
     import sys
     if not "IPython" in sys.modules:
         logging.warning(f"Spawning IPython shell to debug...")
         import IPython
         IPython.embed()
-
-
-def md5(file):
-    with open(file, 'rb') as f:
-        data = f.read()
-
-        return hashlib.md5(data).hexdigest()
 
 
 def backup_pe(pe):
@@ -140,32 +133,20 @@ def get_sections(pe):
 def hide_section(pe, section_name):
     section = next((sec for sec in pe.sections if sec.name == section_name), None)
     logging.debug(f"Hiding section {section.name}")
-    hide_bytes(pe, section.addr, section.size)
+
+    d = bytearray(pe.data)
+    d[section.addr:section.addr+section.size] = b" " * section.size
+
+    pe.data = bytes(d)
 
 
 """
 Hide all sections but the one specified
 """
-
-
 def hide_all_sections_except(pe, exception=".text"):
     for section in pe.sections:
         if section.name != exception:
             hide_section(pe, section.name)
-
-
-def hide_bytes(pe, start, length):
-    #logging.debug(f"Hiding {length} bytes @ {start}")
-    """
-    pipe = r2pipe.open(pe.filename, flags=["-w"])
-    replacement = ''.join(random.choice(string.ascii_letters) for i in range(length))
-    replacement = base64.b64encode(bytes(replacement, "ascii")).decode()
-    pipe.cmd(f"w6d {replacement} @ {start}")
-    """
-    # for some reasons the code above is buggy with my radare2 version
-    with open(pe.filename, 'r+b') as f:
-        f.seek(start)
-        f.write(bytes(''.join(random.choice(string.ascii_letters) for i in range(length)), encoding='ascii'))
 
 
 """
@@ -173,8 +154,6 @@ def hide_bytes(pe, start, length):
     @param encoding the requested encoding (string)
     @return the correct encoding as string
 """
-
-
 def convert_encoding(encoding):
     table = {
         "ascii": "ascii",

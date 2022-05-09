@@ -126,12 +126,12 @@ def sigseek(buffer, current_offset, end, counter, scanner):
         logging.info(f"[+] Patching buffer of size = {len(buffer)}, offset = {current_offset}, leap = {leap}")
         goat = buffer[:current_offset] + patch + buffer[current_offset+leap:]
         bufs += [goat]
-        filepath = GOAT_FILE + "_"+str(counter)
 
-        with open(filepath,'wb') as fw:
-            fw.write(goat)
+        #filepath = GOAT_FILE + "_"+str(counter)
+        #with open(filepath,'wb') as fw:
+        #    fw.write(goat)
 
-        if not scanner.scan(filepath):
+        if not scanner.scan(goat):
             has_lead = True
             logging.info(f"[+] Found signature between {current_offset} and {current_offset+leap}")
             ResultQueue.append(Interval(int(current_offset), current_offset+leap))
@@ -144,7 +144,6 @@ def sigseek(buffer, current_offset, end, counter, scanner):
         current_offset += leap
 
     if detected_chunks == nb_chunk and detected_chunks > 0:
-
         logging.info(f"[!] File appears to be detected with several patterns ({detected_chunks})")
         sigseek(bufs[0], current_offset, end, counter+1000, scanner)
         sigseek(bufs[1], current_offset-leap, end, counter+5000, scanner)

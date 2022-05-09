@@ -206,15 +206,6 @@ def parse_strings(strings_data):
     return string_refs
 
 
-"""
-    Scans a file with Windows Defender and returns True if the file
-    is detected as a threat.
-"""
-def scan(path):
-
-    return g_scanner.scan(path)
-
-
 
 """
     @description patch a binary blob at the location pointed by "str_ref"
