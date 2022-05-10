@@ -87,8 +87,8 @@ def sigseek(buffer, ResultQueue, current_offset, end, counter, scanner):
 
     if detected_chunks == nb_chunk and detected_chunks > 0:
         logging.info(f"[!] File appears to be detected with several patterns ({detected_chunks})")
-        sigseek(bufs[0], current_offset, end, counter+1000, scanner)
-        sigseek(bufs[1], current_offset-leap, end, counter+5000, scanner)
+        sigseek(bufs[0], ResultQueue, current_offset, end, counter+1000, scanner)
+        sigseek(bufs[1], ResultQueue, current_offset-leap, end, counter+5000, scanner)
     elif detected_chunks == 1:
         branch_skipped = count_max_chunks(leap)
 

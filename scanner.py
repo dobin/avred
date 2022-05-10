@@ -32,6 +32,25 @@ class ScannerTest(Scanner):
         return True    
 
 
+class ScannerTestWeighted(Scanner):
+    def __init__(self, detections):
+        self.detections = detections
+
+    def scan(self, data):
+        # 2/3
+        n = 0
+
+        for detection in self.detections:
+            fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if fileData == detection.refData:
+                n += 1
+
+        if n >= 2:
+            return True
+        else:
+            return False
+
+
 class ScannerRest(Scanner):
     def __init__(self):
         self.scanner_path = "http://10.10.10.107:9001"
