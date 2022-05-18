@@ -35,9 +35,9 @@ def test1():
     #detections.append( TestDetection(29824, b"Unknown error") )
     
     # TODO PROBLEM with this one
-    #detections.append( TestDetection(30810, b"\xff\xff\x10\xb1\xff\xff\xc2\xb2\xff\xff") )
+    detections.append( TestDetection(30810, b"\xff\xff\x10\xb1\xff\xff\xc2\xb2\xff\xff") )
     # WORKS
-    detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
+    #detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
     scanner = ScannerTest(detections)
     
     pe, matches = analyzeFile(filename, scanner)

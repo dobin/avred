@@ -1,8 +1,9 @@
 from reducer_orig import bytes_detection
 from reducer_rutd import scanData
-from pe_utils import deepcopy, hide_section, logging, hexdump
+from copy import deepcopy
+from pe_utils import hide_section, logging
 from pe_info import parse_pe
-
+import hexdump
 
 def analyzeFile(filename, scanner, newAlgo=True):
     pe = parse_pe(filename)

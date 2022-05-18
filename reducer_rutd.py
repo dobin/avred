@@ -1,4 +1,5 @@
-from pe_utils import logging, hexdump
+import hexdump
+import logging
 from intervaltree import Interval, IntervalTree
 
 SIG_SIZE = 128
