@@ -4,10 +4,10 @@
   + remove duplicate matches
 
 * problems
-  * if each half is detected
+  + if each half is detected
     * add test
-  * if detection is score based
-
+  + if detection is score based
+  * weird detection below
 
 -------
 

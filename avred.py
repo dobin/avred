@@ -1,7 +1,7 @@
 import argparse
 from pe_utils import *
 from scanner import ScannerRest, ScannerTest
-from test import *
+from test import testMain
 from analyzer import *
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
@@ -18,20 +18,6 @@ consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 
 
-def test():
-    #pe, matches = test1()
-    #pe, matches = test2()
-    #pe, matches = test3()
-    pe, matches = test4()
-
-    for match in matches:
-        for i in sorted(match):
-            size = i.end - i.begin
-            print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-            data = pe.data[i.begin:i.end]
-            print(hexdump.hexdump(data, result='return'))
-
-
 if __name__ == "__main__":
     default_scanner = "Rest"
     parser = argparse.ArgumentParser()
@@ -46,8 +32,9 @@ if __name__ == "__main__":
         scanner = ScannerRest()
 
     if args.test:
-        test()
+        testMain(args.test)
     else:
-        pe = parse_pe(args.file)
-        investigate(pe, scanner)
+        analyzeFile(args.file, scanner, newAlgo=True)
+        #pe = parse_pe(args.file)
+        #investigate(pe, scanner)
 

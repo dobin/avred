@@ -1,11 +1,23 @@
-from pe_utils import *
-from find import bytes_detection
+from reducer_orig import bytes_detection
+from reducer_rutd import scanData
+from pe_utils import deepcopy, hide_section, logging, hexdump
+from pe_info import parse_pe
 
 
+def analyzeFile(filename, scanner, newAlgo=True):
+    pe = parse_pe(filename)
+    matches = investigate(pe, scanner, newAlgo)
 
-"""
-attempts to locate the part in a PE file that causes the antivirus detection
-"""
+    for match in matches:
+        for i in sorted(match):
+            size = i.end - i.begin
+            print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
+            data = pe.data[i.begin:i.end]
+            print(hexdump.hexdump(data, result='return'))
+
+    return pe, matches
+
+
 def findDetectedSections(pe, scanner):
     detected_sections = []
 
@@ -28,7 +40,7 @@ def findDetectedSections(pe, scanner):
     return detected_sections
 
 
-def investigate(pe, scanner):
+def investigate(pe, scanner, newAlgo):
     detected = scanner.scan(pe.data)
     if not detected:
         logging.error(f"{pe.filename} is not detected by {scanner.scanner_name}")
@@ -41,23 +53,12 @@ def investigate(pe, scanner):
     matches = []
     for section in detected_sections:
         logging.info(f"Launching bytes analysis on section {section.name}")
-        match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
+        
+        if newAlgo:
+            match = scanData(scanner, pe.data, section.addr, section.addr+section.size)
+            print(str(match))
+        else:
+            match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
         matches.append(match)
 
     return matches
-
-
-def parse_pe(path):
-    pe = PE()
-    pe.filename = path
-    pe.sections = get_sections(pe)
-
-    if False:
-        for section in pe.sections:
-            print(f"Section {section.name}  addr: {section.addr}   size: {section.size} ")
-
-    #pe.strings = parse_strings(sample_file, args.extensive, args.length)
-    with open(path, "rb") as f:
-        pe.data = f.read()
-    return pe
-

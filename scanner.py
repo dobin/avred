@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import logging
 import requests as req
+from pprint import pprint
 
 logging.basicConfig(filename='debug.log',
                     filemode='a',
@@ -22,6 +23,7 @@ class Scanner:
 class ScannerTest(Scanner):
     def __init__(self, detections):
         self.detections = detections
+        pprint(detections, indent=4)
 
     def scan(self, data):
         for detection in self.detections:
@@ -35,6 +37,7 @@ class ScannerTest(Scanner):
 class ScannerTestWeighted(Scanner):
     def __init__(self, detections):
         self.detections = detections
+        pprint(detections, indent=4)
 
     def scan(self, data):
         # 2/3
