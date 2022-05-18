@@ -21,11 +21,13 @@ rootLogger.addHandler(consoleHandler)
 def test():
     #pe, matches = test1()
     #pe, matches = test2()
-    pe, matches = test3()
+    #pe, matches = test3()
+    pe, matches = test4()
 
     for match in matches:
         for i in sorted(match):
-            print(f"[*] Signature between {i.begin} and {i.end}: ")
+            size = i.end - i.begin
+            print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
             data = pe.data[i.begin:i.end]
             print(hexdump.hexdump(data, result='return'))
 

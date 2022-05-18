@@ -1,5 +1,43 @@
 
-* MIN_LEAP = 4
-  * merge adjectant matches
-  * remove duplicate matches
++ MIN_LEAP = 4
+  + merge adjectant matches
+  + remove duplicate matches
 
+* problems
+  * if each half is detected
+    * add test
+  * if detection is score based
+
+
+-------
+
+offset slightly wrong generated bad results, how to minimize?
+
+
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 42] investigate() :: Launching bytes analysis on section .rdata: 29696-33280
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29696-33280: 1792
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 95] _detection() :: Do Top
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29696-31488: 896
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 95] _detection() :: Do Top
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29696-30592: 448
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 95] _detection() :: Do Top
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29696-30144: 224
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 95] _detection() :: Do Top
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29696-29920: 112
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 98] _detection() :: Do Bot
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29808-29920: 56
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 95] _detection() :: Do Top
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 59] _detection() :: 29808-29864: 28
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 78] _detection() :: No more detection
+[INFO    ][2022-05-18 12:38:43,356][dobin.py: 79] _detection() :: Result: 29808-29864 size:56
+Result:
+00000000: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+00000010: 55 6E 6B 6E 6F 77 6E 20  65 72 72 6F 72 00 00 00  Unknown error...
+00000020: 41 72 67 75 6D 65 6E 74  20 64 6F 6D 61 69 6E 20  Argument domain 
+00000030: 65 72 72 6F 72 20 28 44                           error (D
+TopNull:
+00000000: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+00000010: 55 6E 6B 6E 6F 77 6E 20  65 72 72 6F              Unknown erro
+BotNull:
+00000000: 72 00 00 00 41 72 67 75  6D 65 6E 74 20 64 6F 6D  r...Argument dom
+00000010: 61 69 6E 20 65 72 72 6F  72 20 28 44              ain error (D

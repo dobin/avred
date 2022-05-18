@@ -16,10 +16,9 @@ todo:
 
 """
 
-#ResultQueue = deque()
 interval_tree = IntervalTree()
 START_LEAP = 2048
-MIN_LEAP = 8
+MIN_LEAP = 4 # 4 is like the minimum to work
 MAX_THREADS = 10
 
 
@@ -59,24 +58,33 @@ def filter_matches(good_res):
     the detection verdict. If it does, the half is added to a queue in order
     to improve the precision.
     Problem if each half is detected for now
+
+    buffer:          complete file
+    ResultQueue:     to store results
+    current_offset:  where in the buffer we are (initially begin of section)
+    end:             offset end of the section
+    counter:         just informative
+    scannner:        which scanner we use
 """
 def sigseek(buffer, ResultQueue, current_offset, end, counter, scanner):
     leap = (end - current_offset) // 2
-    patch = bytes(chr(0),'ascii')*int(leap)
+    patch = bytes(chr(0),'ascii') * int(leap)
     nb_chunk = (end - current_offset) // leap if not leap == 0 else 0
     detected_chunks = 0
     bufs = []
+
+    # nb_chunk will always be 2
 
     #logging.info(f"\t\t[+] {nb_chunk} chunks to process")
 
     while current_offset < end and leap >= MIN_LEAP:
         #progress.set_postfix(current_offset=current_offset+leap, refresh=True)
-        logging.info(f"[-] Patching buffer of size = {len(buffer)}, offset = {current_offset}, leap = {leap}")
+        logging.info(f"[-] Patching buffer {len(buffer)} {counter}: offset={current_offset} leap={leap}")
         goat = buffer[:current_offset] + patch + buffer[current_offset+leap:]
         bufs += [goat]
 
         if not scanner.scan(goat):
-            has_lead = True
+            #has_lead = True
             logging.info(f"[+] Found signature between {current_offset} and {current_offset+leap}")
             ResultQueue.append(Interval(int(current_offset), current_offset+leap))
         else:
@@ -107,7 +115,7 @@ def process_file(data, scanner, start = 0, end=-1):
 
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as exec:
         to_do = []
-        last_size = 0
+        #last_size = 0
 
         while len(ResultQueue) > 0 or len(to_do) > 0:
             if len(ResultQueue) == 0:
@@ -126,7 +134,7 @@ def process_file(data, scanner, start = 0, end=-1):
             else:
                 return
 
-            last_size = match.end - match.begin
+            #last_size = match.end - match.begin
             futur = exec.submit(sigseek, data, ResultQueue, match.begin, match.end, counter, scanner)
             to_do = [futur]
 

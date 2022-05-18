@@ -39,7 +39,6 @@ class ScannerTestWeighted(Scanner):
     def scan(self, data):
         # 2/3
         n = 0
-
         for detection in self.detections:
             fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
             if fileData == detection.refData:
