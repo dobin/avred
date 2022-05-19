@@ -21,13 +21,12 @@ def scanData(scanner, fileData, sectionStart, sectionEnd):
 
 # recursive
 def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
-    ret = []
     size = sectionEnd - sectionStart
     chunkSize = int(size // 2)
     
-    logging.info(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
-    #logging.info(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
-    #logging.info(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
+    logging.debug(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
+    #logging.debug(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
+    #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
 
     if chunkSize < 2:
         logging.error(f"Very small chunksize for a signature, problem?")
@@ -43,7 +42,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
         # Both halves are detected
         # Continue scanning both halves independantly, but with each other halve
         # zeroed out (instead of the complete file)
-        logging.error("Both halves are detected!")
+        logging.debug("Both halves are detected!")
         
         scanSection(scanner, chunkBotNull, sectionStart, sectionStart+chunkSize, it)
         scanSection(scanner, chunkTopNull, sectionStart+chunkSize, sectionEnd, it)
@@ -53,7 +52,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
 
         if chunkSize < SIG_SIZE:
             # Small enough, no more detections
-            logging.info("No more detection")
+            logging.debug("No more detection")
             logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)")
             it.add ( Interval(sectionStart, sectionStart+size) )
 
@@ -62,7 +61,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
             #print(hexdump.hexdump(data, result='return'))
         else: 
             # make it smaller still
-            logging.info("No detections anymore, but too big. Continue anyway...")
+            logging.debug("No detections anymore, but too big. Continue anyway...")
             scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
             scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
 

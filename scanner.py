@@ -40,23 +40,22 @@ class ScannerTestWeighted(Scanner):
         pprint(detections, indent=4)
 
     def scan(self, data):
-        # 2/3
         n = 0
         for detection in self.detections:
             fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
             if fileData == detection.refData:
                 n += 1
 
-        if n >= 2:
+        if n > int(len(self.detections) // 2):
             return True
         else:
             return False
 
 
 class ScannerRest(Scanner):
-    def __init__(self):
-        self.scanner_path = "http://10.10.10.107:9001"
-        self.scanner_name = "Windows Defender"
+    def __init__(self, url, name):
+        self.scanner_path = url
+        self.scanner_name = name
 
     def scan(self, data):
         res = req.post(f"{self.scanner_path}/scan?method=run", data=data)

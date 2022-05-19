@@ -1,8 +1,8 @@
 import argparse
-from pe_utils import *
-from scanner import ScannerRest, ScannerTest
+from scanner import ScannerRest
 from test import testMain
 from analyzer import *
+from config import Config
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 logging.basicConfig(filename='debug.log',
@@ -18,23 +18,28 @@ consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 
 
-if __name__ == "__main__":
-    default_scanner = "Rest"
+def main():
     parser = argparse.ArgumentParser()
-
-    parser.add_argument("-t", "--test", help="Test")
+    parser.add_argument("-t", "--test", help="Test 0, 1, 2, ...")
     parser.add_argument("-f", "--file", help="path to file")
-    parser.add_argument('-c', '--section', help="Analyze provided section")
-    parser.add_argument('-S', "--scanner", help="Antivirus engine", default=default_scanner)
+    parser.add_argument('-s', "--server", help="Server")
     args = parser.parse_args()
-
-    if args.scanner == default_scanner:
-        scanner = ScannerRest()
 
     if args.test:
         testMain(args.test)
     else:
-        analyzeFile(args.file, scanner, newAlgo=True)
-        #pe = parse_pe(args.file)
-        #investigate(pe, scanner)
+        if not args.file or not args.server:
+            print("GIFE")
+            return
 
+        config = Config()
+        config.load()
+        url = config.get("server")[args.server]
+        scanner = ScannerRest(url, args.server)
+
+        analyzeFile(args.file, scanner, newAlgo=True)
+
+
+if __name__ == "__main__":
+    main()
+    
