@@ -29,7 +29,7 @@ def testMain(idx):
 
 def test0():
     # simple
-    filename = "files/test.exe"
+    filename = "test/test.exe"
     detections = []
 
     # one string in .rodata
@@ -41,7 +41,7 @@ def test0():
 
 def test1():
     # simple, merge?
-    filename = "files/test.exe"
+    filename = "test/test.exe"
     detections = []
     
     # TODO PROBLEM with this one
@@ -56,7 +56,7 @@ def test1():
 
 def test2():
     # two sections
-    filename = "files/test.exe"
+    filename = "test/test.exe"
     detections = []
     # .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
@@ -70,7 +70,7 @@ def test2():
 
 def test3():
     # two in one section
-    filename = "files/test.exe"
+    filename = "test/test.exe"
     detections = []
     # .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
@@ -85,7 +85,7 @@ def test3():
 
 def test4():
     # weighted
-    filename = "files/test.exe"
+    filename = "test/test.exe"
     detections = []
     # .rodata
     detections.append( TestDetection(29824, b"Unknown error") )
