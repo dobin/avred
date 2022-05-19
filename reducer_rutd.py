@@ -12,6 +12,15 @@ def makePatchedFile(fileData, offset, size):
 
 
 def scanData(scanner, fileData, sectionStart, sectionEnd):
+    # just a wrapper for scanSection()
+    it = IntervalTree()
+    scanSection(scanner, fileData, sectionStart, sectionEnd, it)
+    it.merge_overlaps(strict=False)
+    return it
+
+
+# recursive
+def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
     ret = []
     size = sectionEnd - sectionStart
     chunkSize = int(size // 2)
@@ -36,8 +45,8 @@ def scanData(scanner, fileData, sectionStart, sectionEnd):
         # zeroed out (instead of the complete file)
         logging.error("Both halves are detected!")
         
-        ret += scanData(scanner, chunkBotNull, sectionStart, sectionStart+chunkSize)
-        ret += scanData(scanner, chunkTopNull, sectionStart+chunkSize, sectionEnd)
+        scanSection(scanner, chunkBotNull, sectionStart, sectionStart+chunkSize, it)
+        scanSection(scanner, chunkTopNull, sectionStart+chunkSize, sectionEnd, it)
 
     elif not detectTopNull and not detectBotNull:
         # both parts arent detected anymore
@@ -46,7 +55,7 @@ def scanData(scanner, fileData, sectionStart, sectionEnd):
             # Small enough, no more detections
             logging.info("No more detection")
             logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)")
-            ret += [ Interval(sectionStart, sectionStart+size) ]
+            it.add ( Interval(sectionStart, sectionStart+size) )
 
             #print("Result:")
             #data = fileData[sectionStart:sectionStart+size]
@@ -54,8 +63,8 @@ def scanData(scanner, fileData, sectionStart, sectionEnd):
         else: 
             # make it smaller still
             logging.info("No detections anymore, but too big. Continue anyway...")
-            ret += scanData(scanner, fileData, sectionStart, sectionStart+chunkSize)
-            ret += scanData(scanner, fileData, sectionStart+chunkSize, sectionEnd)
+            scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
+            scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
 
         #print("TopNull:")
         #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
@@ -68,10 +77,10 @@ def scanData(scanner, fileData, sectionStart, sectionEnd):
     elif not detectTopNull:
         # Detection in the top half
         #logging.info("Do Top")
-        ret += scanData(scanner, fileData, sectionStart, sectionStart+chunkSize)
+        scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
     elif not detectBotNull:
         # Detection in the bottom half
         #logging.info(f"Do Bot")
-        ret += scanData(scanner, fileData, sectionStart+chunkSize, sectionEnd)
+        scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
 
-    return ret
+    return

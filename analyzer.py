@@ -4,6 +4,7 @@ from copy import deepcopy
 from pe_utils import hide_section, logging
 from pe_info import parse_pe
 import hexdump
+from intervaltree import Interval, IntervalTree
 
 def analyzeFile(filename, scanner, newAlgo=True):
     pe = parse_pe(filename)
@@ -57,7 +58,6 @@ def investigate(pe, scanner, newAlgo):
         
         if newAlgo:
             match = scanData(scanner, pe.data, section.addr, section.addr+section.size)
-            print(str(match))
         else:
             match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
         matches.append(match)
