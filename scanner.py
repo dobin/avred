@@ -66,5 +66,4 @@ class ScannerRest(Scanner):
             print("ERr: " + str(res.text))
         
         ret_value = jsonRes['detected']
-
         return ret_value

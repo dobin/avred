@@ -29,8 +29,8 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
     #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
 
     if chunkSize < 2:
-        logging.error(f"Very small chunksize for a signature, problem?")
-        return []
+        logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
+        return
 
     chunkTopNull = makePatchedFile(fileData, sectionStart, chunkSize)
     chunkBotNull = makePatchedFile(fileData, sectionStart+chunkSize, chunkSize)

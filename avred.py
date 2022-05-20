@@ -9,13 +9,14 @@ logging.basicConfig(filename='debug.log',
                             filemode='a',
                             format=format,
                             datefmt='%Y/%m/%d %H:%M',
-                            level=logging.DEBUG
+                            level=logging.INFO
                     )
 rootLogger = logging.getLogger()
 logFormatter = logging.Formatter(log_format)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
+logging.getLogger().setLevel(logging.INFO)
 
 
 def main():
@@ -37,7 +38,7 @@ def main():
         url = config.get("server")[args.server]
         scanner = ScannerRest(url, args.server)
 
-        analyzeFile(args.file, scanner, newAlgo=True)
+        pe, matches = analyzeFile(args.file, scanner, newAlgo=True)
 
 
 if __name__ == "__main__":

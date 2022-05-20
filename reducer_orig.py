@@ -5,7 +5,6 @@ import pe_utils
 
 from collections import deque
 from concurrent import futures
-from capstone import *
 from intervaltree import Interval, IntervalTree
 
 """

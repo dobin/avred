@@ -1,7 +1,4 @@
-tqdm
-hexdump
-pytest
-r2pipe
-capstone
 intervaltree
+hexdump
 requests
+pefile
