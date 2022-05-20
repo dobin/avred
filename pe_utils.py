@@ -30,7 +30,7 @@ def parse_pe(path, showInfo=False):
 
     if showInfo:
         for section in pe.sections:
-            print(f"Section {section.name}  addr: {section.addr}   size: {section.size} ")
+            print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
     return pe
 
@@ -40,9 +40,15 @@ def get_sections(pe):
 
     # Normal sections
     for section in pepe.sections:
-        name = section.Name.decode("utf-8")
+        name = section.Name.decode("iso-8859-1")
         addr = section.PointerToRawData
         size = section.SizeOfRawData
+
+        #print("Name: -" + name + "-" + str.encode(name))
+        #if ".text" in name:
+        #    print("AAAAAAAAAAAAAAA 1")
+        #if name == b".text":
+        #    print("AAAAAAAAAAAAAAA 2")
 
         if addr != 0 and size != 0:
             pe.sections += [
@@ -76,13 +82,20 @@ def get_sections(pe):
 
 
 def hide_section(pe, section_name):
-    section = next((sec for sec in pe.sections if sec.name == section_name), None)
+    #section = next((sec for sec in pe.sections if sec.name == section_name), None)
+    section = next((sec for sec in pe.sections if section_name in sec.name ), None)
+
+    if section is None:
+        logging.warn(f"Section {section_name} does not exist.")
+        return
+
+    logging.debug(f"Hide: {hex(section.addr)} {section.size}")
     hidePart(pe, section.addr, section.size)
     
 
 def hidePart(pe, base, size):
     d = bytearray(pe.data)
-    d[base:base+size] = b" " * size
+    d[base:base+size] = b"\x00" * size
     pe.data = bytes(d)
 
 

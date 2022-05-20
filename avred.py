@@ -24,6 +24,11 @@ def main():
     parser.add_argument("-t", "--test", help="Test 0, 1, 2, ...")
     parser.add_argument("-f", "--file", help="path to file")
     parser.add_argument('-s', "--server", help="Server")
+
+    parser.add_argument('-i', "--isolate", help="Isolate sections to be tested (null all other)", default=False,  action='store_true')
+    parser.add_argument('-r', "--remove", help="Remove some standard sections at the beginning", default=False,  action='store_true')
+    parser.add_argument('-c', "--checkOnly", help="Check only", default=False, action='store_true')
+    parser.add_argument('-y', "--verify", help="Verify result", default=False, action='store_true')
     args = parser.parse_args()
 
     if args.test:
@@ -38,7 +43,17 @@ def main():
         url = config.get("server")[args.server]
         scanner = ScannerRest(url, args.server)
 
-        pe, matches = analyzeFile(args.file, scanner, newAlgo=True)
+        if args.checkOnly:
+            pe = parse_pe(args.file)
+            detected = scanner.scan(pe.data)
+            if detected:
+                print("File is detected")
+            else:
+                print("File is not detected")
+            
+        else:
+            pe, matches = analyzeFile(args.file, scanner, 
+                newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify)
 
 
 if __name__ == "__main__":
