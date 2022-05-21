@@ -9,9 +9,9 @@ from pe_utils import *
 from utils import *
 
 
-def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False):
+def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
     pe = parse_pe(filename, showInfo=True)
-    matches = investigate(pe, scanner, newAlgo, isolate, remove)
+    matches = investigate(pe, scanner, newAlgo, isolate, remove, ignoreText)
 
     if len(matches) == 0:
         return pe, []
@@ -45,7 +45,7 @@ def verifyFile(pe, matches, scanner):
     print("Still detected? :-(")
 
 
-def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
+def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreText=False):
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
         hide_section(pe, "Ressources")
@@ -82,8 +82,9 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
     # analyze each detected section
     matches = []
     for section in detected_sections:
-        #if '.text' in section.name:
-        #    continue
+        # reducing .text does not work well
+        if ignoreText and '.text' in section.name:
+            continue
 
         logging.info(f"Launching bytes analysis on section {section.name}")
         if newAlgo:
@@ -93,6 +94,14 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
         matches += match
 
     return matches
+
+
+def analyzePlain(filename, scanner):
+    data = None
+    with open(filename, "rb") as file:
+        data = file.read()
+    match = scanData(scanner, data, 0, len(data))
+    return data, match
 
 
 def findDetectedSectionsIsolate(pe, scanner):

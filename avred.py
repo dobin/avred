@@ -3,6 +3,7 @@ from scanner import ScannerRest
 from test import testMain
 from analyzer import *
 from config import Config
+from intervaltree import IntervalTree, Interval
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 logging.basicConfig(filename='debug.log',
@@ -30,6 +31,8 @@ def main():
     parser.add_argument("--checkOnly", help="Check only", default=False, action='store_true')
     parser.add_argument("--verify", help="Verify result", default=False, action='store_true')
     parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
+    parser.add_argument("--ignoreText", help="Dont analyze .text section", default=False, action='store_true')
+
     args = parser.parse_args()
 
     if args.test:
@@ -45,16 +48,21 @@ def main():
         scanner = ScannerRest(url, args.server)
 
         if args.checkOnly:
-            pe = parse_pe(args.file)
-            detected = scanner.scan(pe.data)
+            f = open(args.file, 'rb')
+            data = f.read(-1)
+            detected = scanner.scan(data)
             if detected:
                 print("File is detected")
             else:
                 print("File is not detected")
             
         else:
-            pe, matches = analyzeFile(args.file, scanner, 
-                newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, saveMatches=args.saveMatches)
+            if args.file.endswith('.ps1'):
+                data, matches = analyzePlain(args.file, scanner)
+            else:
+                pe, matches = analyzeFile(args.file, scanner, 
+                    newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
+                    saveMatches=args.saveMatches, ignoreText=args.ignoreText)
 
 
 if __name__ == "__main__":

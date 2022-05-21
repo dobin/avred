@@ -42,7 +42,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
         # Both halves are detected
         # Continue scanning both halves independantly, but with each other halve
         # zeroed out (instead of the complete file)
-        logging.debug("Both halves are detected!")
+        logging.debug("--> Both halves are detected!")
         
         scanSection(scanner, chunkBotNull, sectionStart, sectionStart+chunkSize, it)
         scanSection(scanner, chunkTopNull, sectionStart+chunkSize, sectionEnd, it)
@@ -61,7 +61,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
             #print(hexdump.hexdump(data, result='return'))
         else: 
             # make it smaller still. Take complete data (not nulled)
-            logging.debug("No detections anymore, but too big. Continue anyway...")
+            logging.debug("--> No detections anymore, but too big. Continue anyway...")
             scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
             scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
 
@@ -75,11 +75,11 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
 
     elif not detectTopNull:
         # Detection in the top half
-        #logging.info("Do Top")
+        logging.debug("--> Do Top")
         scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
     elif not detectBotNull:
         # Detection in the bottom half
-        #logging.info(f"Do Bot")
+        logging.debug("--> Do Bot")
         scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
 
     return
