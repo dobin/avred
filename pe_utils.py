@@ -100,7 +100,6 @@ def hidePart(pe, base, size):
 
 
 def hide_all_sections_except(pe, exception):
-    logging.info(f"Hide all except: {exception}")
     for section in pe.sections:
         if section.name != exception:
             hidePart(pe, section.addr, section.size)

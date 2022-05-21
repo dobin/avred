@@ -6,9 +6,10 @@ from reducer_orig import bytes_detection
 from reducer_rutd import scanData
 from copy import deepcopy
 from pe_utils import *
+from utils import *
 
 
-def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True):
+def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False):
     pe = parse_pe(filename, showInfo=True)
     matches = investigate(pe, scanner, newAlgo, isolate, remove)
 
@@ -20,6 +21,9 @@ def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, ve
         print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
         data = pe.data[i.begin:i.end]
         print(hexdump.hexdump(data, result='return'))
+
+    if saveMatches:
+        saveMatchesToFile(pe, matches)
 
     if verify:
         verifyFile(deepcopy(pe), matches, scanner)
@@ -47,6 +51,7 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
         hide_section(pe, "Ressources")
         hide_section(pe, "VersionInfo")
 
+    # check if its really being detected first
     detected = scanner.scan(pe.data)
     if not detected:
         logging.error(f"{pe.filename} is not detected by {scanner.scanner_name}")
@@ -55,16 +60,17 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
     # identify which sections get detected
     detected_sections = []
     if isolate:
-        logging.info("Isolating sections")
+        logging.info("Section Detection: Isolating sections (zero all others)")
         detected_sections = findDetectedSectionsIsolate(pe, scanner)
     else:
+        logging.info("Section Detection: Zero section (leave all others)")
         detected_sections = findDetectedSections(pe, scanner)
 
     if len(detected_sections) == 0:
         print("No matches?!")
         return []
 
-    print(f"{len(detected_sections)} section(s) trigger the antivirus")
+    print(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         print(f"  section: {section.name}")
 
@@ -76,6 +82,9 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False):
     # analyze each detected section
     matches = []
     for section in detected_sections:
+        #if '.text' in section.name:
+        #    continue
+
         logging.info(f"Launching bytes analysis on section {section.name}")
         if newAlgo:
             match = scanData(scanner, pe.data, section.addr, section.addr+section.size)
@@ -99,6 +108,8 @@ def findDetectedSectionsIsolate(pe, scanner):
         if status:
             detected_sections += [section]
 
+        logging.info(f"Hide all except: {section.name} -> {status}")
+
     return detected_sections
 
 
@@ -113,5 +124,7 @@ def findDetectedSections(pe, scanner):
         status = scanner.scan(new_pe.data)
         if not status:
             detected_sections += [section]
+
+        logging.info(f"Hide: {section.name} -> {status}")
 
     return detected_sections

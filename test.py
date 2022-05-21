@@ -28,7 +28,7 @@ def testMain(idx):
         pe, matches = test4()
 
 def test0():
-    # simple
+    # simple, 1
     filename = "test/test.exe"
     detections = []
 
@@ -40,14 +40,14 @@ def test0():
     return pe, matches
 
 def test1():
-    # simple, merge?
+    # simple, merge 2-OR
     filename = "test/test.exe"
     detections = []
     
     # TODO PROBLEM with this one
     detections.append( TestDetection(30810, b"\xff\xff\x10\xb1\xff\xff\xc2\xb2\xff\xff") )
     # WORKS
-    #detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
+    detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
     scanner = ScannerTest(detections)
     
     pe, matches = analyzeFile(filename, scanner)
@@ -55,7 +55,7 @@ def test1():
 
 
 def test2():
-    # two sections
+    # 2 sections OR
     filename = "test/test.exe"
     detections = []
     # .rodata
@@ -69,7 +69,7 @@ def test2():
 
 
 def test3():
-    # two in one section
+    # two in one section OR
     filename = "test/test.exe"
     detections = []
     # .rodata
@@ -84,7 +84,7 @@ def test3():
 
 
 def test4():
-    # weighted
+    # weighted (at least half)
     filename = "test/test.exe"
     detections = []
     # .rodata

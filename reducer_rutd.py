@@ -60,7 +60,7 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
             #data = fileData[sectionStart:sectionStart+size]
             #print(hexdump.hexdump(data, result='return'))
         else: 
-            # make it smaller still
+            # make it smaller still. Take complete data (not nulled)
             logging.debug("No detections anymore, but too big. Continue anyway...")
             scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
             scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
