@@ -9,6 +9,7 @@ from pe_utils import *
 from utils import *
 
 
+
 def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
     pe = parse_pe(filename, showInfo=True)
     matches = investigate(pe, scanner, newAlgo, isolate, remove, ignoreText)
@@ -36,7 +37,7 @@ def verifyFile(pe, matches, scanner):
     for i in matches:
         size = i.end - i.begin
         print(f"Patch: {i.begin}-{i.end} size {size}")
-        hidePart(pe, i.begin, size)
+        hidePart(pe, i.begin, size, fillType=FillType.lowentropy)
 
         if not scanner.scan(pe.data):
             print("Success, not detected!")
@@ -83,7 +84,7 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
     matches = []
     for section in detected_sections:
         # reducing .text does not work well
-        if ignoreText and '.text' in section.name:
+        if ignoreText and section.name == '.text':
             continue
 
         logging.info(f"Launching bytes analysis on section {section.name}")
@@ -95,13 +96,6 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
 
     return matches
 
-
-def analyzePlain(filename, scanner):
-    data = None
-    with open(filename, "rb") as file:
-        data = file.read()
-    match = scanData(scanner, data, 0, len(data))
-    return data, match
 
 
 def findDetectedSectionsIsolate(pe, scanner):
@@ -117,7 +111,7 @@ def findDetectedSectionsIsolate(pe, scanner):
         if status:
             detected_sections += [section]
 
-        logging.info(f"Hide all except: {section.name} -> {status}")
+        logging.info(f"Hide all except: {section.name} -> Detected: {status}")
 
     return detected_sections
 
@@ -134,6 +128,27 @@ def findDetectedSections(pe, scanner):
         if not status:
             detected_sections += [section]
 
-        logging.info(f"Hide: {section.name} -> {status}")
+        logging.info(f"Hide: {section.name} -> Detected: {status}")
 
     return detected_sections
+
+
+# no PE file, just check its content
+def analyzePlain(filename, scanner):
+    data = None
+    with open(filename, "rb") as file:
+        data = file.read()
+    match = scanData(scanner, data, 0, len(data))
+    return data, match
+
+
+# Check if file gets detected by the scanner
+def scanFileOnly(filename, scanner):
+    data = None
+    with open(filename, 'rb') as file:
+        data = file.read()
+    detected = scanner.scan(data)
+    if detected:
+        print(f"File is detected")
+    else:
+        print(f"File is not detected")

@@ -22,16 +22,16 @@ logging.getLogger().setLevel(logging.INFO)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--test", help="Test 0, 1, 2, ...")
     parser.add_argument("-f", "--file", help="path to file")
     parser.add_argument('-s', "--server", help="Server")
 
     parser.add_argument("--isolate", help="Isolate sections to be tested (null all other)", default=False,  action='store_true')
-    parser.add_argument("--remove", help="Remove some standard sections at the beginning", default=False,  action='store_true')
-    parser.add_argument("--checkOnly", help="Check only", default=False, action='store_true')
-    parser.add_argument("--verify", help="Verify result", default=False, action='store_true')
+    parser.add_argument("--remove", help="Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
+    parser.add_argument("--checkOnly", help="Check only if AV detects the file", default=False, action='store_true')
+    parser.add_argument("--verify", help="Verify results at the end", default=False, action='store_true')
     parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
     parser.add_argument("--ignoreText", help="Dont analyze .text section", default=False, action='store_true')
+    parser.add_argument("--test", help="Perform simple test with index 0, 1, 2, ...")
 
     args = parser.parse_args()
 
@@ -39,7 +39,7 @@ def main():
         testMain(args.test)
     else:
         if not args.file or not args.server:
-            print("GIFE")
+            print("Give at least --file and --server")
             return
 
         config = Config()
@@ -48,14 +48,7 @@ def main():
         scanner = ScannerRest(url, args.server)
 
         if args.checkOnly:
-            f = open(args.file, 'rb')
-            data = f.read(-1)
-            detected = scanner.scan(data)
-            if detected:
-                print("File is detected")
-            else:
-                print("File is not detected")
-            
+            scanFileOnly(args.file, scanner)
         else:
             if args.file.endswith('.ps1'):
                 data, matches = analyzePlain(args.file, scanner)

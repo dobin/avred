@@ -1,6 +1,9 @@
 import logging
 from dataclasses import dataclass
 import pefile
+import os
+import base64
+from enum import Enum
 
 @dataclass
 class Section:
@@ -40,22 +43,16 @@ def get_sections(pe):
 
     # Normal sections
     for section in pepe.sections:
-        name = section.Name.decode("iso-8859-1")
+        name = section.Name.decode("ascii").rstrip("\x00") # its always padded to 8 bytes with \x00
         addr = section.PointerToRawData
         size = section.SizeOfRawData
-
-        #print("Name: -" + name + "-" + str.encode(name))
-        #if ".text" in name:
-        #    print("AAAAAAAAAAAAAAA 1")
-        #if name == b".text":
-        #    print("AAAAAAAAAAAAAAA 2")
 
         if addr != 0 and size != 0:
             pe.sections += [
                 Section(name, addr, size)
             ]
 
-    # version information
+    # (not necessary?) version information
     if hasattr(pepe, "VS_VERSIONINFO"):
         vi = pepe.VS_VERSIONINFO
         if len(vi) != 0:
@@ -66,7 +63,7 @@ def get_sections(pe):
                 Section("VersionInfo", base, size)
             )
 
-    # resources
+    # (not necessary?) resources
     d = None
     for directory in pepe.OPTIONAL_HEADER.DATA_DIRECTORY:
         if (directory.name == "IMAGE_DIRECTORY_ENTRY_RESOURCE"):
@@ -91,11 +88,33 @@ def hide_section(pe, section_name):
 
     logging.debug(f"Hide: {hex(section.addr)} {section.size}")
     hidePart(pe, section.addr, section.size)
-    
 
-def hidePart(pe, base, size):
+
+class FillType(Enum):
+    null = 1
+    space = 2
+    highentropy = 3
+    lowentropy = 4
+
+
+def hidePart(pe, base, size, fillType=FillType.null):
+    fill = None # has to be exactly <size> bytes
+    if fillType is FillType.null:
+        fill = b"\x00" * size
+    elif fillType is FillType.space:
+        fill = b" " * size
+    elif fillType is FillType.highentropy:
+        #fill = random.randbytes(size) # 3.9..
+        fill = os.getrandom(size)
+    elif fillType is FillType.lowentropy:
+        #temp = random.randbytes(size) # 3.9..
+        temp = os.getrandom(size)
+        temp = base64.b64encode(temp)
+        fill = temp[:size]
+
     d = bytearray(pe.data)
-    d[base:base+size] = b"\x00" * size
+    #d[base:base+size] = b"\x00" * size
+    d[base:base+size] = fill
     pe.data = bytes(d)
 
 
