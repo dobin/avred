@@ -4,28 +4,35 @@
   </head>
   <body>
     <h1> avred </h1>
-
     <p>antivirus reducer - AV signature identificator</p>
+
+    <h2>about this</h2>
 
     <p>This will split the provided file until Windows Defender does not 
         detect it anymore. It will show which parts of the file is being detected. 
     </p>
-
-    <p> Examples: 
-        <ul>
-            {% for entry in examples %}
-                <li><a href="/examples/{{entry}}">{{entry}}</a></li>
-            {% endfor %}
-        </ul>
-    </p>
-
     <p>
-        Analyze your own file. All uploads will be stored. All requests are logged. 
+        <b>Note that it is usually enough to change ONE byte in ONE
+          part to make the AV fail to identify the file.</b>
+      </p>
+    <p>
+        <a href="/upload">Analyze your own file.</a>
+    </p>
+    
+    <p>
+        All uploads will be stored. All requests are logged. 
         Defender sample submission is disabled.
         Use at your own risk. Do not misuse this service. 
     </p>
-    <p>
-        Upload your own files: <a href="/upload">Analyze</a>
-    </p>
+
+
+    <h2>Examples</h2>
+    <p>  
+      <ul>
+          {% for entry in examples %}
+              <li><a href="/examples/{{entry}}">{{entry}}</a></li>
+          {% endfor %}
+      </ul>
+  </p>
   </body>
 </html>
