@@ -53,12 +53,10 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
         if chunkSize < SIG_SIZE:
             # Small enough, no more detections
             logging.debug("No more detection")
-            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)")
-            it.add ( Interval(sectionStart, sectionStart+size) )
-
-            #print("Result:")
             data = fileData[sectionStart:sectionStart+size]
-            logging.info("\n" + hexdump.hexdump(data, result='return'))
+
+            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdump.hexdump(data, result='return'))
+            it.add ( Interval(sectionStart, sectionStart+size) )
         else: 
             # make it smaller still. Take complete data (not nulled)
             logging.debug("--> No detections anymore, but too big. Continue anyway...")

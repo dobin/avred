@@ -17,12 +17,12 @@ def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, ve
 
     for i in matches:
         size = i.end - i.begin
-        print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
         data = pe.data[i.begin:i.end]
-        print(hexdump.hexdump(data, result='return'))
-        logging.info("\n" + hexdump.hexdump(data, result='return'))
 
+        print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
+        print(hexdump.hexdump(data, result='return'))
+
+        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(data, result='return'))
 
     if verify:
         verifyFile(deepcopy(pe), matches, scanner)
