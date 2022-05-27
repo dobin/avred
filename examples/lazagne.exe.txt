@@ -1,29 +1,27 @@
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x400   size: 136192 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .rdata	  addr: 0x21800   size: 62464 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .data	  addr: 0x30c00   size: 3072 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .pdata	  addr: 0x31800   size: 7680 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .gfids	  addr: 0x33600   size: 512 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x33800   size: 60416 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x42400   size: 2048 
-[INFO    ][2022/05/27 16:40][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x46000   size: 59960 
-[INFO    ][2022/05/27 16:40][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .rdata -> Detected: False
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .data -> Detected: False
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .pdata -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .gfids -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
-[INFO    ][2022/05/27 16:40][analyzer.py: 77] investigate() :: 2 section(s) trigger the antivirus independantly
-[INFO    ][2022/05/27 16:40][analyzer.py: 80] investigate() ::   section: .rdata
-[INFO    ][2022/05/27 16:40][analyzer.py: 80] investigate() ::   section: .data
-[INFO    ][2022/05/27 16:40][analyzer.py: 95] investigate() :: Launching bytes analysis on section .rdata
-[INFO    ][2022/05/27 16:40][reducer_rutd.py: 56] scanSection() :: Result: 137993-138009 (16 bytes)
-[INFO    ][2022/05/27 16:40][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x400   size: 136192 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .rdata	  addr: 0x21800   size: 62464 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .data	  addr: 0x30c00   size: 3072 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .pdata	  addr: 0x31800   size: 7680 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .gfids	  addr: 0x33600   size: 512 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x33800   size: 60416 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x42400   size: 2048 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x46000   size: 59960 
+[INFO    ][2022/05/27 20:35][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .rdata -> Detected: False
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .data -> Detected: False
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .pdata -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .gfids -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py: 77] investigate() :: 2 section(s) trigger the antivirus independantly
+[INFO    ][2022/05/27 20:35][analyzer.py: 80] investigate() ::   section: .rdata
+[INFO    ][2022/05/27 20:35][analyzer.py: 80] investigate() ::   section: .data
+[INFO    ][2022/05/27 20:35][analyzer.py: 95] investigate() :: Launching bytes analysis on section .rdata
+[INFO    ][2022/05/27 20:35][reducer_rutd.py: 58] scanSection() :: Result: 137993-138009 (16 bytes)
 00000000: 00 00 00 00 00 00 00 F0  8F 00 40 01 00 00 00 E0  ..........@.....
-[INFO    ][2022/05/27 16:40][reducer_rutd.py: 56] scanSection() :: Result: 139168-139290 (122 bytes)
-[INFO    ][2022/05/27 16:40][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:35][reducer_rutd.py: 58] scanSection() :: Result: 139168-139290 (122 bytes)
 00000000: 43 61 6E 6E 6F 74 20 61  6C 6C 6F 63 61 74 65 20  Cannot allocate 
 00000010: 6D 65 6D 6F 72 79 20 66  6F 72 20 41 52 43 48 49  memory for ARCHI
 00000020: 56 45 5F 53 54 41 54 55  53 0A 00 00 63 61 6C 6C  VE_STATUS...call
@@ -32,12 +30,10 @@
 00000050: 70 65 6E 20 73 65 6C 66  20 25 73 20 6F 72 20 61  pen self %s or a
 00000060: 72 63 68 69 76 65 20 25  73 0A 00 00 00 00 00 00  rchive %s.......
 00000070: 46 61 69 6C 65 64 20 74  6F 20                    Failed to 
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 158901-158932 (31 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 158901-158932 (31 bytes)
 00000000: 00 00 00 00 00 00 00 00  00 00 00 14 65 01 40 01  ............e.@.
 00000010: 00 00 00 D4 65 01 40 01  00 00 00 54 2E 01 40     ....e.@....T..@
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 158932-159054 (122 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 158932-159054 (122 bytes)
 00000000: 01 00 00 00 54 2E 01 40  01 00 00 00 B8 8F 01 40  ....T..@.......@
 00000010: 01 00 00 00 1C 90 01 40  01 00 00 00 CC BC 01 40  .......@.......@
 00000020: 01 00 00 00 E8 BC 01 40  01 00 00 00 00 00 00 00  .......@........
@@ -46,14 +42,12 @@
 00000050: 01 00 00 00 C4 51 01 40  01 00 00 00 38 A4 00 40  .....Q.@....8..@
 00000060: 01 00 00 00 54 2E 01 40  01 00 00 00 DC AD 01 40  ....T..@.......@
 00000070: 01 00 00 00 00 00 00 00  00 00                    ..........
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 196935-196996 (61 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 196935-196996 (61 bytes)
 00000000: 00 00 00 00 00 00 00 00  00 1A 1E 03 00 00 30 02  ..............0.
 00000010: 00 80 1C 03 00 00 00 00  00 00 00 00 00 28 1E 03  .............(..
 00000020: 00 00 33 02 00 00 00 00  00 00 00 00 00 00 00 00  ..3.............
 00000030: 00 00 00 00 00 00 00 00  00 90 1C 03 00           .............
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 196996-197240 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 196996-197240 (244 bytes)
 00000000: 00 00 00 00 A0 1C 03 00  00 00 00 00 B4 1C 03 00  ................
 00000010: 00 00 00 00 CA 1C 03 00  00 00 00 00 DC 1C 03 00  ................
 00000020: 00 00 00 00 EE 1C 03 00  00 00 00 00 08 1D 03 00  ................
@@ -70,8 +64,7 @@
 000000D0: 00 00 00 00 B0 1E 03 00  00 00 00 00 C4 1E 03 00  ................
 000000E0: 00 00 00 00 D8 1E 03 00  00 00 00 00 F4 1E 03 00  ................
 000000F0: 00 00 00 00                                       ....
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 197240-197484 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 197240-197484 (244 bytes)
 00000000: 0E 1F 03 00 00 00 00 00  24 1F 03 00 00 00 00 00  ........$.......
 00000010: 3A 1F 03 00 00 00 00 00  54 1F 03 00 00 00 00 00  :.......T.......
 00000020: 6A 1F 03 00 00 00 00 00  7E 1F 03 00 00 00 00 00  j.......~.......
@@ -88,8 +81,7 @@
 000000D0: 02 21 03 00 00 00 00 00  16 21 03 00 00 00 00 00  .!.......!......
 000000E0: 2A 21 03 00 00 00 00 00  3E 21 03 00 00 00 00 00  *!......>!......
 000000F0: 52 21 03 00                                       R!..
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 197484-197728 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 197484-197728 (244 bytes)
 00000000: 00 00 00 00 5E 21 03 00  00 00 00 00 72 21 03 00  ....^!......r!..
 00000010: 00 00 00 00 82 21 03 00  00 00 00 00 92 21 03 00  .....!.......!..
 00000020: 00 00 00 00 AA 21 03 00  00 00 00 00 B8 21 03 00  .....!.......!..
@@ -106,8 +98,7 @@
 000000D0: 00 00 00 00 24 23 03 00  00 00 00 00 3E 23 03 00  ....$#......>#..
 000000E0: 00 00 00 00 50 23 03 00  00 00 00 00 62 23 03 00  ....P#......b#..
 000000F0: 00 00 00 00                                       ....
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 197728-197972 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 197728-197972 (244 bytes)
 00000000: 72 23 03 00 00 00 00 00  8C 23 03 00 00 00 00 00  r#.......#......
 00000010: B6 23 03 00 00 00 00 00  00 00 00 00 00 00 00 00  .#..............
 00000020: 0E 00 00 00 00 00 00 80  00 00 00 00 00 00 00 00  ................
@@ -124,8 +115,7 @@
 000000D0: 6E 6D 65 6E 74 53 74 72  69 6E 67 73 57 00 EA 02  nmentStringsW...
 000000E0: 47 65 74 54 65 6D 70 50  61 74 68 57 00 00 BB 05  GetTempPathW....
 000000F0: 57 61 69 74                                       Wait
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 197972-198216 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 197972-198216 (244 bytes)
 00000000: 46 6F 72 53 69 6E 67 6C  65 4F 62 6A 65 63 74 00  ForSingleObject.
 00000010: 61 05 53 6C 65 65 70 00  33 02 47 65 74 45 78 69  a.Sleep.3.GetExi
 00000020: 74 43 6F 64 65 50 72 6F  63 65 73 73 00 00 DB 00  tCodeProcess....
@@ -142,8 +132,7 @@
 000000D0: 6C 6C 00 00 57 53 32 5F  33 32 2E 64 6C 6C 00 00  ll..WS2_32.dll..
 000000E0: AE 04 52 74 6C 43 61 70  74 75 72 65 43 6F 6E 74  ..RtlCaptureCont
 000000F0: 65 78 74 00                                       ext.
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 198216-198460 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 198216-198460 (244 bytes)
 00000000: B5 04 52 74 6C 4C 6F 6F  6B 75 70 46 75 6E 63 74  ..RtlLookupFunct
 00000010: 69 6F 6E 45 6E 74 72 79  00 00 BC 04 52 74 6C 56  ionEntry....RtlV
 00000020: 69 72 74 75 61 6C 55 6E  77 69 6E 64 00 00 92 05  irtualUnwind....
@@ -160,8 +149,7 @@
 000000D0: 6E 74 50 72 6F 63 65 73  73 49 64 00 14 02 47 65  ntProcessId...Ge
 000000E0: 74 43 75 72 72 65 6E 74  54 68 72 65 61 64 49 64  tCurrentThreadId
 000000F0: 00 00 DD 02                                       ....
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 198460-198704 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 198460-198704 (244 bytes)
 00000000: 47 65 74 53 79 73 74 65  6D 54 69 6D 65 41 73 46  GetSystemTimeAsF
 00000010: 69 6C 65 54 69 6D 65 00  54 03 49 6E 69 74 69 61  ileTime.T.Initia
 00000020: 6C 69 7A 65 53 4C 69 73  74 48 65 61 64 00 6A 03  lizeSListHead.j.
@@ -178,8 +166,7 @@
 000000D0: 53 65 63 74 69 6F 6E 41  6E 64 53 70 69 6E 43 6F  SectionAndSpinCo
 000000E0: 75 6E 74 00 82 05 54 6C  73 41 6C 6C 6F 63 00 00  unt...TlsAlloc..
 000000F0: 84 05 54 6C                                       ..Tl
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 198704-198826 (122 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 198704-198826 (122 bytes)
 00000000: 73 47 65 74 56 61 6C 75  65 00 85 05 54 6C 73 53  sGetValue...TlsS
 00000010: 65 74 56 61 6C 75 65 00  83 05 54 6C 73 46 72 65  etValue...TlsFre
 00000020: 65 00 A4 01 46 72 65 65  4C 69 62 72 61 72 79 00  e...FreeLibrary.
@@ -188,8 +175,7 @@
 00000050: 43 72 65 61 74 65 46 69  6C 65 57 00 26 02 47 65  CreateFileW.&.Ge
 00000060: 74 44 72 69 76 65 54 79  70 65 57 00 45 02 47 65  tDriveTypeW.E.Ge
 00000070: 74 46 69 6C 65 54 79 70  65 00                    tFileType.
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 199070-199192 (122 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 199070-199192 (122 bytes)
 00000000: 43 74 72 6C 48 61 6E 64  6C 65 72 00 0B 01 44 65  CtrlHandler...De
 00000010: 6C 65 74 65 46 69 6C 65  57 00 C7 02 47 65 74 53  leteFileW...GetS
 00000020: 74 64 48 61 6E 64 6C 65  00 00 F1 05 57 72 69 74  tdHandle....Writ
@@ -198,8 +184,7 @@
 00000050: 61 6E 64 6C 65 45 78 57  00 00 AA 01 47 65 74 41  andleExW....GetA
 00000060: 43 50 00 00 3C 03 48 65  61 70 46 72 65 65 00 00  CP..<.HeapFree..
 00000070: 38 03 48 65 61 70 41 6C  6C 6F                    8.HeapAllo
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 199192-199436 (244 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 199192-199436 (244 bytes)
 00000000: 63 00 F4 01 47 65 74 43  6F 6E 73 6F 6C 65 4D 6F  c...GetConsoleMo
 00000010: 64 65 00 00 52 04 52 65  61 64 43 6F 6E 73 6F 6C  de..R.ReadConsol
 00000020: 65 57 00 00 0C 05 53 65  74 46 69 6C 65 50 6F 69  eW....SetFilePoi
@@ -216,8 +201,7 @@
 000000D0: 64 43 6F 64 65 50 61 67  65 00 8D 02 47 65 74 4F  dCodePage...GetO
 000000E0: 45 4D 43 50 00 00 B9 01  47 65 74 43 50 49 6E 66  EMCP....GetCPInf
 000000F0: 6F 00 2E 02                                       o...
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 199436-199558 (122 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 199436-199558 (122 bytes)
 00000000: 47 65 74 45 6E 76 69 72  6F 6E 6D 65 6E 74 53 74  GetEnvironmentSt
 00000010: 72 69 6E 67 73 57 00 00  A3 01 46 72 65 65 45 6E  ringsW....FreeEn
 00000020: 76 69 72 6F 6E 6D 65 6E  74 53 74 72 69 6E 67 73  vironmentStrings
@@ -226,13 +210,11 @@
 00000050: 48 65 61 70 00 00 F0 05  57 72 69 74 65 43 6F 6E  Heap....WriteCon
 00000060: 73 6F 6C 65 57 00 00 03  47 65 74 54 69 6D 65 5A  soleW...GetTimeZ
 00000070: 6F 6E 65 49 6E 66 6F 72  6D 61                    oneInforma
-[INFO    ][2022/05/27 16:41][analyzer.py: 95] investigate() :: Launching bytes analysis on section .data
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 56] scanSection() :: Result: 201312-201336 (24 bytes)
-[INFO    ][2022/05/27 16:41][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 95] investigate() :: Launching bytes analysis on section .data
+[INFO    ][2022/05/27 20:36][reducer_rutd.py: 58] scanSection() :: Result: 201312-201336 (24 bytes)
 00000000: 00 00 00 00 00 00 00 00  40 34 03 40 01 00 00 00  ........@4.@....
 00000010: 01 02 04 08 00 00 00 00                           ........
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 139168 and 139290 size 122: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 139168 and 139290 size 122: 
 00000000: 43 61 6E 6E 6F 74 20 61  6C 6C 6F 63 61 74 65 20  Cannot allocate 
 00000010: 6D 65 6D 6F 72 79 20 66  6F 72 20 41 52 43 48 49  memory for ARCHI
 00000020: 56 45 5F 53 54 41 54 55  53 0A 00 00 63 61 6C 6C  VE_STATUS...call
@@ -241,8 +223,7 @@
 00000050: 70 65 6E 20 73 65 6C 66  20 25 73 20 6F 72 20 61  pen self %s or a
 00000060: 72 63 68 69 76 65 20 25  73 0A 00 00 00 00 00 00  rchive %s.......
 00000070: 46 61 69 6C 65 64 20 74  6F 20                    Failed to 
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 199070 and 199558 size 488: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 199070 and 199558 size 488: 
 00000000: 43 74 72 6C 48 61 6E 64  6C 65 72 00 0B 01 44 65  CtrlHandler...De
 00000010: 6C 65 74 65 46 69 6C 65  57 00 C7 02 47 65 74 53  leteFileW...GetS
 00000020: 74 64 48 61 6E 64 6C 65  00 00 F1 05 57 72 69 74  tdHandle....Writ
@@ -274,8 +255,7 @@
 000001C0: 61 70 00 00 F0 05 57 72  69 74 65 43 6F 6E 73 6F  ap....WriteConso
 000001D0: 6C 65 57 00 00 03 47 65  74 54 69 6D 65 5A 6F 6E  leW...GetTimeZon
 000001E0: 65 49 6E 66 6F 72 6D 61                           eInforma
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 196935 and 198826 size 1891: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 196935 and 198826 size 1891: 
 00000000: 00 00 00 00 00 00 00 00  00 1A 1E 03 00 00 30 02  ..............0.
 00000010: 00 80 1C 03 00 00 00 00  00 00 00 00 00 28 1E 03  .............(..
 00000020: 00 00 33 02 00 00 00 00  00 00 00 00 00 00 00 00  ..3.............
@@ -395,11 +375,9 @@
 00000740: 69 6C 65 57 00 26 02 47  65 74 44 72 69 76 65 54  ileW.&.GetDriveT
 00000750: 79 70 65 57 00 45 02 47  65 74 46 69 6C 65 54 79  ypeW.E.GetFileTy
 00000760: 70 65 00                                          pe.
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 137993 and 138009 size 16: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 137993 and 138009 size 16: 
 00000000: 00 00 00 00 00 00 00 F0  8F 00 40 01 00 00 00 E0  ..........@.....
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 158901 and 159054 size 153: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 158901 and 159054 size 153: 
 00000000: 00 00 00 00 00 00 00 00  00 00 00 14 65 01 40 01  ............e.@.
 00000010: 00 00 00 D4 65 01 40 01  00 00 00 54 2E 01 40 01  ....e.@....T..@.
 00000020: 00 00 00 54 2E 01 40 01  00 00 00 B8 8F 01 40 01  ...T..@.......@.
@@ -410,7 +388,9 @@
 00000070: 00 00 00 C4 51 01 40 01  00 00 00 38 A4 00 40 01  ....Q.@....8..@.
 00000080: 00 00 00 54 2E 01 40 01  00 00 00 DC AD 01 40 01  ...T..@.......@.
 00000090: 00 00 00 00 00 00 00 00  00                       .........
-[INFO    ][2022/05/27 16:41][analyzer.py: 21] analyzeFile() :: [*] Signature between 201312 and 201336 size 24: 
-[INFO    ][2022/05/27 16:41][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:36][analyzer.py: 25] analyzeFile() :: [*] Signature between 201312 and 201336 size 24: 
 00000000: 00 00 00 00 00 00 00 00  40 34 03 40 01 00 00 00  ........@4.@....
 00000010: 01 02 04 08 00 00 00 00                           ........
+[INFO    ][2022/05/27 20:36][analyzer.py: 35] verifyFile() :: Patching file with results...
+[INFO    ][2022/05/27 20:36][analyzer.py: 39] verifyFile() :: Patch: 139168-139290 size 122
+[INFO    ][2022/05/27 20:36][analyzer.py: 44] verifyFile() :: Success, not detected!

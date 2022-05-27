@@ -1,6 +1,6 @@
-[INFO    ][2022/05/27 16:46][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 36352 
-[INFO    ][2022/05/27 16:46][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x9000   size: 1536 
-[INFO    ][2022/05/27 16:46][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x9600   size: 512 
-[INFO    ][2022/05/27 16:46][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x9090   size: 780 
-[INFO    ][2022/05/27 16:46][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0xc000   size: 1436 
-[ERROR   ][2022/05/27 16:46][analyzer.py: 60] investigate() :: testing/sharp/SharpUp.exe is not detected by Defender
+[INFO    ][2022/05/27 20:30][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 36352 
+[INFO    ][2022/05/27 20:30][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x9000   size: 1536 
+[INFO    ][2022/05/27 20:30][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x9600   size: 512 
+[INFO    ][2022/05/27 20:30][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x9090   size: 780 
+[INFO    ][2022/05/27 20:30][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0xc000   size: 1436 
+[ERROR   ][2022/05/27 20:30][analyzer.py: 60] investigate() :: testing/sharp/SharpUp.exe is not detected by Defender

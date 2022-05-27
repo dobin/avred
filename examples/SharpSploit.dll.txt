@@ -1,33 +1,31 @@
-[INFO    ][2022/05/27 16:48][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 2784256 
-[INFO    ][2022/05/27 16:48][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x2a7e00   size: 1536 
-[INFO    ][2022/05/27 16:48][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x2a8400   size: 512 
-[INFO    ][2022/05/27 16:48][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x2a7e58   size: 960 
-[INFO    ][2022/05/27 16:48][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x2aa000   size: 1052 
-[INFO    ][2022/05/27 16:48][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
-[INFO    ][2022/05/27 16:48][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
-[INFO    ][2022/05/27 16:48][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
-[INFO    ][2022/05/27 16:48][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
-[INFO    ][2022/05/27 16:48][analyzer.py:136] findDetectedSections() :: Hide: VersionInfo -> Detected: True
-[INFO    ][2022/05/27 16:48][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
-[INFO    ][2022/05/27 16:48][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
-[INFO    ][2022/05/27 16:48][analyzer.py: 80] investigate() ::   section: .text
-[INFO    ][2022/05/27 16:48][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 56] scanSection() :: Result: 527-533 (6 bytes)
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:31][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 2784256 
+[INFO    ][2022/05/27 20:31][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x2a7e00   size: 1536 
+[INFO    ][2022/05/27 20:31][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x2a8400   size: 512 
+[INFO    ][2022/05/27 20:31][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x2a7e58   size: 960 
+[INFO    ][2022/05/27 20:31][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x2aa000   size: 1052 
+[INFO    ][2022/05/27 20:31][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
+[INFO    ][2022/05/27 20:31][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
+[INFO    ][2022/05/27 20:31][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
+[INFO    ][2022/05/27 20:31][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
+[INFO    ][2022/05/27 20:31][analyzer.py:136] findDetectedSections() :: Hide: VersionInfo -> Detected: True
+[INFO    ][2022/05/27 20:31][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
+[INFO    ][2022/05/27 20:31][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
+[INFO    ][2022/05/27 20:31][analyzer.py: 80] investigate() ::   section: .text
+[INFO    ][2022/05/27 20:31][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
+[INFO    ][2022/05/27 20:31][reducer_rutd.py: 58] scanSection() :: Result: 527-533 (6 bytes)
 00000000: 00 48 10 01 00 BC                                 .H....
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 56] scanSection() :: Result: 62023-62029 (6 bytes)
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:31][reducer_rutd.py: 58] scanSection() :: Result: 62023-62029 (6 bytes)
 00000000: 00 42 53 4A 42 01                                 .BSJB.
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 56] scanSection() :: Result: 62029-62071 (42 bytes)
-[INFO    ][2022/05/27 16:48][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:31][reducer_rutd.py: 58] scanSection() :: Result: 62029-62071 (42 bytes)
 00000000: 00 01 00 00 00 00 00 0C  00 00 00 76 34 2E 30 2E  ...........v4.0.
 00000010: 33 30 33 31 39 00 00 00  00 05 00 6C 00 00 00 C4  30319......l....
 00000020: F1 00 00 23 7E 00 00 30  F2 00                    ...#~..0..
-[INFO    ][2022/05/27 16:48][analyzer.py: 21] analyzeFile() :: [*] Signature between 527 and 533 size 6: 
-[INFO    ][2022/05/27 16:48][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:31][analyzer.py: 25] analyzeFile() :: [*] Signature between 527 and 533 size 6: 
 00000000: 00 48 10 01 00 BC                                 .H....
-[INFO    ][2022/05/27 16:48][analyzer.py: 21] analyzeFile() :: [*] Signature between 62023 and 62071 size 48: 
-[INFO    ][2022/05/27 16:48][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:31][analyzer.py: 25] analyzeFile() :: [*] Signature between 62023 and 62071 size 48: 
 00000000: 00 42 53 4A 42 01 00 01  00 00 00 00 00 0C 00 00  .BSJB...........
 00000010: 00 76 34 2E 30 2E 33 30  33 31 39 00 00 00 00 05  .v4.0.30319.....
 00000020: 00 6C 00 00 00 C4 F1 00  00 23 7E 00 00 30 F2 00  .l.......#~..0..
+[INFO    ][2022/05/27 20:31][analyzer.py: 35] verifyFile() :: Patching file with results...
+[INFO    ][2022/05/27 20:31][analyzer.py: 39] verifyFile() :: Patch: 527-533 size 6
+[INFO    ][2022/05/27 20:31][analyzer.py: 44] verifyFile() :: Success, not detected!

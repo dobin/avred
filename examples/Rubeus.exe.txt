@@ -1,19 +1,18 @@
-[INFO    ][2022/05/27 16:44][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 426496 
-[INFO    ][2022/05/27 16:44][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x68400   size: 1536 
-[INFO    ][2022/05/27 16:44][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x68a00   size: 512 
-[INFO    ][2022/05/27 16:44][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x68490   size: 780 
-[INFO    ][2022/05/27 16:44][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x6c000   size: 1436 
-[INFO    ][2022/05/27 16:44][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
-[INFO    ][2022/05/27 16:44][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
-[INFO    ][2022/05/27 16:44][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
-[INFO    ][2022/05/27 16:44][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
-[INFO    ][2022/05/27 16:44][analyzer.py:136] findDetectedSections() :: Hide: VersionInfo -> Detected: True
-[INFO    ][2022/05/27 16:44][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
-[INFO    ][2022/05/27 16:44][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
-[INFO    ][2022/05/27 16:44][analyzer.py: 80] investigate() ::   section: .text
-[INFO    ][2022/05/27 16:44][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
-[INFO    ][2022/05/27 16:44][reducer_rutd.py: 56] scanSection() :: Result: 155450-155658 (208 bytes)
-[INFO    ][2022/05/27 16:44][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x200   size: 426496 
+[INFO    ][2022/05/27 20:28][pe_utils.py: 37] parse_pe() :: Section .rsrc	  addr: 0x68400   size: 1536 
+[INFO    ][2022/05/27 20:28][pe_utils.py: 37] parse_pe() :: Section .reloc	  addr: 0x68a00   size: 512 
+[INFO    ][2022/05/27 20:28][pe_utils.py: 37] parse_pe() :: Section VersionInfo	  addr: 0x68490   size: 780 
+[INFO    ][2022/05/27 20:28][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x6c000   size: 1436 
+[INFO    ][2022/05/27 20:28][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
+[INFO    ][2022/05/27 20:28][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
+[INFO    ][2022/05/27 20:28][analyzer.py:136] findDetectedSections() :: Hide: .rsrc -> Detected: True
+[INFO    ][2022/05/27 20:28][analyzer.py:136] findDetectedSections() :: Hide: .reloc -> Detected: True
+[INFO    ][2022/05/27 20:28][analyzer.py:136] findDetectedSections() :: Hide: VersionInfo -> Detected: True
+[INFO    ][2022/05/27 20:28][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
+[INFO    ][2022/05/27 20:28][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
+[INFO    ][2022/05/27 20:28][analyzer.py: 80] investigate() ::   section: .text
+[INFO    ][2022/05/27 20:28][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 155450-155658 (208 bytes)
 00000000: 2A 1A 73 7D 06 00 06 2A  22 02 03 28 39 00 00 0A  *.s}...*"..(9...
 00000010: 2A 2E 73 E8 07 00 06 80  82 06 00 04 2A 1E 03 6F  *.s.........*..o
 00000020: 5B 00 00 0A 2A 00 13 30  03 00 30 00 00 00 62 01  [...*..0..0...b.
@@ -27,50 +26,41 @@
 000000A0: 00 00 C4 21 02 00 00 9D  01 00 23 55 53 00 C4 BE  ...!......#US...
 000000B0: 03 00 10 00 00 00 23 47  55 49 44 00 00 00 D4 BE  ......#GUID.....
 000000C0: 03 00 7C 54 00 00 23 42  6C 6F 62 00 00 00 00 00  ..|T..#Blob.....
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 56] scanSection() :: Result: 260095-260147 (52 bytes)
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 260095-260147 (52 bytes)
 00000000: 65 67 65 72 53 69 67 6E  65 64 00 75 6E 63 6F 6E  egerSigned.uncon
 00000010: 73 74 72 61 69 6E 65 64  00 4B 72 62 43 72 65 64  strained.KrbCred
 00000020: 00 63 72 65 64 00 52 65  6D 65 6D 62 65 72 65 64  .cred.Remembered
 00000030: 00 52 70 63                                       .Rpc
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 56] scanSection() :: Result: 272070-272096 (26 bytes)
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 272070-272096 (26 bytes)
 00000000: 72 69 62 75 74 65 00 44  65 62 75 67 67 61 62 6C  ribute.Debuggabl
 00000010: 65 41 74 74 72 69 62 75  74 65                    eAttribute
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 56] scanSection() :: Result: 272226-272278 (52 bytes)
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 272226-272278 (52 bytes)
 00000000: 74 72 69 62 75 74 65 00  44 65 62 75 67 67 65 72  tribute.Debugger
 00000010: 48 69 64 64 65 6E 41 74  74 72 69 62 75 74 65 00  HiddenAttribute.
 00000020: 45 78 74 65 6E 73 69 6F  6E 41 74 74 72 69 62 75  ExtensionAttribu
 00000030: 74 65 00 41                                       te.A
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 56] scanSection() :: Result: 298673-298726 (53 bytes)
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 298673-298726 (53 bytes)
 00000000: 00 20 00 54 00 47 00 54  00 2E 00 01 15 6B 00 72  . .T.G.T.....k.r
 00000010: 00 62 00 74 00 67 00 74  00 2F 00 7B 00 30 00 7D  .b.t.g.t./.{.0.}
 00000020: 00 00 37 5B 00 2A 00 5D  00 20 00 62 00 61 00 73  ..7[.*.]. .b.a.s
 00000030: 00 65 00 36 00                                    .e.6.
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 56] scanSection() :: Result: 307186-307212 (26 bytes)
-[INFO    ][2022/05/27 16:45][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:28][reducer_rutd.py: 58] scanSection() :: Result: 307186-307212 (26 bytes)
 00000000: 5E 00 6B 00 72 00 62 00  74 00 67 00 74 00 2F 00  ^.k.r.b.t.g.t./.
 00000010: 2E 00 2A 00 00 25 5B 00  58 00                    ..*..%[.X.
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 260095 and 260147 size 52: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 260095 and 260147 size 52: 
 00000000: 65 67 65 72 53 69 67 6E  65 64 00 75 6E 63 6F 6E  egerSigned.uncon
 00000010: 73 74 72 61 69 6E 65 64  00 4B 72 62 43 72 65 64  strained.KrbCred
 00000020: 00 63 72 65 64 00 52 65  6D 65 6D 62 65 72 65 64  .cred.Remembered
 00000030: 00 52 70 63                                       .Rpc
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 272226 and 272278 size 52: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 272226 and 272278 size 52: 
 00000000: 74 72 69 62 75 74 65 00  44 65 62 75 67 67 65 72  tribute.Debugger
 00000010: 48 69 64 64 65 6E 41 74  74 72 69 62 75 74 65 00  HiddenAttribute.
 00000020: 45 78 74 65 6E 73 69 6F  6E 41 74 74 72 69 62 75  ExtensionAttribu
 00000030: 74 65 00 41                                       te.A
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 307186 and 307212 size 26: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 307186 and 307212 size 26: 
 00000000: 5E 00 6B 00 72 00 62 00  74 00 67 00 74 00 2F 00  ^.k.r.b.t.g.t./.
 00000010: 2E 00 2A 00 00 25 5B 00  58 00                    ..*..%[.X.
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 155450 and 155658 size 208: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 155450 and 155658 size 208: 
 00000000: 2A 1A 73 7D 06 00 06 2A  22 02 03 28 39 00 00 0A  *.s}...*"..(9...
 00000010: 2A 2E 73 E8 07 00 06 80  82 06 00 04 2A 1E 03 6F  *.s.........*..o
 00000020: 5B 00 00 0A 2A 00 13 30  03 00 30 00 00 00 62 01  [...*..0..0...b.
@@ -84,13 +74,17 @@
 000000A0: 00 00 C4 21 02 00 00 9D  01 00 23 55 53 00 C4 BE  ...!......#US...
 000000B0: 03 00 10 00 00 00 23 47  55 49 44 00 00 00 D4 BE  ......#GUID.....
 000000C0: 03 00 7C 54 00 00 23 42  6C 6F 62 00 00 00 00 00  ..|T..#Blob.....
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 298673 and 298726 size 53: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 298673 and 298726 size 53: 
 00000000: 00 20 00 54 00 47 00 54  00 2E 00 01 15 6B 00 72  . .T.G.T.....k.r
 00000010: 00 62 00 74 00 67 00 74  00 2F 00 7B 00 30 00 7D  .b.t.g.t./.{.0.}
 00000020: 00 00 37 5B 00 2A 00 5D  00 20 00 62 00 61 00 73  ..7[.*.]. .b.a.s
 00000030: 00 65 00 36 00                                    .e.6.
-[INFO    ][2022/05/27 16:45][analyzer.py: 21] analyzeFile() :: [*] Signature between 272070 and 272096 size 26: 
-[INFO    ][2022/05/27 16:45][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:28][analyzer.py: 25] analyzeFile() :: [*] Signature between 272070 and 272096 size 26: 
 00000000: 72 69 62 75 74 65 00 44  65 62 75 67 67 61 62 6C  ribute.Debuggabl
 00000010: 65 41 74 74 72 69 62 75  74 65                    eAttribute
+[INFO    ][2022/05/27 20:28][analyzer.py: 35] verifyFile() :: Patching file with results...
+[INFO    ][2022/05/27 20:28][analyzer.py: 39] verifyFile() :: Patch: 260095-260147 size 52
+[INFO    ][2022/05/27 20:28][analyzer.py: 39] verifyFile() :: Patch: 272226-272278 size 52
+[INFO    ][2022/05/27 20:28][analyzer.py: 39] verifyFile() :: Patch: 307186-307212 size 26
+[INFO    ][2022/05/27 20:28][analyzer.py: 39] verifyFile() :: Patch: 155450-155658 size 208
+[INFO    ][2022/05/27 20:28][analyzer.py: 44] verifyFile() :: Success, not detected!
