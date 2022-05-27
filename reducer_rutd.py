@@ -57,8 +57,8 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
             it.add ( Interval(sectionStart, sectionStart+size) )
 
             #print("Result:")
-            #data = fileData[sectionStart:sectionStart+size]
-            #print(hexdump.hexdump(data, result='return'))
+            data = fileData[sectionStart:sectionStart+size]
+            logging.info("\n" + hexdump.hexdump(data, result='return'))
         else: 
             # make it smaller still. Take complete data (not nulled)
             logging.debug("--> No detections anymore, but too big. Continue anyway...")

@@ -34,7 +34,7 @@ def parse_pe(path, showInfo=False):
     if showInfo:
         for section in pe.sections:
             print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
-
+            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
     return pe
 
 

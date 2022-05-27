@@ -1,14 +1,8 @@
-
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 import requests as req
 from pprint import pprint
 
-logging.basicConfig(filename='debug.log',
-                    filemode='a',
-                    format='[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s',
-                    datefmt='%Y/%m/%d %H:%M',
-                    level=logging.DEBUG)
 
 
 @dataclass

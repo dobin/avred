@@ -1,13 +1,11 @@
-import logging
 import hexdump
 from intervaltree import Interval, IntervalTree
-
+import logging
 from reducer_orig import bytes_detection
 from reducer_rutd import scanData
 from copy import deepcopy
 from pe_utils import *
 from utils import *
-
 
 
 def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
@@ -20,11 +18,11 @@ def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, ve
     for i in matches:
         size = i.end - i.begin
         print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
+        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
         data = pe.data[i.begin:i.end]
         print(hexdump.hexdump(data, result='return'))
+        logging.info("\n" + hexdump.hexdump(data, result='return'))
 
-    if saveMatches:
-        saveMatchesToFile(pe, matches)
 
     if verify:
         verifyFile(deepcopy(pe), matches, scanner)
@@ -34,16 +32,20 @@ def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, ve
 
 def verifyFile(pe, matches, scanner):
     print("Patching file with results...")
+    logging.info("Patching file with results...")
     for i in matches:
         size = i.end - i.begin
         print(f"Patch: {i.begin}-{i.end} size {size}")
+        logging.info(f"Patch: {i.begin}-{i.end} size {size}")
         hidePart(pe, i.begin, size, fillType=FillType.lowentropy)
 
         if not scanner.scan(pe.data):
             print("Success, not detected!")
+            logging.info("Success, not detected!")
             return
 
     print("Still detected? :-(")
+    logging.info("Still detected? :-(")
 
 
 def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreText=False):
@@ -72,12 +74,15 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
         return []
 
     print(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
+    logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         print(f"  section: {section.name}")
+        logging.info(f"  section: {section.name}")
 
     if len(detected_sections) > 3:
         print("More than 3 sections detected. That cant be right.")
         print("Try --isolate")
+        logging.info("More than 3 sections detected. That cant be right.")
         return []
 
     # analyze each detected section

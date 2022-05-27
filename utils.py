@@ -1,6 +1,11 @@
 import json
 
-def saveMatchesToFile(pe, matches):
+#def saveInfoToFile(filename, pe, matches):
+#    with open(filename, 'w') as outfile:
+        
+
+
+def saveMatchesToFile(filename, matches):
     # convert first
     results = []
     for match in matches: 
@@ -10,7 +15,6 @@ def saveMatchesToFile(pe, matches):
         }
         results.append(result)
 
-    newFilename = pe.filename + ".matches.json"
-    with open(newFilename, 'w') as outfile:
+    with open(filename, 'w') as outfile:
         json.dump(results, outfile)
 

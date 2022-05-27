@@ -1,23 +1,14 @@
+#!/usr/bin/python3
+
 import argparse
 from scanner import ScannerRest
 from test import testMain
 from analyzer import *
 from config import Config
 from intervaltree import IntervalTree, Interval
+import logging
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
-logging.basicConfig(filename='debug.log',
-                            filemode='a',
-                            format=format,
-                            datefmt='%Y/%m/%d %H:%M',
-                            level=logging.INFO
-                    )
-rootLogger = logging.getLogger()
-logFormatter = logging.Formatter(log_format)
-consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(logFormatter)
-rootLogger.addHandler(consoleHandler)
-logging.getLogger().setLevel(logging.INFO)
 
 
 def main():
@@ -32,8 +23,26 @@ def main():
     parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
     parser.add_argument("--ignoreText", help="Dont analyze .text section", default=False, action='store_true')
     parser.add_argument("--test", help="Perform simple test with index 0, 1, 2, ...")
+    parser.add_argument("--logtofile", help="Log everything to file")
 
     args = parser.parse_args()
+
+    logging.getLogger().setLevel(logging.INFO)
+    if args.logtofile:
+        print(f"Logging to file: {args.logtofile}")
+        logging.basicConfig(filename=args.logtofile,
+                        filemode='a',
+                        format=log_format,
+                        datefmt='%Y/%m/%d %H:%M',
+                        level=logging.INFO
+                )
+    else:
+        logging.basicConfig(
+                format=log_format,
+                datefmt='%Y/%m/%d %H:%M',
+                level=logging.INFO
+        )
+
 
     if args.test:
         testMain(args.test)
@@ -57,6 +66,9 @@ def main():
                     newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
                     saveMatches=args.saveMatches, ignoreText=args.ignoreText)
 
+                if args.saveMatches:
+                    #saveInfoToFile(pe.filename + ".txt", pe, matches)
+                    saveMatchesToFile(pe.filename + ".matches.json", matches)
 
 if __name__ == "__main__":
     main()
