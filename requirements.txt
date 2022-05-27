@@ -2,3 +2,4 @@ intervaltree
 hexdump
 requests
 pefile
+waitress

@@ -57,4 +57,14 @@ The findings in the other sections are usually good enough.
   * SharpHound.exe
   * SharpSploit.dll
 
+# Web server
 
+Development:
+```
+flask run
+```
+
+Prod:
+```
+./app.py
+```

@@ -6,6 +6,7 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 import random
 import subprocess
+from waitress import serve
 
 UPLOAD_FOLDER = './upload'
 ALLOWED_EXTENSIONS = {'exe'}
@@ -87,3 +88,7 @@ def upload_file():
             return redirect(url_for('view_file', filename=filename))
 
     return render_template('upload.html')
+
+
+if __name__ == '__main__':
+    serve(app, host='0.0.0.0', port=8080)
