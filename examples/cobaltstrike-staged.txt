@@ -1,27 +1,26 @@
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x400   size: 8704 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .data	  addr: 0x2600   size: 1536 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .rdata	  addr: 0x2c00   size: 1024 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .pdata	  addr: 0x3000   size: 1024 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .xdata	  addr: 0x3400   size: 1024 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .idata	  addr: 0x3800   size: 2560 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .CRT	  addr: 0x4200   size: 512 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section .tls	  addr: 0x4400   size: 512 
-[INFO    ][2022/05/27 16:30][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x0   size: 0 
-[INFO    ][2022/05/27 16:30][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .data -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .rdata -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .pdata -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .xdata -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .idata -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .CRT -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: .tls -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
-[INFO    ][2022/05/27 16:30][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
-[INFO    ][2022/05/27 16:30][analyzer.py: 80] investigate() ::   section: .text
-[INFO    ][2022/05/27 16:30][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
-[INFO    ][2022/05/27 16:30][reducer_rutd.py: 56] scanSection() :: Result: 2112-2248 (136 bytes)
-[INFO    ][2022/05/27 16:30][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .text	  addr: 0x400   size: 8704 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .data	  addr: 0x2600   size: 1536 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .rdata	  addr: 0x2c00   size: 1024 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .pdata	  addr: 0x3000   size: 1024 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .xdata	  addr: 0x3400   size: 1024 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .idata	  addr: 0x3800   size: 2560 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .CRT	  addr: 0x4200   size: 512 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section .tls	  addr: 0x4400   size: 512 
+[INFO    ][2022/05/27 20:35][pe_utils.py: 37] parse_pe() :: Section Ressources	  addr: 0x0   size: 0 
+[INFO    ][2022/05/27 20:35][analyzer.py: 69] investigate() :: Section Detection: Zero section (leave all others)
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .text -> Detected: False
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .data -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .rdata -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .pdata -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .xdata -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .idata -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .CRT -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: .tls -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py:136] findDetectedSections() :: Hide: Ressources -> Detected: True
+[INFO    ][2022/05/27 20:35][analyzer.py: 77] investigate() :: 1 section(s) trigger the antivirus independantly
+[INFO    ][2022/05/27 20:35][analyzer.py: 80] investigate() ::   section: .text
+[INFO    ][2022/05/27 20:35][analyzer.py: 95] investigate() :: Launching bytes analysis on section .text
+[INFO    ][2022/05/27 20:35][reducer_rutd.py: 58] scanSection() :: Result: 2112-2248 (136 bytes)
 00000000: BC 75 00 00 83 F8 01 0F  85 ED FD FF FF 0F 1F 00  .u..............
 00000010: 48 8D 15 B9 8B 00 00 48  8D 0D A2 8B 00 00 E8 9D  H......H........
 00000020: 1A 00 00 C7 05 93 75 00  00 02 00 00 00 E9 C8 FD  ......u.........
@@ -31,15 +30,13 @@
 00000060: FF FF 89 C1 E8 5F 1A 00  00 90 66 0F 1F 44 00 00  ....._....f..D..
 00000070: 48 83 EC 28 C7 05 B2 6B  00 00 01 00 00 00 E8 BD  H..(...k........
 00000080: 15 00 00 E8 B8 FC FF FF                           ........
-[INFO    ][2022/05/27 16:31][reducer_rutd.py: 56] scanSection() :: Result: 2384-2452 (68 bytes)
-[INFO    ][2022/05/27 16:31][reducer_rutd.py: 61] scanSection() :: 
+[INFO    ][2022/05/27 20:35][reducer_rutd.py: 58] scanSection() :: Result: 2384-2452 (68 bytes)
 00000000: 00 00 31 C9 FF 15 DA 7D  00 00 48 89 C3 31 C0 EB  ..1....}..H..1..
 00000010: 11 83 E2 03 8A 54 15 00  41 32 14 04 88 14 03 48  .....T..A2.....H
 00000020: FF C0 39 F8 89 C2 7C E9  48 89 D9 E8 73 FF FF FF  ..9...|.H...s...
 00000030: 4C 8D 4C 24 3C 48 89 F2  48 89 D9 41 B8 20 00 00  L.L$<H..H..A. ..
 00000040: 00 FF 15 A5                                       ....
-[INFO    ][2022/05/27 16:31][analyzer.py: 21] analyzeFile() :: [*] Signature between 2112 and 2248 size 136: 
-[INFO    ][2022/05/27 16:31][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:35][analyzer.py: 25] analyzeFile() :: [*] Signature between 2112 and 2248 size 136: 
 00000000: BC 75 00 00 83 F8 01 0F  85 ED FD FF FF 0F 1F 00  .u..............
 00000010: 48 8D 15 B9 8B 00 00 48  8D 0D A2 8B 00 00 E8 9D  H......H........
 00000020: 1A 00 00 C7 05 93 75 00  00 02 00 00 00 E9 C8 FD  ......u.........
@@ -49,10 +46,13 @@
 00000060: FF FF 89 C1 E8 5F 1A 00  00 90 66 0F 1F 44 00 00  ....._....f..D..
 00000070: 48 83 EC 28 C7 05 B2 6B  00 00 01 00 00 00 E8 BD  H..(...k........
 00000080: 15 00 00 E8 B8 FC FF FF                           ........
-[INFO    ][2022/05/27 16:31][analyzer.py: 21] analyzeFile() :: [*] Signature between 2384 and 2452 size 68: 
-[INFO    ][2022/05/27 16:31][analyzer.py: 24] analyzeFile() :: 
+[INFO    ][2022/05/27 20:35][analyzer.py: 25] analyzeFile() :: [*] Signature between 2384 and 2452 size 68: 
 00000000: 00 00 31 C9 FF 15 DA 7D  00 00 48 89 C3 31 C0 EB  ..1....}..H..1..
 00000010: 11 83 E2 03 8A 54 15 00  41 32 14 04 88 14 03 48  .....T..A2.....H
 00000020: FF C0 39 F8 89 C2 7C E9  48 89 D9 E8 73 FF FF FF  ..9...|.H...s...
 00000030: 4C 8D 4C 24 3C 48 89 F2  48 89 D9 41 B8 20 00 00  L.L$<H..H..A. ..
 00000040: 00 FF 15 A5                                       ....
+[INFO    ][2022/05/27 20:35][analyzer.py: 35] verifyFile() :: Patching file with results...
+[INFO    ][2022/05/27 20:35][analyzer.py: 39] verifyFile() :: Patch: 2112-2248 size 136
+[INFO    ][2022/05/27 20:35][analyzer.py: 39] verifyFile() :: Patch: 2384-2452 size 68
+[INFO    ][2022/05/27 20:35][analyzer.py: 44] verifyFile() :: Success, not detected!
