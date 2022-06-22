@@ -82,7 +82,7 @@ def sigseek(buffer, ResultQueue, current_offset, end, counter, scanner):
         goat = buffer[:current_offset] + patch + buffer[current_offset+leap:]
         bufs += [goat]
 
-        if not scanner.scan(goat):
+        if not scanner.scan(goat, "test.exe"):
             #has_lead = True
             logging.info(f"[+] Found signature between {current_offset} and {current_offset+leap}")
             ResultQueue.append(Interval(int(current_offset), current_offset+leap))

@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 import pefile
+import random
 import os
 import base64
 from enum import Enum
@@ -16,6 +17,7 @@ class Section:
 @dataclass
 class PE:
     filename = ""
+    filepath = ""
     sections = []
     strings = []
     data = b""
@@ -28,7 +30,8 @@ def parse_pe(path, showInfo=False):
     with open(path, "rb") as f:
         pe.data = f.read()
 
-    pe.filename = path
+    pe.filename = os.path.basename(path)
+    pe.filepath = path
     pe.sections = get_sections(pe)
 
     if showInfo:
@@ -104,11 +107,11 @@ def hidePart(pe, base, size, fillType=FillType.null):
     elif fillType is FillType.space:
         fill = b" " * size
     elif fillType is FillType.highentropy:
-        #fill = random.randbytes(size) # 3.9..
-        fill = os.getrandom(size)
+        fill = random.randbytes(size) # 3.9..
+        #fill = os.getrandom(size)
     elif fillType is FillType.lowentropy:
-        #temp = random.randbytes(size) # 3.9..
-        temp = os.getrandom(size)
+        temp = random.randbytes(size) # 3.9..
+        #temp = os.getrandom(size)
         temp = base64.b64encode(temp)
         fill = temp[:size]
 

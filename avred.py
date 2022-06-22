@@ -59,16 +59,18 @@ def main():
         if args.checkOnly:
             scanFileOnly(args.file, scanner)
         else:
+            matches = None
             if args.file.endswith('.ps1'):
-                data, matches = analyzePlain(args.file, scanner)
-            else:
-                pe, matches = analyzeFile(args.file, scanner, 
+                data, matches = analyzeFilePlain(args.file, scanner)
+            elif args.file.endswith('.docx'):
+                data, matches = analyzeFileWord(args.file, scanner)
+            elif args.file.endswith('.exe'):
+                pe, matches = analyzeFileExe(args.file, scanner, 
                     newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
                     saveMatches=args.saveMatches, ignoreText=args.ignoreText)
 
-                if args.saveMatches:
-                    #saveInfoToFile(pe.filename + ".txt", pe, matches)
-                    saveMatchesToFile(pe.filename + ".matches.json", matches)
+            if args.saveMatches:
+                saveMatchesToFile(pe.filename + ".matches.json", matches)
 
 if __name__ == "__main__":
     main()

@@ -54,7 +54,7 @@ def main():
         peCopy = deepcopy(pe)
         size = match.end - match.start
         hidePart(pe, match.start, size)
-        result = scanner.scan(pe.data)
+        result = scanner.scan(pe.data, args.file)
         print(f"Patching: {match.start}-{match.end} size {size}  Detected: {result}")
     print("")
 
@@ -64,7 +64,7 @@ def main():
         peCopy = deepcopy(pe)
         size = 1
         hidePart(pe, match.start, size)
-        result = scanner.scan(pe.data)
+        result = scanner.scan(pe.data, args.file)
         print(f"Patching: {match.start}-{match.end} size {size}  Detected: {result}")
           
 

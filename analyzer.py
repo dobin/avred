@@ -8,8 +8,8 @@ from pe_utils import *
 from utils import *
 
 
-def analyzeFile(filename, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
-    pe = parse_pe(filename, showInfo=True)
+def analyzeFileExe(filepath, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
+    pe = parse_pe(filepath, showInfo=True)
     matches = investigate(pe, scanner, newAlgo, isolate, remove, ignoreText)
 
     if len(matches) == 0:
@@ -39,7 +39,7 @@ def verifyFile(pe, matches, scanner):
         logging.info(f"Patch: {i.begin}-{i.end} size {size}")
         hidePart(pe, i.begin, size, fillType=FillType.lowentropy)
 
-        if not scanner.scan(pe.data):
+        if not scanner.scan(pe.data, pe.filename):
             print("Success, not detected!")
             logging.info("Success, not detected!")
             return
@@ -55,7 +55,7 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
         hide_section(pe, "VersionInfo")
 
     # check if its really being detected first
-    detected = scanner.scan(pe.data)
+    detected = scanner.scan(pe.data, pe.filename)
     if not detected:
         logging.error(f"{pe.filename} is not detected by {scanner.scanner_name}")
         return []
@@ -94,7 +94,7 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
 
         logging.info(f"Launching bytes analysis on section {section.name}")
         if newAlgo:
-            match = scanData(scanner, pe.data, section.addr, section.addr+section.size)
+            match = scanData(scanner, pe.data, pe.filename, section.addr, section.addr+section.size)
         else:
             match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
         matches += match
@@ -111,7 +111,7 @@ def findDetectedSectionsIsolate(pe, scanner):
         new_pe = deepcopy(pe)
 
         hide_all_sections_except(new_pe, section.name)
-        status = scanner.scan(new_pe.data)
+        status = scanner.scan(new_pe.data, new_pe.filename)
 
         if status:
             detected_sections += [section]
@@ -129,7 +129,7 @@ def findDetectedSections(pe, scanner):
         new_pe = deepcopy(pe)
         hide_section(new_pe, section.name)
 
-        status = scanner.scan(new_pe.data)
+        status = scanner.scan(new_pe.data, new_pe.filename)
         if not status:
             detected_sections += [section]
 
@@ -139,21 +139,30 @@ def findDetectedSections(pe, scanner):
 
 
 # no PE file, just check its content
-def analyzePlain(filename, scanner):
+def analyzeFilePlain(filename, scanner):
     data = None
     with open(filename, "rb") as file:
         data = file.read()
-    match = scanData(scanner, data, 0, len(data))
+    match = scanData(scanner, filename, data, 0, len(data))
     return data, match
 
 
 # Check if file gets detected by the scanner
-def scanFileOnly(filename, scanner):
+def scanFileOnly(filepath, scanner):
     data = None
-    with open(filename, 'rb') as file:
+    with open(filepath, 'rb') as file:
         data = file.read()
-    detected = scanner.scan(data)
+    detected = scanner.scan(data, filepath)
     if detected:
         print(f"File is detected")
     else:
         print(f"File is not detected")
+
+
+def analyzeFileWord(filepath, scanner):
+    data = None
+    with open(filepath, "rb") as file:
+        data = file.read()
+    #match = scanData(scanner, data, 0, len(data))
+    match = None
+    return data, match

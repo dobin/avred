@@ -11,16 +11,16 @@ def makePatchedFile(fileData, offset, size):
     return goat
 
 
-def scanData(scanner, fileData, sectionStart, sectionEnd):
+def scanData(scanner, fileData, filename, sectionStart, sectionEnd):
     # just a wrapper for scanSection()
     it = IntervalTree()
-    scanSection(scanner, fileData, sectionStart, sectionEnd, it)
+    scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
     it.merge_overlaps(strict=False)
     return it
 
 
 # recursive
-def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
+def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
     size = sectionEnd - sectionStart
     chunkSize = int(size // 2)
     
@@ -35,8 +35,8 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
     chunkTopNull = makePatchedFile(fileData, sectionStart, chunkSize)
     chunkBotNull = makePatchedFile(fileData, sectionStart+chunkSize, chunkSize)
 
-    detectTopNull = scanner.scan(chunkTopNull)
-    detectBotNull = scanner.scan(chunkBotNull)
+    detectTopNull = scanner.scan(chunkTopNull, filename)
+    detectBotNull = scanner.scan(chunkBotNull, filename)
 
     if detectTopNull and detectBotNull:
         # Both halves are detected
@@ -44,8 +44,8 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
         # zeroed out (instead of the complete file)
         logging.debug("--> Both halves are detected!")
         
-        scanSection(scanner, chunkBotNull, sectionStart, sectionStart+chunkSize, it)
-        scanSection(scanner, chunkTopNull, sectionStart+chunkSize, sectionEnd, it)
+        scanSection(scanner, chunkBotNull, filename, sectionStart, sectionStart+chunkSize, it)
+        scanSection(scanner, chunkTopNull, filename, sectionStart+chunkSize, sectionEnd, it)
 
     elif not detectTopNull and not detectBotNull:
         # both parts arent detected anymore
@@ -60,8 +60,8 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
         else: 
             # make it smaller still. Take complete data (not nulled)
             logging.debug("--> No detections anymore, but too big. Continue anyway...")
-            scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
-            scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
+            scanSection(scanner, fileData, filename, sectionStart, sectionStart+chunkSize, it)
+            scanSection(scanner, fileData, filename, sectionStart+chunkSize, sectionEnd, it)
 
         #print("TopNull:")
         #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
@@ -74,10 +74,10 @@ def scanSection(scanner, fileData, sectionStart, sectionEnd, it):
     elif not detectTopNull:
         # Detection in the top half
         logging.debug("--> Do Top")
-        scanSection(scanner, fileData, sectionStart, sectionStart+chunkSize, it)
+        scanSection(scanner, fileData, filename, sectionStart, sectionStart+chunkSize, it)
     elif not detectBotNull:
         # Detection in the bottom half
         logging.debug("--> Do Bot")
-        scanSection(scanner, fileData, sectionStart+chunkSize, sectionEnd, it)
+        scanSection(scanner, fileData, filename, sectionStart+chunkSize, sectionEnd, it)
 
     return

@@ -3,7 +3,7 @@ from scanner import ScannerTest, ScannerTestWeighted
 from pe_utils import *
 
 #from analyzer import *
-from analyzer import analyzeFile, parse_pe
+from analyzer import analyzeFileExe, parse_pe
 
 class TestDetection():
     def __init__(self, refPos, refData):
@@ -36,7 +36,7 @@ def test0():
     detections.append( TestDetection(29824, b"Unknown error") )
     scanner = ScannerTest(detections)
     
-    pe, matches = analyzeFile(filename, scanner)
+    pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
 
 def test1():
@@ -50,7 +50,7 @@ def test1():
     detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
     scanner = ScannerTest(detections)
     
-    pe, matches = analyzeFile(filename, scanner)
+    pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
 
 
@@ -64,7 +64,7 @@ def test2():
     detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
     scanner = ScannerTest(detections)
 
-    pe, matches = analyzeFile(filename, scanner)
+    pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
 
 
@@ -79,7 +79,7 @@ def test3():
     #detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
     scanner = ScannerTest(detections)
 
-    pe, matches = analyzeFile(filename, scanner)
+    pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
 
 
@@ -95,6 +95,6 @@ def test4():
 
     scanner = ScannerTestWeighted(detections)
 
-    pe, matches = analyzeFile(filename, scanner)
+    pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
 
