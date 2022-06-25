@@ -53,7 +53,7 @@ class ScannerRest(Scanner):
 
     def scan(self, data, filename):
         params = { 'filename': filename }
-        res = req.post(f"{self.scanner_path}/scan?method=run", params=params, data=data)
+        res = req.post(f"{self.scanner_path}/scan", params=params, data=data)
         jsonRes = res.json()
 
         if res.status_code != 200:
