@@ -2,16 +2,20 @@ import logging
 from dataclasses import dataclass
 import requests as req
 from pprint import pprint
-
+from packers import Packer
 
 
 @dataclass
 class Scanner:
     scanner_path: str = ""
     scanner_name: str = ""
+    packer: Packer = None
 
     def scan(self, data, filename):
         return False
+
+    def setPacker(self, packer):
+        self.packer = packer
 
 
 class ScannerTest(Scanner):
@@ -53,6 +57,10 @@ class ScannerRest(Scanner):
 
     def scan(self, data, filename):
         params = { 'filename': filename }
+
+        if self.packer is not None:
+            data = self.packer.pack(data)
+
         res = req.post(f"{self.scanner_path}/scan", params=params, data=data)
         jsonRes = res.json()
 

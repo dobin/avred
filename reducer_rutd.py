@@ -5,14 +5,8 @@ from intervaltree import Interval, IntervalTree
 SIG_SIZE = 128
 
 
-def makePatchedFile(fileData, offset, size):
-    patch = bytes(chr(0),'ascii') * int(size)
-    goat = fileData[:offset] + patch + fileData[offset+size:]
-    return goat
-
-
+# just a wrapper for scanSection()
 def scanData(scanner, fileData, filename, sectionStart, sectionEnd):
-    # just a wrapper for scanSection()
     it = IntervalTree()
     scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
     it.merge_overlaps(strict=False)
@@ -32,8 +26,8 @@ def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
         logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
         return
 
-    chunkTopNull = makePatchedFile(fileData, sectionStart, chunkSize)
-    chunkBotNull = makePatchedFile(fileData, sectionStart+chunkSize, chunkSize)
+    chunkTopNull = makePatch(fileData, sectionStart, chunkSize)
+    chunkBotNull = makePatch(fileData, sectionStart+chunkSize, chunkSize)
 
     detectTopNull = scanner.scan(chunkTopNull, filename)
     detectBotNull = scanner.scan(chunkBotNull, filename)
@@ -81,3 +75,9 @@ def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
         scanSection(scanner, fileData, filename, sectionStart+chunkSize, sectionEnd, it)
 
     return
+
+
+def makePatch(fileData, offset, size):
+    patch = bytes(chr(0),'ascii') * int(size)
+    goat = fileData[:offset] + patch + fileData[offset+size:]
+    return goat

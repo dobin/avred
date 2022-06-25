@@ -5,6 +5,10 @@ Based on: https://github.com/scrt/avdebugger
 Most antivirus engines rely on strings or other bytes sequences to recognize malware.
 This project helps to automatically recover these signatures.
 
+Similar to matterpreter/DefenderCheck and rasta-mouse/ThreatCheck, but working on individual
+PE sections, more modular, and in python.
+
+
 ## Install 
 
 ```

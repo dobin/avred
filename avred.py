@@ -2,11 +2,14 @@
 
 import argparse
 from scanner import ScannerRest
-from test import testMain
-from analyzer import *
+from analyzer_office import analyzeFileWord
+from analyzer_pe import analyzeFileExe
+from analyzer_plain import analyzeFilePlain
+from analyzer import scanFileOnly
 from config import Config
-from intervaltree import IntervalTree, Interval
+from test_pe import testPeMain
 import logging
+from utils import saveMatchesToFile
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -45,7 +48,7 @@ def main():
 
 
     if args.test:
-        testMain(args.test)
+        testPeMain(args.test)
     else:
         if not args.file or not args.server:
             print("Give at least --file and --server")
@@ -62,7 +65,7 @@ def main():
             matches = None
             if args.file.endswith('.ps1'):
                 data, matches = analyzeFilePlain(args.file, scanner)
-            elif args.file.endswith('.docx'):
+            elif args.file.endswith('.docm'):
                 data, matches = analyzeFileWord(args.file, scanner)
             elif args.file.endswith('.exe'):
                 pe, matches = analyzeFileExe(args.file, scanner, 
@@ -71,6 +74,7 @@ def main():
 
             if args.saveMatches:
                 saveMatchesToFile(pe.filename + ".matches.json", matches)
+
 
 if __name__ == "__main__":
     main()
