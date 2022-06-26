@@ -24,7 +24,7 @@ def analyzeFileWord(filepath, scanner, verify=True):
     return makroData, matches
 
 
-def verifyFile(officeFile, matches, scanner):
+def verifyFile(officeFile, matches, scanner, patchSize=None):
     print("Patching file with results...")
     logging.info("Patching file with results...")
 
@@ -33,6 +33,9 @@ def verifyFile(officeFile, matches, scanner):
 
     for i in matches:
         size = i.end - i.begin
+        if patchSize is not None:
+            size = patchSize
+
         print(f"Patch: {i.begin}-{i.end} size {size}")
         logging.info(f"Patch: {i.begin}-{i.end} size {size}")
 
