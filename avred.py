@@ -19,14 +19,16 @@ def main():
     parser.add_argument("-f", "--file", help="path to file")
     parser.add_argument('-s', "--server", help="Server")
 
-    parser.add_argument("--isolate", help="Isolate sections to be tested (null all other)", default=False,  action='store_true')
-    parser.add_argument("--remove", help="Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
+    parser.add_argument("--logtofile", help="Log everything to file")
     parser.add_argument("--checkOnly", help="Check only if AV detects the file", default=False, action='store_true')
     parser.add_argument("--verify", help="Verify results at the end", default=False, action='store_true')
     parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
-    parser.add_argument("--ignoreText", help="Dont analyze .text section", default=False, action='store_true')
     parser.add_argument("--test", help="Perform simple test with index 0, 1, 2, ...")
-    parser.add_argument("--logtofile", help="Log everything to file")
+
+    parser.add_argument("--isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
+    parser.add_argument("--remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
+    parser.add_argument("--ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
+
 
     args = parser.parse_args()
 
@@ -70,10 +72,10 @@ def main():
             elif args.file.endswith('.exe'):
                 pe, matches = analyzeFileExe(args.file, scanner, 
                     newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
-                    saveMatches=args.saveMatches, ignoreText=args.ignoreText)
+                    ignoreText=args.ignoreText)
 
             if args.saveMatches:
-                saveMatchesToFile(pe.filename + ".matches.json", matches)
+                saveMatchesToFile(args.file + ".matches.json", matches)
 
 
 if __name__ == "__main__":

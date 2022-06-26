@@ -1,5 +1,4 @@
 import hexdump
-from intervaltree import Interval, IntervalTree
 import logging
 from reducer_orig import bytes_detection
 from reducer_rutd import scanData
@@ -8,9 +7,9 @@ from pe_utils import *
 from utils import *
 
 
-def analyzeFileExe(filepath, scanner, newAlgo=True, isolate=False, remove=False, verify=True, saveMatches=False, ignoreText=False):
+def analyzeFileExe(filepath, scanner, isolate=False, remove=False, verify=True, ignoreText=False):
     pe = parse_pe(filepath, showInfo=True)
-    matches = investigate(pe, scanner, newAlgo, isolate, remove, ignoreText)
+    matches = investigate(pe, scanner, isolate, remove, ignoreText)
 
     if len(matches) == 0:
         return pe, []
@@ -48,7 +47,7 @@ def verifyFile(pe, matches, scanner):
     logging.info("Still detected? :-(")
 
 
-def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreText=False):
+def investigate(pe, scanner, isolate=False, remove=False, ignoreText=False):
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
         hide_section(pe, "Ressources")
@@ -93,10 +92,13 @@ def investigate(pe, scanner, newAlgo=True, isolate=False, remove=False, ignoreTe
             continue
 
         logging.info(f"Launching bytes analysis on section {section.name}")
-        if newAlgo:
-            match = scanData(scanner, pe.data, pe.filename, section.addr, section.addr+section.size)
-        else:
-            match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
+
+        # new algo
+        match = scanData(scanner, pe.data, pe.filename, section.addr, section.addr+section.size)
+        
+        # original algo
+        #match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
+
         matches += match
 
     return matches

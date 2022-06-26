@@ -1,8 +1,7 @@
 import json
-
-#def saveInfoToFile(filename, pe, matches):
-#    with open(filename, 'w') as outfile:
-        
+import random
+from enum import Enum
+import base64
 
 
 def saveMatchesToFile(filename, matches):
@@ -18,3 +17,31 @@ def saveMatchesToFile(filename, matches):
     with open(filename, 'w') as outfile:
         json.dump(results, outfile)
 
+
+class FillType(Enum):
+    null = 1
+    space = 2
+    highentropy = 3
+    lowentropy = 4
+
+
+def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
+    fill = None # has to be exactly <size> bytes
+    if fillType is FillType.null:
+        fill = b"\x00" * size
+    elif fillType is FillType.space:
+        fill = b" " * size
+    elif fillType is FillType.highentropy:
+        fill = random.randbytes(size) # 3.9..
+        #fill = os.getrandom(size)
+    elif fillType is FillType.lowentropy:
+        temp = random.randbytes(size) # 3.9..
+        #temp = os.getrandom(size)
+        temp = base64.b64encode(temp)
+        fill = temp[:size]
+
+    d = bytearray(data)
+    d[base:base+size] = fill
+    data = bytes(d)
+
+    return data

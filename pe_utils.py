@@ -1,17 +1,16 @@
 import logging
-from dataclasses import dataclass
 import pefile
-import random
 import os
-import base64
-from enum import Enum
+from dataclasses import dataclass
+
+from utils import patchData, FillType
+
 
 @dataclass
 class Section:
     name: str
     addr: int
     size: int
-    #detected: bool = False
 
 
 @dataclass
@@ -19,9 +18,7 @@ class PE:
     filename = ""
     filepath = ""
     sections = []
-    strings = []
     data = b""
-    patches = []
 
 
 def parse_pe(path, showInfo=False):
@@ -93,32 +90,8 @@ def hide_section(pe, section_name):
     hidePart(pe, section.addr, section.size)
 
 
-class FillType(Enum):
-    null = 1
-    space = 2
-    highentropy = 3
-    lowentropy = 4
-
-
 def hidePart(pe, base, size, fillType=FillType.null):
-    fill = None # has to be exactly <size> bytes
-    if fillType is FillType.null:
-        fill = b"\x00" * size
-    elif fillType is FillType.space:
-        fill = b" " * size
-    elif fillType is FillType.highentropy:
-        fill = random.randbytes(size) # 3.9..
-        #fill = os.getrandom(size)
-    elif fillType is FillType.lowentropy:
-        temp = random.randbytes(size) # 3.9..
-        #temp = os.getrandom(size)
-        temp = base64.b64encode(temp)
-        fill = temp[:size]
-
-    d = bytearray(pe.data)
-    #d[base:base+size] = b"\x00" * size
-    d[base:base+size] = fill
-    pe.data = bytes(d)
+    pe.data = patchData(pe.data, base, size, fillType)
 
 
 def hide_all_sections_except(pe, exception):
