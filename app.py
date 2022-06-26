@@ -9,7 +9,7 @@ import subprocess
 from waitress import serve
 
 UPLOAD_FOLDER = './upload'
-ALLOWED_EXTENSIONS = {'exe'}
+ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
