@@ -28,12 +28,12 @@ def analyzeFileExe(filepath, scanner, isolate=False, remove=False, verify=True, 
 def printMatches(data, matches):
     for i in matches:
         size = i.end - i.begin
-        data = data[i.begin:i.end]
+        dataDump = data[i.begin:i.end]
 
         print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-        print(hexdump.hexdump(data, result='return'))
+        print(hexdump.hexdump(dataDump, result='return'))
 
-        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(data, result='return'))
+        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(dataDump, result='return'))
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):

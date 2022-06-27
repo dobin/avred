@@ -1,29 +1,6 @@
-from scanner import ScannerTest, ScannerTestWeighted
 from analyzer_pe import analyzeFileExe
-
-
-class TestDetection():
-    def __init__(self, refPos, refData):
-        self.refPos = refPos
-        self.refData = refData
-
-    def __str__(self):
-        return f"{self.refPos} {self.refData}"
-    def __repr__(self):
-        return f"{self.refPos} {self.refData}"
-
-
-def testPeMain(idx):
-    if idx == "0":
-        pe, matches = test0()
-    elif idx == "1":
-        pe, matches = test1()
-    elif idx == "2":
-        pe, matches = test2()
-    elif idx == "3":
-        pe, matches = test3()
-    elif idx == "4":
-        pe, matches = test4()
+from model import TestDetection, Scanner
+from pprint import pprint
 
 def test0():
     # simple, 1
@@ -95,4 +72,36 @@ def test4():
 
     pe, matches = analyzeFileExe(filename, scanner)
     return pe, matches
+
+
+class ScannerTest(Scanner):
+    def __init__(self, detections):
+        self.detections = detections
+        pprint(detections, indent=4)
+
+    def scan(self, data, filename):
+        for detection in self.detections:
+            fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if fileData != detection.refData:
+                return False
+
+        return True    
+
+
+class ScannerTestWeighted(Scanner):
+    def __init__(self, detections):
+        self.detections = detections
+        pprint(detections, indent=4)
+
+    def scan(self, data, filename):
+        n = 0
+        for detection in self.detections:
+            fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if fileData == detection.refData:
+                n += 1
+
+        if n > int(len(self.detections) // 2):
+            return True
+        else:
+            return False
 

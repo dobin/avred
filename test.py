@@ -1,99 +1,30 @@
+#!/usr/bin/python3
 
-from scanner import ScannerTest, ScannerTestWeighted
+import argparse
+import test_pe
+import test_office
 
-#from analyzer import *
-from analyzer import analyzeFileExe, parse_pe
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", help="Perform simple test with index 0, 1, 2, ...")
+    args = parser.parse_args()
 
-class TestDetection():
-    def __init__(self, refPos, refData):
-        self.refPos = refPos
-        self.refData = refData
+    idx = args.test
 
-    def __str__(self):
-        return f"{self.refPos} {self.refData}"
-    def __repr__(self):
-        return f"{self.refPos} {self.refData}"
-
-def testMain(idx):
     if idx == "0":
-        pe, matches = test0()
+        pe, matches = test_pe.test0()
     elif idx == "1":
-        pe, matches = test1()
+        pe, matches = test_pe.test1()
     elif idx == "2":
-        pe, matches = test2()
+        pe, matches = test_pe.test2()
     elif idx == "3":
-        pe, matches = test3()
+        pe, matches = test_pe.test3()
     elif idx == "4":
-        pe, matches = test4()
+        pe, matches = test_pe.test4()
+    elif idx == "docx":
+        pe, matches = test_office.testDocx()
 
-def test0():
-    # simple, 1
-    filename = "test/test.exe"
-    detections = []
 
-    # one string in .rodata
-    detections.append( TestDetection(29824, b"Unknown error") )
-    scanner = ScannerTest(detections)
+if __name__ == "__main__":
+    main()
     
-    pe, matches = analyzeFileExe(filename, scanner)
-    return pe, matches
-
-def test1():
-    # simple, merge 2-OR
-    filename = "test/test.exe"
-    detections = []
-    
-    # TODO PROBLEM with this one
-    detections.append( TestDetection(30810, b"\xff\xff\x10\xb1\xff\xff\xc2\xb2\xff\xff") )
-    # WORKS
-    detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-    scanner = ScannerTest(detections)
-    
-    pe, matches = analyzeFileExe(filename, scanner)
-    return pe, matches
-
-
-def test2():
-    # 2 sections OR
-    filename = "test/test.exe"
-    detections = []
-    # .rodata
-    detections.append( TestDetection(29824, b"Unknown error") )
-    # .text
-    detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
-    scanner = ScannerTest(detections)
-
-    pe, matches = analyzeFileExe(filename, scanner)
-    return pe, matches
-
-
-def test3():
-    # two in one section OR
-    filename = "test/test.exe"
-    detections = []
-    # .rodata
-    detections.append( TestDetection(29824, b"Unknown error") )
-    detections.append( TestDetection(31850, b" 10.2.0") )
-    # .text
-    #detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
-    scanner = ScannerTest(detections)
-
-    pe, matches = analyzeFileExe(filename, scanner)
-    return pe, matches
-
-
-def test4():
-    # weighted (at least half)
-    filename = "test/test.exe"
-    detections = []
-    # .rodata
-    detections.append( TestDetection(29824, b"Unknown error") )
-    detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-    detections.append( TestDetection(31850, b" 10.2.0") )
-    detections.append( TestDetection(33150, b"\x00\x00\x47\x43\x43\x3a\x20") )
-
-    scanner = ScannerTestWeighted(detections)
-
-    pe, matches = analyzeFileExe(filename, scanner)
-    return pe, matches
-

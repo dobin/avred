@@ -23,14 +23,13 @@ def main():
     parser.add_argument("--checkOnly", help="Check only if AV detects the file", default=False, action='store_true')
     parser.add_argument("--verify", help="Verify results at the end", default=False, action='store_true')
     parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
-    parser.add_argument("--test", help="Perform simple test with index 0, 1, 2, ...")
 
     parser.add_argument("--isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
     parser.add_argument("--remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
     parser.add_argument("--ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
 
-
     args = parser.parse_args()
+
 
     logging.getLogger().setLevel(logging.INFO)
     if args.logtofile:
@@ -48,34 +47,30 @@ def main():
                 level=logging.INFO
         )
 
+    if not args.file or not args.server:
+        print("Give at least --file and --server")
+        return
 
-    if args.test:
-        testPeMain(args.test)
+    config = Config()
+    config.load()
+    url = config.get("server")[args.server]
+    scanner = ScannerRest(url, args.server)
+
+    if args.checkOnly:
+        scanFileOnly(args.file, scanner)
     else:
-        if not args.file or not args.server:
-            print("Give at least --file and --server")
-            return
+        matches = None
+        if args.file.endswith('.ps1'):
+            data, matches = analyzeFilePlain(args.file, scanner)
+        elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
+            data, matches = analyzeFileWord(args.file, scanner)
+        elif args.file.endswith('.exe'):
+            pe, matches = analyzeFileExe(args.file, scanner, 
+                newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
+                ignoreText=args.ignoreText)
 
-        config = Config()
-        config.load()
-        url = config.get("server")[args.server]
-        scanner = ScannerRest(url, args.server)
-
-        if args.checkOnly:
-            scanFileOnly(args.file, scanner)
-        else:
-            matches = None
-            if args.file.endswith('.ps1'):
-                data, matches = analyzeFilePlain(args.file, scanner)
-            elif args.file.endswith('.docm'):
-                data, matches = analyzeFileWord(args.file, scanner)
-            elif args.file.endswith('.exe'):
-                pe, matches = analyzeFileExe(args.file, scanner, 
-                    newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
-                    ignoreText=args.ignoreText)
-
-            if args.saveMatches:
-                saveMatchesToFile(args.file + ".matches.json", matches)
+        if args.saveMatches:
+            saveMatchesToFile(args.file + ".matches.json", matches)
 
 
 if __name__ == "__main__":

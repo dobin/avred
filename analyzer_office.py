@@ -9,8 +9,8 @@ from file_office import FileOffice
 
 
 def analyzeFileWord(filepath, scanner, verify=True):
-    fileOffice = FileOffice(filepath)
-    fileOffice.load()
+    fileOffice = FileOffice()
+    fileOffice.loadFromFile(filepath)
     makroData = fileOffice.data
 
     packer = PackerWord(fileOffice)

@@ -1,13 +1,5 @@
-from dataclasses import dataclass
 from file_office import FileOffice
-
-@dataclass
-class Packer:
-    data: bytes = None
-
-    def pack(self, data) -> bytes:
-        pass
-
+from model import Packer
 
 class PackerWord(Packer):
     def __init__(self, fileOffice: FileOffice):

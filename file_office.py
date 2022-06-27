@@ -7,19 +7,33 @@ MAKRO_PATH = 'word/vbaProject.bin'
 
 
 class FileOffice():
-    def __init__(self, filepath: str):
-        self.filepath: str = filepath 
-        self.filename: str = os.path.basename(filepath)
+    def __init__(self):
+        self.filepath: str = None 
+        self.filename: str = None
 
         self.dataFile: bytes = None
         self.data: bytes = None
 
 
-    def load(self) -> bool:
+    def loadFromFile(self, filepath: str) -> bool:
+        self.filepath = filepath 
+        self.filename = os.path.basename(filepath)
+
         # read complete file
         with open(self.filepath, "rb") as file:
             self.dataFile = file.read()
 
+        return self._loadData()
+
+
+    def loadFromMem(self, dataFile: bytes) -> bool:
+        self.filepath = "test.exe"
+        self.filename = "test.exe"
+        self.dataFile = dataFile
+        return self._loadData()
+
+
+    def _loadData(self) -> bool:
         # get the relevant part (makro)
         with zipfile.ZipFile(io.BytesIO(self.dataFile)) as thezip:
             for zipinfo in thezip.infolist():
@@ -54,4 +68,3 @@ class FileOffice():
     def getPatchedByOffset(self, offset: int, patch: bytes) -> bytes:
         goat = self.data[:offset] + patch + self.data[offset+len(patch):]
         return self.getPatchedByReplacement(goat)
-    
