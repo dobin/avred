@@ -1,72 +1,61 @@
 import hexdump
 import logging
 from reducer_orig import bytes_detection
-from reducer_rutd import scanData
+from reducer import scanData
+from file_pe import FilePe
 from copy import deepcopy
-from pe_utils import *
 from utils import *
 
 
 def analyzeFileExe(filepath, scanner, isolate=False, remove=False, verify=True, ignoreText=False):
-    pe = parse_pe(filepath, showInfo=True)
-    matches = investigate(pe, scanner, isolate, remove, ignoreText)
+    filePe = FilePe(filepath)
+    filePe.load()
+    filePe.printSections()    
+
+    matches = investigate(filePe, scanner, isolate, remove, ignoreText)
 
     if len(matches) == 0:
-        return pe, []
+        return filePe, []
 
+    printMatches(filePe.data, matches)
+
+    if verify:
+        verifyFile(filePe, matches, scanner)
+
+    return filePe, matches
+
+
+def printMatches(data, matches):
     for i in matches:
         size = i.end - i.begin
-        data = pe.data[i.begin:i.end]
+        data = data[i.begin:i.end]
 
         print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
         print(hexdump.hexdump(data, result='return'))
 
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(data, result='return'))
 
-    if verify:
-        verifyFile(deepcopy(pe), matches, scanner)
 
-    return pe, matches
-
-
-def verifyFile(pe, matches, scanner):
-    print("Patching file with results...")
-    logging.info("Patching file with results...")
-    for i in matches:
-        size = i.end - i.begin
-        print(f"Patch: {i.begin}-{i.end} size {size}")
-        logging.info(f"Patch: {i.begin}-{i.end} size {size}")
-        hidePart(pe, i.begin, size, fillType=FillType.lowentropy)
-
-        if not scanner.scan(pe.data, pe.filename):
-            print("Success, not detected!")
-            logging.info("Success, not detected!")
-            return
-
-    print("Still detected? :-(")
-    logging.info("Still detected? :-(")
-
-
-def investigate(pe, scanner, isolate=False, remove=False, ignoreText=False):
+def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
-        hide_section(pe, "Ressources")
-        hide_section(pe, "VersionInfo")
+        filePe.hideSection("Ressources")
+        filePe.hideSection("VersionInfo")
 
     # check if its really being detected first
-    detected = scanner.scan(pe.data, pe.filename)
+    detected = scanner.scan(filePe.data, filePe.filename)
     if not detected:
-        logging.error(f"{pe.filename} is not detected by {scanner.scanner_name}")
+        logging.error(f"{filePe.filename} is not detected by {scanner.scanner_name}")
         return []
 
     # identify which sections get detected
     detected_sections = []
     if isolate:
         logging.info("Section Detection: Isolating sections (zero all others)")
-        detected_sections = findDetectedSectionsIsolate(pe, scanner)
+        detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
         logging.info("Section Detection: Zero section (leave all others)")
-        detected_sections = findDetectedSections(pe, scanner)
+        detected_sections = findDetectedSections(filePe, scanner)
 
     if len(detected_sections) == 0:
         print("No matches?!")
@@ -94,8 +83,7 @@ def investigate(pe, scanner, isolate=False, remove=False, ignoreText=False):
         logging.info(f"Launching bytes analysis on section {section.name}")
 
         # new algo
-        match = scanData(scanner, pe.data, pe.filename, section.addr, section.addr+section.size)
-        
+        match = scanData(scanner, filePe.data, filePe.filename, section.addr, section.addr+section.size)
         # original algo
         #match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
 
@@ -104,15 +92,15 @@ def investigate(pe, scanner, isolate=False, remove=False, ignoreText=False):
     return matches
 
 
-def findDetectedSectionsIsolate(pe, scanner):
+def findDetectedSectionsIsolate(filePe, scanner):
     # isolate individual sections, and see which one gets detected
     detected_sections = []
 
-    for section in pe.sections:
-        new_pe = deepcopy(pe)
+    for section in filePe.sections:
+        filePeCopy = deepcopy(filePe)
 
-        hide_all_sections_except(new_pe, section.name)
-        status = scanner.scan(new_pe.data, new_pe.filename)
+        filePeCopy.hideAllSectionsExcept(section.name)
+        status = scanner.scan(filePeCopy.data, filePeCopy.filename)
 
         if status:
             detected_sections += [section]
@@ -122,18 +110,39 @@ def findDetectedSectionsIsolate(pe, scanner):
     return detected_sections
 
 
-def findDetectedSections(pe, scanner):
+def findDetectedSections(filePe, scanner):
     # remove stuff until it does not get detected anymore
     detected_sections = []
 
-    for section in pe.sections:
-        new_pe = deepcopy(pe)
-        hide_section(new_pe, section.name)
+    for section in filePe.sections:
+        filePeCopy = deepcopy(filePe)
+        filePeCopy.hideSection(section.name)
 
-        status = scanner.scan(new_pe.data, new_pe.filename)
+        status = scanner.scan(filePeCopy.data, filePeCopy.filename)
         if not status:
             detected_sections += [section]
 
         logging.info(f"Hide: {section.name} -> Detected: {status}")
 
     return detected_sections
+
+
+def verifyFile(filePe, matches, scanner):
+    print("Patching file with results...")
+    logging.info("Patching file with results...")
+
+    filePeCopy = deepcopy(filePe)
+
+    for i in matches:
+        size = i.end - i.begin
+        print(f"Patch: {i.begin}-{i.end} size {size}")
+        logging.info(f"Patch: {i.begin}-{i.end} size {size}")
+        filePeCopy.hidePart(i.begin, size, fillType=FillType.lowentropy)
+
+        if not scanner.scan(filePeCopy.data, filePeCopy.filename):
+            print("Success, not detected!")
+            logging.info("Success, not detected!")
+            return
+
+    print("Still detected? :-(")
+    logging.info("Still detected? :-(")

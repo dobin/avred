@@ -2,7 +2,7 @@
 import copy
 import logging
 
-from reducer_rutd import scanData
+from reducer import scanData
 from packers import PackerWord
 from utils import patchData, FillType
 from file_office import FileOffice

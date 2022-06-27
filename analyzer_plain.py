@@ -1,5 +1,5 @@
 import os
-from reducer_rutd import scanData
+from reducer import scanData
 
 # no PE file, just check its content
 def analyzeFilePlain(filename, scanner):

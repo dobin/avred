@@ -15,7 +15,7 @@ class FileOffice():
         self.data: bytes = None
 
 
-    def load(self):
+    def load(self) -> bool:
         # read complete file
         with open(self.filepath, "rb") as file:
             self.dataFile = file.read()
@@ -26,6 +26,8 @@ class FileOffice():
                 if zipinfo.filename == MAKRO_PATH:
                     with thezip.open(zipinfo) as thefile:
                         self.data = thefile.read()
+                        return True
+        return False
 
 
     def getPatchedByReplacement(self, data: bytes) -> bytes:

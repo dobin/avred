@@ -6,6 +6,7 @@ SIG_SIZE = 128
 
 
 # just a wrapper for scanSection()
+# to collect its result, and merge it
 def scanData(scanner, fileData, filename, sectionStart, sectionEnd):
     it = IntervalTree()
     scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
@@ -26,8 +27,8 @@ def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
         logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
         return
 
-    chunkTopNull = makePatch(fileData, sectionStart, chunkSize)
-    chunkBotNull = makePatch(fileData, sectionStart+chunkSize, chunkSize)
+    chunkTopNull = makeWithPatch(fileData, sectionStart, chunkSize)
+    chunkBotNull = makeWithPatch(fileData, sectionStart+chunkSize, chunkSize)
 
     detectTopNull = scanner.scan(chunkTopNull, filename)
     detectBotNull = scanner.scan(chunkBotNull, filename)
@@ -77,7 +78,7 @@ def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
     return
 
 
-def makePatch(fileData, offset, size):
+def makeWithPatch(fileData, offset, size):
     patch = bytes(chr(0),'ascii') * int(size)
     goat = fileData[:offset] + patch + fileData[offset+size:]
     return goat

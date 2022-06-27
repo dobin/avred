@@ -1,6 +1,8 @@
-from scanner import ScannerTest, ScannerTestWeighted
-from analyzer_pe import analyzeFileExe
 
+from scanner import ScannerTest, ScannerTestWeighted
+
+#from analyzer import *
+from analyzer import analyzeFileExe, parse_pe
 
 class TestDetection():
     def __init__(self, refPos, refData):
@@ -12,8 +14,7 @@ class TestDetection():
     def __repr__(self):
         return f"{self.refPos} {self.refData}"
 
-
-def testPeMain(idx):
+def testMain(idx):
     if idx == "0":
         pe, matches = test0()
     elif idx == "1":
