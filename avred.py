@@ -7,7 +7,6 @@ from analyzer_pe import analyzeFileExe
 from analyzer_plain import analyzeFilePlain
 from analyzer import scanFileOnly
 from config import Config
-from test_pe import testPeMain
 import logging
 from utils import saveMatchesToFile
 

@@ -1,4 +1,4 @@
-import hexdump
+
 import logging
 from reducer_orig import bytes_detection
 from reducer import scanData
@@ -13,27 +13,14 @@ def analyzeFileExe(filepath, scanner, isolate=False, remove=False, verify=True, 
     filePe.printSections()    
 
     matches = investigate(filePe, scanner, isolate, remove, ignoreText)
-
     if len(matches) == 0:
         return filePe, []
-
     printMatches(filePe.data, matches)
 
     if verify:
         verifyFile(filePe, matches, scanner)
 
     return filePe, matches
-
-
-def printMatches(data, matches):
-    for i in matches:
-        size = i.end - i.begin
-        dataDump = data[i.begin:i.end]
-
-        print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-        print(hexdump.hexdump(dataDump, result='return'))
-
-        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(dataDump, result='return'))
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):

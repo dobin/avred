@@ -4,7 +4,7 @@ import logging
 
 from reducer import scanData
 from packers import PackerWord
-from utils import patchData, FillType
+from utils import *
 from file_office import FileOffice
 
 
@@ -17,6 +17,9 @@ def analyzeFileWord(filepath, scanner, verify=True):
     scanner.setPacker(packer)
 
     matches = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
+    if len(matches) == 0:
+        return makroData, []
+    printMatches(makroData, matches)
 
     if verify: 
         verifyFile(fileOffice, matches, scanner)

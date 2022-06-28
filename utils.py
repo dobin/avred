@@ -1,8 +1,10 @@
+import logging
 import json
 import random
+import os
 from enum import Enum
 import base64
-
+import hexdump
 
 def saveMatchesToFile(filename, matches):
     # convert first
@@ -32,11 +34,11 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
     elif fillType is FillType.space:
         fill = b" " * size
     elif fillType is FillType.highentropy:
-        fill = random.randbytes(size) # 3.9..
-        #fill = os.getrandom(size)
+        #fill = random.randbytes(size) # 3.9..
+        fill = os.getrandom(size)
     elif fillType is FillType.lowentropy:
-        temp = random.randbytes(size) # 3.9..
-        #temp = os.getrandom(size)
+        #temp = random.randbytes(size) # 3.9..
+        temp = os.getrandom(size)
         temp = base64.b64encode(temp)
         fill = temp[:size]
 
@@ -45,3 +47,14 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
     data = bytes(d)
 
     return data
+
+
+def printMatches(data, matches):
+    for i in matches:
+        size = i.end - i.begin
+        dataDump = data[i.begin:i.end]
+
+        print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
+        print(hexdump.hexdump(dataDump, result='return'))
+
+        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(dataDump, result='return'))
