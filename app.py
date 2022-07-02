@@ -7,6 +7,8 @@ from werkzeug.utils import secure_filename
 import random
 import subprocess
 from waitress import serve
+import json
+from viewer import *
 
 UPLOAD_FOLDER = './upload'
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
@@ -31,7 +33,6 @@ def send_report(path):
 @app.route("/view_file/<filename>")
 def view_file(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_MATCHES)
-
     filepathLog = os.path.join(app.config['UPLOAD_FOLDER'],filename + EXT_LOG)
     logData = ""
     if os.path.isfile(filepathLog):
@@ -50,6 +51,31 @@ def view_file(filename):
         print("File does not exist! " + filepath)
         return render_template('view_file_refresh.html',
             logdata=logData)
+
+
+@app.route("/file/<filename>")
+def file(filename):
+    filename: str = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    fileContent: bytes = None
+    matches = None
+
+    if not os.path.isfile(filename):
+        print("File does not exist")
+        return
+    with open(filename, 'rb') as f:
+        fileContent = f.read()
+
+    matchesFile = filename + EXT_MATCHES
+    if not os.path.isfile(matchesFile):
+        print("File does not exist!")
+        return
+    with open(matchesFile, 'r') as f:
+        matches = json.load(f)
+
+    matches = GetViewData(fileContent, matches, filename)
+
+    return render_template('file.html', 
+        matches=matches, filename=filename)
 
 
 def allowed_file(filename):
