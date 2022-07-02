@@ -65,7 +65,7 @@ def main():
             data, matches = analyzeFileWord(args.file, scanner)
         elif args.file.endswith('.exe'):
             pe, matches = analyzeFileExe(args.file, scanner, 
-                newAlgo=True, isolate=args.isolate, remove=args.remove, verify=args.verify, 
+                isolate=args.isolate, remove=args.remove, verify=args.verify, 
                 ignoreText=args.ignoreText)
 
         if args.saveMatches:

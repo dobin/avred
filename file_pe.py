@@ -79,7 +79,7 @@ class FilePe():
         self.hidePart(section.addr, section.size)
 
 
-    def hideAllSsectionsExcept(self, sectionName: str):
+    def hideAllSectionsExcept(self, sectionName: str):
         for section in self.sections:
             if section.name != sectionName:
                 self.hidePart(section.addr, section.size)

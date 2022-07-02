@@ -41,7 +41,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
         logging.info("Section Detection: Isolating sections (zero all others)")
         detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
-        logging.info("Section Detection: Zero section (leave all others)")
+        logging.info("Section Detection: Zero section (leave all others intact)")
         detected_sections = findDetectedSections(filePe, scanner)
 
     if len(detected_sections) == 0:
