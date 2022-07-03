@@ -3,3 +3,4 @@ hexdump
 requests
 pefile
 waitress
+r2pipe

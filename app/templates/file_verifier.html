@@ -1,0 +1,33 @@
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>Test #</td>
+            <td>Type</td>
+
+            {% for testEntry in verifyData.verificationRuns[0].testEntries %}
+            <td>Match {{loop.index0}}</td>
+            {% endfor %}
+
+            <td><b>Result</b></td>
+        </tr>
+    </thead>
+
+    {% for verificationRun in verifyData.verificationRuns %}
+    <tr>
+        <td>{{verificationRun.index}}</td>
+        <td>{{verificationRun.type}}</td>
+
+        {% for testEntry in verificationRun.testEntries %}
+        <td>
+            {{testEntry}}
+        </td>
+        {% endfor %}
+    
+        <td>{{verificationRun.result}}</td>
+    </tr>
+    {% endfor %}
+
+
+
+</table>
