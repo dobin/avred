@@ -1,6 +1,5 @@
 
 import logging
-from reducer_orig import bytes_detection
 from reducer import scanData
 from file_pe import FilePe
 from copy import deepcopy

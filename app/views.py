@@ -9,10 +9,13 @@ from waitress import serve
 import json
 from viewer import *
 import glob
+import pickle
 from app  import app
+
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 EXT_MATCHES = ".matches.json"
+EXT_VERIFY = ".verify.pickle"
 EXT_LOG = ".txt"
 
 
@@ -55,7 +58,7 @@ def files():
     examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_MATCHES))
     res = []
     for example in examples:
-        name = example[:-13]
+        name = os.path.basename(example[:-13])
         res.append(name)
     return render_template('file_list.html',
         filenames=res)
@@ -67,12 +70,14 @@ def file(filename):
     fileContent: bytes = None
     matches = None
 
+    # Main file
     if not os.path.isfile(filename):
         print("File does not exist")
         return 'File not found: ' + filename, 500
     with open(filename, 'rb') as f:
         fileContent = f.read()
 
+    # Matches
     matchesFile = filename + EXT_MATCHES
     if not os.path.isfile(matchesFile):
         print("File does not exist!")
@@ -80,11 +85,17 @@ def file(filename):
     with open(matchesFile, 'r') as f:
         matches = json.load(f)
 
-    matches = GetViewData(fileContent, matches, filename)
-    verifyData = GetVerifyData(fileContent, matches, filename)
+    matches = convertMatches(fileContent, matches, filename)
 
+    # VerifyData
+    verificationRuns = None
+    verifyDataFile = filename + EXT_VERIFY
+    if os.path.isfile(verifyDataFile):
+        with open(verifyDataFile, "rb") as input_file:
+            verificationRuns = pickle.load(input_file)
+            
     return render_template('file.html', 
-        matches=matches, filename=filename, verifyData=verifyData)
+        matches=matches, filename=filename, verificationRuns=verificationRuns)
 
 
 def allowed_file(filename):

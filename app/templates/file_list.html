@@ -1,5 +1,16 @@
-<ul>
-    {% for filename in filenames %}
-        <li>{{filename}}</li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html>
+<head>
+{% include 'includes/header.html' %}
+</head>
+<body>
+    {% include 'includes/navigation.html' %}
+
+    <ul>
+        {% for filename in filenames %}
+            <li><a href="/file/{{filename}}">{{filename}}</a></li>
+        {% endfor %}
+    </ul>
+    
+</body>
+</html>

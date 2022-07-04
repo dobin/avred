@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import List, Set, Dict, Tuple, Optional
+from enum import Enum
 
 
 class TestDetection():
@@ -31,3 +33,18 @@ class Scanner:
 
     def setPacker(self, packer):
         self.packer = packer
+
+
+
+class TestType(Enum):
+    FULL = 1
+    MIDDLE = 2
+
+
+class VerificationRun():
+    def __init__(self, index, type, info):
+        self.index: int = index
+        self.type: TestType = type
+        self.info: str = info
+        self.testEntries: List[bool] = []
+    

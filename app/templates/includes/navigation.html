@@ -4,8 +4,9 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/' else '' }}" href="/">File List</a></li>
+                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/' else '' }}" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/upload' else '' }}" href="/upload">Upload</a></li>
+                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files' else '' }}" href="/files">Files</a></li>
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path.startswith('/file') else ''}}" href="/file/F156AC6CB5D5655B.test1.exe">File</a></li>
             </ul>
         </div>

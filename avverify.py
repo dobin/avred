@@ -2,17 +2,19 @@ import json
 from dataclasses import dataclass
 import argparse
 import pprint
-from copy import deepcopy
 from config import Config
 from scanner import ScannerRest
-from pe_utils import parse_pe, hidePart
+from file_pe import FilePe
+import pickle
+
+from verifier import verify
+from viewer import *
 
 @dataclass
 class Match:
     index: int
     start: int
     end: int
-
 
 
 def loadMatches(filename):
@@ -42,31 +44,27 @@ def main():
     scanner = ScannerRest(url, args.server)
 
     # PE and its matches
-    pe = parse_pe(args.file)
+    filePe = FilePe(args.file)
+    filePe.load()
+
     matches = loadMatches(args.file)
     print("Matches: ")
     pprint.pprint(matches)
     print("")
 
-    # Patch: ALL
-    print("Patch complete match: ")
-    for match in matches:
-        peCopy = deepcopy(pe)
-        size = match.end - match.start
-        hidePart(pe, match.start, size)
-        result = scanner.scan(pe.data, args.file)
-        print(f"Patching: {match.start}-{match.end} size {size}  Detected: {result}")
-    print("")
+    verificationRuns = verify(scanner, filePe, matches)
+    with open(args.file + '.verify.pickle', 'wb') as handle:
+        pickle.dump(verificationRuns, handle)
 
-    # Patch: 1 byte
-    print("Patch first 1 byte for each match: ")
-    for match in matches:
-        peCopy = deepcopy(pe)
-        size = 1
-        hidePart(pe, match.start, size)
-        result = scanner.scan(pe.data, args.file)
-        print(f"Patching: {match.start}-{match.end} size {size}  Detected: {result}")
-          
+    printVerifyData(verificationRuns)
+
+
+def printVerifyData(verificationRuns):
+    for verificationRun in verificationRuns:
+        print(str(verificationRun))
+
+        for test in verificationRun.testEntries:
+            print("A: " + str(test))
 
 if __name__ == "__main__":
     main()
