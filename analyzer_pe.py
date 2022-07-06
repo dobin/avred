@@ -4,22 +4,61 @@ from reducer import scanData
 from file_pe import FilePe
 from copy import deepcopy
 from utils import *
+import r2pipe
+from ansi2html import Ansi2HTMLConverter
+import json
+
+from model import Match
 
 
-def analyzeFileExe(filepath, scanner, isolate=False, remove=False, verify=True, ignoreText=False):
-    filePe = FilePe(filepath)
-    filePe.load()
-    filePe.printSections()    
+def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):
+    matchesIntervalTree = investigate(filePe, scanner, isolate, remove, ignoreText)
+    printMatches(filePe.data, matchesIntervalTree)
 
-    matches = investigate(filePe, scanner, isolate, remove, ignoreText)
-    if len(matches) == 0:
-        return filePe, []
-    printMatches(filePe.data, matches)
+    matches = augmentMatches(filePe, matchesIntervalTree)
+    return matches
 
-    if verify:
-        verifyFile(filePe, matches, scanner)
 
-    return filePe, matches
+def augmentMatches(filePe, matchesIntervalTree):
+    matches = []
+
+    conv = Ansi2HTMLConverter()
+    r2 = r2pipe.open(filePe.filepath)
+    r2.cmd("e scr.color=2") # enable terminal color output
+    r2.cmd("aaa")
+
+    baddr = r2.cmd("e bin.baddr")
+    baseAddr = int(baddr, 16)
+
+    MORE = 16
+    idx = 0
+    for m in matchesIntervalTree:
+        data = filePe.data[m.begin:m.end]
+        dataHexdump = hexdump.hexdump(data, result='return')
+        sectionName = filePe.findSectionNameFor(m.begin)
+
+        addrDisasm = baseAddr + m.begin - MORE
+        sizeDisasm = m.end - m.begin + MORE + MORE
+
+        detail = None
+        if sectionName == ".text":
+            # r2: Print Dissabled (by bytes)
+            asm = r2.cmd("pDJ {} @{}".format(sizeDisasm, addrDisasm))
+            asm = json.loads(asm)
+            for a in asm:
+                relOffset = a['offset'] - baseAddr
+
+                if relOffset >= m.begin and relOffset < m.end:
+                    a['part'] = True
+
+                a['textHtml'] = conv.convert(a['text'], full=False)
+            detail = asm
+
+        match = Match(idx, data, dataHexdump, m.begin, m.end-m.begin, sectionName, detail)
+        matches.append(match)
+        idx += 1
+
+    return matches
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
@@ -62,7 +101,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
     # analyze each detected section
     matches = []
     for section in detected_sections:
-        # reducing .text does not work well
+        # reducing .text may not work well
         if ignoreText and section.name == '.text':
             continue
 

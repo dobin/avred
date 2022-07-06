@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-import r2pipe
 import json
-from ansi2html import Ansi2HTMLConverter
 import pprint
+import r2pipe
+from ansi2html import Ansi2HTMLConverter
 import hexdump
 
 PREV = 16

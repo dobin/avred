@@ -6,14 +6,14 @@
             <td>Info</td>
             <td>Type</td>
 
-            {% for testEntry in verificationRuns[0].testEntries %}
+            {% for testEntry in verifications[0].testEntries %}
             <td>Match {{loop.index0}}</td>
             {% endfor %}
 
         </tr>
     </thead>
 
-    {% for verificationRun in verificationRuns %}
+    {% for verificationRun in verifications %}
     <tr>
         <td>{{verificationRun.index}}</td>
         <td>{{verificationRun.info}}</td>

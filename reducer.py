@@ -7,7 +7,7 @@ SIG_SIZE = 128
 
 # just a wrapper for scanSection()
 # to collect its result, and merge it
-def scanData(scanner, fileData, filename, sectionStart, sectionEnd):
+def scanData(scanner, fileData, filename, sectionStart, sectionEnd) -> IntervalTree:
     it = IntervalTree()
     scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
     it.merge_overlaps(strict=False)

@@ -9,6 +9,10 @@ from analyzer import scanFileOnly
 from config import Config
 import logging
 from utils import saveMatchesToFile
+from verifier import verify
+from file_pe import FilePe
+from model import Scanner, Packer, Match, Verification, FileData
+import pickle
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -21,7 +25,7 @@ def main():
     parser.add_argument("--logtofile", help="Log everything to file")
     parser.add_argument("--checkOnly", help="Check only if AV detects the file", default=False, action='store_true')
     parser.add_argument("--verify", help="Verify results at the end", default=False, action='store_true')
-    parser.add_argument("--saveMatches", help="Save matches", default=False, action='store_true')
+    parser.add_argument("--save", help="Save results", default=False, action='store_true')
 
     parser.add_argument("--isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
     parser.add_argument("--remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
@@ -59,18 +63,40 @@ def main():
         scanFileOnly(args.file, scanner)
     else:
         matches = None
+        verifications = None
+
         if args.file.endswith('.ps1'):
             data, matches = analyzeFilePlain(args.file, scanner)
         elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
             data, matches = analyzeFileWord(args.file, scanner)
         elif args.file.endswith('.exe'):
-            pe, matches = analyzeFileExe(args.file, scanner, 
-                isolate=args.isolate, remove=args.remove, verify=args.verify, 
-                ignoreText=args.ignoreText)
+            filePe = FilePe(args.file)
+            filePe.load()
+            filePe.printSections()  
 
-        if args.saveMatches:
-            saveMatchesToFile(args.file + ".matches.json", matches)
+            matches = analyzeFileExe(filePe, scanner, 
+                isolate=args.isolate, remove=args.remove, ignoreText=args.ignoreText)
 
+            if args.verify:
+                verifications = verify(filePe, matches, scanner)
+                printVerifyData(verifications)
+
+        if args.save:
+            fileData = FileData(matches, verifications)
+            with open(args.file + '.pickle', 'wb') as handle:
+                pickle.dump(fileData, handle)
+
+
+def printVerifyData(verificationRuns):
+    for verificationRun in verificationRuns:
+        print(str(verificationRun))
+
+        for test in verificationRun.testEntries:
+            print("A: " + str(test))
+
+def printMatches(matches):
+    for match in matches:
+        print("Match: " + str(match))
 
 if __name__ == "__main__":
     main()

@@ -6,16 +6,14 @@ from werkzeug.utils import secure_filename
 import random
 import subprocess
 from waitress import serve
-import json
-from viewer import *
 import glob
 import pickle
 from app  import app
+from model import FileData
 
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
-EXT_MATCHES = ".matches.json"
-EXT_VERIFY = ".verify.pickle"
+EXT_INFO = ".pickle"
 EXT_LOG = ".txt"
 
 
@@ -32,7 +30,7 @@ def example(path):
 
 @app.route("/view_file/<filename>")
 def view_file(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_MATCHES)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_INFO)
     filepathLog = os.path.join(app.config['UPLOAD_FOLDER'],filename + EXT_LOG)
     logData = ""
     if os.path.isfile(filepathLog):
@@ -40,13 +38,7 @@ def view_file(filename):
             logData = f.read()
 
     if os.path.isfile(filepath):
-        print("File exists!")
-        matchData = None
-        with open(filepath) as f:
-            matchData = f.read()
-            print(matchData)
-        return render_template('view_file.html', 
-            matches=matchData, logdata=logData)
+        return redirect("/file/" + filename, code=302)
     else:
         print("File does not exist! " + filepath)
         return render_template('view_file_refresh.html',
@@ -55,7 +47,7 @@ def view_file(filename):
 
 @app.route("/files")
 def files():
-    examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_MATCHES))
+    examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     res = []
     for example in examples:
         name = os.path.basename(example[:-13])
@@ -77,25 +69,15 @@ def file(filename):
     with open(filename, 'rb') as f:
         fileContent = f.read()
 
-    # Matches
-    matchesFile = filename + EXT_MATCHES
-    if not os.path.isfile(matchesFile):
-        print("File does not exist!")
-        return 'File not found: ' + matchesFile, 500
-    with open(matchesFile, 'r') as f:
-        matches = json.load(f)
-
-    matches = convertMatches(fileContent, matches, filename)
-
     # VerifyData
-    verificationRuns = None
-    verifyDataFile = filename + EXT_VERIFY
+    verifyDataFile = filename + EXT_INFO
+    fileData: FileData = None
     if os.path.isfile(verifyDataFile):
         with open(verifyDataFile, "rb") as input_file:
-            verificationRuns = pickle.load(input_file)
+            fileData = pickle.load(input_file)
             
     return render_template('file.html', 
-        matches=matches, filename=filename, verificationRuns=verificationRuns)
+        filename=filename, matches=fileData.matches, verifications=fileData.verifications)
 
 
 def allowed_file(filename):
@@ -129,7 +111,7 @@ def upload_file():
             logfilepath = filepath + ".txt"
 
             subprocess.Popen(["./avred.py", "--server", "Defender", "--file", filepath, 
-                "--saveMatches", "--logtofile", logfilepath, "--verify"])
+                "--save", "--logtofile", logfilepath, "--verify"])
 
             return redirect(url_for('view_file', filename=filename))
 

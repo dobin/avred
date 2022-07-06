@@ -8,7 +8,6 @@ from file_pe import FilePe
 import pickle
 
 from verifier import verify
-from viewer import *
 
 @dataclass
 class Match:

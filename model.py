@@ -36,15 +36,31 @@ class Scanner:
 
 
 
+class Match():
+    def __init__(self, idx, data, dataHexdump, fileOffset, size, info, detail):
+        self.idx = idx
+        self.data = data
+        self.dataHexdump = dataHexdump
+        self.fileOffset = fileOffset
+        self.size = size
+        self.info = info
+        self.detail = detail
+
+
 class TestType(Enum):
     FULL = 1
     MIDDLE = 2
 
 
-class VerificationRun():
+class Verification():
     def __init__(self, index, type, info):
         self.index: int = index
         self.type: TestType = type
         self.info: str = info
         self.testEntries: List[bool] = []
     
+
+class FileData():
+    def __init__(self, matches, verifications):
+        self.matches: List[Match] = matches
+        self.verifications: List[Verification] = verifications

@@ -89,6 +89,13 @@ class FilePe():
         self.data = patchData(self.data, base, size, fillType)
 
 
+    def findSectionNameFor(self, address: int):
+        for section in self.sections:
+            if address >= section.addr and address <= section.addr + section.size:
+                return section.name
+
+        return ""
+
     def printSections(self):
         for section in self.sections:
             print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
