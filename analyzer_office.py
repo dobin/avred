@@ -17,8 +17,6 @@ def analyzeFileWord(filepath, scanner, verify=True):
     scanner.setPacker(packer)
 
     matches = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
-    if len(matches) == 0:
-        return makroData, []
     printMatches(makroData, matches)
 
     if verify: 

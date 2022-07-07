@@ -114,7 +114,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
 
         matches += match
 
-    return matches
+    return sorted(matches)
 
 
 def findDetectedSectionsIsolate(filePe, scanner):

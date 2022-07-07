@@ -11,7 +11,7 @@ def scanData(scanner, fileData, filename, sectionStart, sectionEnd) -> IntervalT
     it = IntervalTree()
     scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
     it.merge_overlaps(strict=False)
-    return it
+    return sorted(it)
 
 
 # recursive

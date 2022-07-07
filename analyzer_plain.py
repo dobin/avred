@@ -6,5 +6,5 @@ def analyzeFilePlain(filename, scanner):
     data = None
     with open(filename, "rb") as file:
         data = file.read()
-    match = scanData(scanner, data, os.path.basename(filename), 0, len(data))
-    return data, match
+    matches = scanData(scanner, data, os.path.basename(filename), 0, len(data))
+    return data, matches
