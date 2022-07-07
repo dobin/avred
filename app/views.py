@@ -40,7 +40,6 @@ def view_file(filename):
     if os.path.isfile(filepath):
         return redirect("/file/" + filename, code=302)
     else:
-        print("File does not exist! " + filepath)
         return render_template('view_file_refresh.html',
             logdata=logData)
 
@@ -50,7 +49,7 @@ def files():
     examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     res = []
     for example in examples:
-        name = os.path.basename(example[:-13])
+        name = os.path.basename(example[:-len(EXT_INFO)])
         res.append(name)
     return render_template('file_list.html',
         filenames=res)

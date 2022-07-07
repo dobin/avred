@@ -9,11 +9,20 @@ Similar to matterpreter/DefenderCheck and rasta-mouse/ThreatCheck, but working o
 PE sections, more modular, and in python.
 
 
+## Supports
+
+* PE files (exe, .NET)
+* Office (2007+ formats)
+
+
 ## Install 
+
+Requires: python 3.8
 
 ```
 pip3 install -r requirements.txt
 ```
+
 
 ## Setup
 
@@ -65,10 +74,7 @@ The findings in the other sections are usually good enough.
 
 Development:
 ```
-flask run
+$ export FLASK_DEBUG=1
+$ flask run --host=0.0.0.0
 ```
 
-Prod:
-```
-./app.py
-```
