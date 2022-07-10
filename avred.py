@@ -22,7 +22,7 @@ def main():
     parser.add_argument("-f", "--file", help="path to file")
     parser.add_argument('-s', "--server", help="Server")
 
-    parser.add_argument("--logtofile", help="Log everything to file")
+    parser.add_argument("--logtofile", help="Log everything to file", default=False, action='store_true')
     parser.add_argument("--checkOnly", help="Check only if AV detects the file", default=False, action='store_true')
     parser.add_argument("--verify", help="Verify results at the end", default=False, action='store_true')
     parser.add_argument("--save", help="Save results", default=False, action='store_true')
@@ -33,11 +33,15 @@ def main():
 
     args = parser.parse_args()
 
+    if not args.file or not args.server:
+        print("Give at least --file and --server")
+        return
 
     logging.getLogger().setLevel(logging.INFO)
     if args.logtofile:
-        print(f"Logging to file: {args.logtofile}")
-        logging.basicConfig(filename=args.logtofile,
+        logfile = args.file + ".log"
+        print(f"Logging to file: {logfile}")
+        logging.basicConfig(filename=logfile,
                         filemode='a',
                         format=log_format,
                         datefmt='%Y/%m/%d %H:%M',
@@ -50,9 +54,7 @@ def main():
                 level=logging.INFO
         )
 
-    if not args.file or not args.server:
-        print("Give at least --file and --server")
-        return
+
 
     config = Config()
     config.load()

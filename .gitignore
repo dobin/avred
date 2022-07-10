@@ -7,4 +7,6 @@ files/
 bak/
 testing/
 stuff/
-app/upload/
+app/upload/*.exe
+app/upload/*.pickle
+app/upload/*.log

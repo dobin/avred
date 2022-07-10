@@ -35,10 +35,10 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
         fill = b" " * size
     elif fillType is FillType.highentropy:
         #fill = random.randbytes(size) # 3.9..
-        fill = os.getrandom(size)
+        fill = os.urandom(size)
     elif fillType is FillType.lowentropy:
         #temp = random.randbytes(size) # 3.9..
-        temp = os.getrandom(size)
+        temp = os.urandom(size)
         temp = base64.b64encode(temp)
         fill = temp[:size]
 

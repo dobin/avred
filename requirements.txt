@@ -4,3 +4,6 @@ requests
 pefile
 waitress
 r2pipe
+pefile
+ansi2html
+flask
