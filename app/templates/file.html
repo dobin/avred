@@ -17,7 +17,7 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" 
-                  type="button" role="tab" aria-controls="contact" aria-selected="false">Other</button>
+                  type="button" role="tab" aria-controls="contact" aria-selected="false">Log</button>
         </li>
       </ul>
       <div class="tab-content" id="myTabContent">
@@ -29,7 +29,9 @@
             {% include 'file_verifier.html' %}
           {% endif %}
         </div>
-        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+          {% include 'file_log.html' %}
+        </div>
       </div>
 
       <style type="text/css">
