@@ -5,7 +5,7 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 import random
 import subprocess
-from waitress import serve
+#from waitress import serve
 import glob
 import pickle
 from app  import app
@@ -14,7 +14,7 @@ from model import FileData
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 EXT_INFO = ".pickle"
-EXT_LOG = ".txt"
+EXT_LOG = ".log"
 
 
 @app.route("/")
@@ -58,15 +58,18 @@ def files():
 @app.route("/file/<filename>")
 def file(filename):
     filename: str = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    fileContent: bytes = None
-    matches = None
+    verifyDataFile = filename + EXT_INFO
+    logFilename = filename + EXT_LOG
+
+    fileData: FileData = None
+    logData: str = None
 
     # Main file
     if not os.path.isfile(filename):
         print("File does not exist")
         return 'File not found: ' + filename, 500
-    with open(filename, 'rb') as f:
-        fileContent = f.read()
+    #with open(filename, 'rb') as f:
+    #    fileContent = f.read()
 
     # log file
     filepathLog = filename + EXT_LOG
@@ -117,10 +120,8 @@ def upload_file():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            logfilepath = filepath + ".txt"
-
             subprocess.Popen(["./avred.py", "--server", "Defender", "--file", filepath, 
-                "--save", "--logtofile", logfilepath, "--verify"])
+                "--save", "--logtofile", "--verify"])
 
             return redirect(url_for('view_file', filename=filename))
 
