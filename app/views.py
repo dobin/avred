@@ -31,7 +31,7 @@ def example(path):
 @app.route("/view_file/<filename>")
 def view_file(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_INFO)
-    filepathLog = os.path.join(app.config['UPLOAD_FOLDER'],filename + EXT_LOG)
+    filepathLog = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_LOG)
     logData = ""
     if os.path.isfile(filepathLog):
         with open(filepathLog) as f:
@@ -71,23 +71,25 @@ def file(filename):
     #with open(filename, 'rb') as f:
     #    fileContent = f.read()
 
-    # Log Data
-    if not os.path.isfile(logFilename):
-        print("File does not exist")
-        return 'File not found: ' + logFilename, 500
-    with open(logFilename, 'r') as f:
-        logData = f.read()
+    # log file
+    filepathLog = filename + EXT_LOG
+    logData = ""
+    if os.path.isfile(filepathLog):
+        with open(filepathLog) as f:
+            logData = f.read()
 
-    # Verify Data
+    # VerifyData
+    verifyDataFile = filename + EXT_INFO
+    fileData: FileData = None
     if os.path.isfile(verifyDataFile):
         with open(verifyDataFile, "rb") as input_file:
             fileData = pickle.load(input_file)
-            
+
     return render_template('file.html', 
         filename=filename, 
-        logData=logData,
         matches=fileData.matches, 
-        verifications=fileData.verifications)
+        verifications=fileData.verifications,
+        logData=logData)
 
 
 def allowed_file(filename):
