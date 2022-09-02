@@ -5,24 +5,59 @@ import logging
 from reducer import scanData
 from packers import PackerWord
 from utils import *
-from file_office import FileOffice
+from model import Match
+import argparse
+import pcodedmp.pcodedmp as pcodedmp
 
 
-def analyzeFileWord(filepath, scanner, verify=True):
-    fileOffice = FileOffice()
-    fileOffice.loadFromFile(filepath)
+def analyzeFileWord(fileOffice, scanner, verify=True):
     makroData = fileOffice.data
 
     packer = PackerWord(fileOffice)
     scanner.setPacker(packer)
 
-    matches = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
-    printMatches(makroData, matches)
+    matchesIntervalTree = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
+    printMatches(makroData, matchesIntervalTree)
 
-    if verify: 
-        verifyFile(fileOffice, matches, scanner)
+    matches = augmentMatches(fileOffice, matchesIntervalTree)
 
-    return makroData, matches
+    return matches
+
+
+def augmentMatches(fileOffice, matchesIntervalTree):
+    matches = []
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--norecurse', action='store_true',
+                        help="Don't recurse into directories")
+    parser.add_argument('-d', '--disasmonly', dest='disasmOnly', action='store_true',
+                        help='Only disassemble, no stream dumps')
+    parser.add_argument('-b', '--verbose', action='store_true',
+                        help='Dump the stream contents')
+    parser.add_argument('-o', '--output', dest='outputfile', default=None,
+                        help='Output file name')
+    args = parser.parse_args()
+    results = pcodedmp.processFile("tests/data/P5-5h3ll.docm", args)
+
+    
+    idx = 0
+    for m in matchesIntervalTree:
+        data = fileOffice.data[m.begin:m.end]
+        dataHexdump = hexdump.hexdump(data, result='return')
+        sectionName = 'word/vbaProject.bin'
+
+        print("A: " + str(results))
+        print("B: " + str(m.begin))
+        itemSet = results[0].at(m.begin)
+        print("C: " + str(len(itemSet)))
+        item = next(iter(itemSet))
+        detail = "{} {} {}: ".format(item.data.lineNr, item.data.) + "\n" + item.data.text
+        
+        match = Match(idx, data, dataHexdump, m.begin, m.end-m.begin, sectionName, detail)
+        matches.append(match)
+        idx += 1
+
+    return matches
 
 
 def verifyFile(officeFile, matches, scanner, patchSize=None):

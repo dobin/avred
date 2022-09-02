@@ -13,6 +13,7 @@ from verifier import verify
 from file_pe import FilePe
 from model import Scanner, Packer, Match, Verification, FileData
 import pickle
+from file_office import FileOffice
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -54,8 +55,6 @@ def main():
                 level=logging.INFO
         )
 
-
-
     config = Config()
     config.load()
     url = config.get("server")[args.server]
@@ -69,12 +68,16 @@ def main():
 
         if args.file.endswith('.ps1'):
             data, matches = analyzeFilePlain(args.file, scanner)
+            
         elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
-            data, matches = analyzeFileWord(args.file, scanner)
+            fileOffice = FileOffice()
+            fileOffice.loadFromFile(args.file)
+            matches = analyzeFileWord(fileOffice, scanner)
+
         elif args.file.endswith('.exe'):
             filePe = FilePe(args.file)
             filePe.load()
-            filePe.printSections()  
+            filePe.printSections()
 
             matches = analyzeFileExe(filePe, scanner, 
                 isolate=args.isolate, remove=args.remove, ignoreText=args.ignoreText)

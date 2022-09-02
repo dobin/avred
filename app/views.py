@@ -14,7 +14,7 @@ from model import FileData
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 EXT_INFO = ".pickle"
-EXT_LOG = ".log"
+EXT_LOG = ".txt"
 
 
 @app.route("/")
@@ -72,10 +72,9 @@ def file(filename):
     #    fileContent = f.read()
 
     # log file
-    filepathLog = filename + EXT_LOG
     logData = ""
-    if os.path.isfile(filepathLog):
-        with open(filepathLog) as f:
+    if os.path.isfile(logFilename):
+        with open(logFilename) as f:
             logData = f.read()
 
     # VerifyData

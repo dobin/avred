@@ -1,13 +1,11 @@
 
 import logging
 from reducer import scanData
-from file_pe import FilePe
 from copy import deepcopy
 from utils import *
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
-
 from model import Match
 
 
