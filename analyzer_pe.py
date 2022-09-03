@@ -11,13 +11,12 @@ from model import Match
 
 def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):
     matchesIntervalTree = investigate(filePe, scanner, isolate, remove, ignoreText)
-    printMatches(filePe.data, matchesIntervalTree)
+    #printMatches(filePe.data, matchesIntervalTree)
+    #matches = augmentMatches(filePe, matchesIntervalTree)
+    return matchesIntervalTree
 
-    matches = augmentMatches(filePe, matchesIntervalTree)
-    return matches
 
-
-def augmentMatches(filePe, matchesIntervalTree):
+def augmentFilePe(filePe, matchesIntervalTree):
     matches = []
 
     conv = Ansi2HTMLConverter()

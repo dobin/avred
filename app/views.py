@@ -14,7 +14,7 @@ from model import FileData
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 EXT_INFO = ".pickle"
-EXT_LOG = ".txt"
+EXT_LOG = ".log"
 
 
 @app.route("/")

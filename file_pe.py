@@ -15,15 +15,18 @@ class Section:
 
 
 class FilePe():
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
+    def __init__(self):
+        self.filepath = None
+        self.filename = None
         
         self.data = b""
         self.sections = []
         
 
-    def load(self):
+    def loadFromFile(self, filepath: str):
+        self.filepath = filepath
+        self.filename = os.path.basename(filepath)
+
         with open(self.filepath, "rb") as f:
             self.data = f.read()
 

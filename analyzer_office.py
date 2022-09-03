@@ -1,6 +1,7 @@
 
 import copy
 import logging
+from re import I
 
 from reducer import scanData
 from packers import PackerWord
@@ -17,41 +18,24 @@ def analyzeFileWord(fileOffice, scanner, verify=True):
     scanner.setPacker(packer)
 
     matchesIntervalTree = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
-    printMatches(makroData, matchesIntervalTree)
-
-    matches = augmentMatches(fileOffice, matchesIntervalTree)
-
-    return matches
+    return matchesIntervalTree
 
 
-def augmentMatches(fileOffice, matchesIntervalTree):
+def augmentFileWord(fileOffice, matchesIntervalTree):
     matches = []
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--norecurse', action='store_true',
-                        help="Don't recurse into directories")
-    parser.add_argument('-d', '--disasmonly', dest='disasmOnly', action='store_true',
-                        help='Only disassemble, no stream dumps')
-    parser.add_argument('-b', '--verbose', action='store_true',
-                        help='Dump the stream contents')
-    parser.add_argument('-o', '--output', dest='outputfile', default=None,
-                        help='Output file name')
-    args = parser.parse_args()
-    results = pcodedmp.processFile("tests/data/P5-5h3ll.docm", args)
-
+    results = pcodedmp.processFile("tests/data/P5-5h3ll.docm")
     
     idx = 0
     for m in matchesIntervalTree:
         data = fileOffice.data[m.begin:m.end]
         dataHexdump = hexdump.hexdump(data, result='return')
         sectionName = 'word/vbaProject.bin'
+        detail = ''
 
-        print("A: " + str(results))
-        print("B: " + str(m.begin))
         itemSet = results[0].at(m.begin)
-        print("C: " + str(len(itemSet)))
-        item = next(iter(itemSet))
-        detail = "{} {} {}: ".format(item.data.lineNr, item.data.) + "\n" + item.data.text
+        if len(itemSet) > 0:
+            item = next(iter(itemSet))
+            detail = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
         
         match = Match(idx, data, dataHexdump, m.begin, m.end-m.begin, sectionName, detail)
         matches.append(match)

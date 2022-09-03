@@ -81,7 +81,7 @@ def getTypeAndLength(buffer, offset, endian):
     else:
         return ord(buffer[offset + 1]), ord(buffer[offset])
 
-def processDir(vbaParser, dirPath, args, output_file=sys.stdout):
+def processDir(vbaParser, dirPath, disasmOnly, verbose, output_file=sys.stdout):
     tags = {
 	 1 : 'PROJ_SYSKIND',	# 0 - Win16, 1 - Win32, 2 - Mac, 3 - Win64
 	 2 : 'PROJ_LCID',
@@ -144,7 +144,7 @@ def processDir(vbaParser, dirPath, args, output_file=sys.stdout):
 	73 : 'MOD_UNICODE_HELPFILE'
     }
     global codec
-    if not args.disasmOnly:
+    if not disasmOnly:
         print('-' * 79, file=output_file)
         print('dir stream after decompression:', file=output_file)
     is64bit = False
@@ -152,9 +152,9 @@ def processDir(vbaParser, dirPath, args, output_file=sys.stdout):
     dirData = decompress_stream(dirDataCompressed)
     streamSize = len(dirData)
     codeModules = []
-    if not args.disasmOnly:
+    if not disasmOnly:
         print('{:d} bytes'.format(streamSize), file=output_file)
-        if args.verbose:
+        if verbose:
             print(hexdump(dirData), file=output_file)
         print('dir stream parsed:', file=output_file)
     offset = 0
@@ -174,11 +174,11 @@ def processDir(vbaParser, dirPath, args, output_file=sys.stdout):
                 tagName = 'UNKNOWN'
             else:
                 tagName = tags[tag]
-            if not args.disasmOnly:
+            if not disasmOnly:
                 print('{:08X}:  {}'.format(offset, tagName), end='', file=output_file)
             offset += 6
             if wLength:
-                if not args.disasmOnly:
+                if not disasmOnly:
                     print(':', file=output_file)
                     print(hexdump(dirData[offset:offset + wLength]), file=output_file)
                 if tagName == 'PROJ_CODEPAGE':
@@ -198,20 +198,20 @@ def processDir(vbaParser, dirPath, args, output_file=sys.stdout):
                     sysKind = getDWord(dirData, offset, '<')
                     is64bit = sysKind == 3
                 offset += wLength
-            elif not args.disasmOnly:
+            elif not disasmOnly:
                 print('', file=output_file)
         except:
             break
     return dirData, codeModules, is64bit
 
-def process_VBA_PROJECT(vbaParser, vbaProjectPath, args, output_file=sys.stdout):
+def process_VBA_PROJECT(vbaParser, vbaProjectPath, disasmOnly, verbose, output_file=sys.stdout):
     vbaProjectData = vbaParser.ole_file.openstream(vbaProjectPath).read()
-    if args.disasmOnly:
+    if disasmOnly:
         return vbaProjectData
     print('-' * 79, file=output_file)
     print('_VBA_PROJECT stream:', file=output_file)
     print('{:d} bytes'.format(len(vbaProjectData)), file=output_file)
-    if args.verbose:
+    if verbose:
         print(hexdump(vbaProjectData), file=output_file)
     return vbaProjectData
 
@@ -1101,10 +1101,10 @@ class DisasmEntry():
         self.text = text
 
 
-def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, args, output_file = sys.stdout):
+def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file = sys.stdout):
     it = IntervalTree()
 
-    if args.verbose and not args.disasmOnly:
+    if verbose and not disasmOnly:
         print(hexdump(moduleData), file=output_file)
     # Determine endinanness: PC (little-endian) or Mac (big-endian)
     if getWord(moduleData, 2, '<') > 0xFF:
@@ -1115,7 +1115,7 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, args, o
     vbaVer = 3
     try:
         version = getWord(vbaProjectData, 2, endian)
-        if args.verbose:
+        if verbose:
             print('Internal Office version: 0x{:04X}.'.format(version), file=output_file)
         # Office 2010 is 0x0097; Office 2013 is 0x00A3;
         # Office 2016 PC 32-bit is 0x00B2, 64-bit is 0x00D7, Mac is 0x00D9
@@ -1168,7 +1168,7 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, args, o
             offs += 4
             objectTable = moduleData[offs:offs + dwLength]
             offset += 77
-        if args.verbose:
+        if verbose:
             if len(declarationTable):
                 print('Declaration table:', file=output_file)
                 print(hexdump(declarationTable), file=output_file)
@@ -1192,12 +1192,12 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, args, o
             offset += 2
             offset, lineOffset = getVar(moduleData, offset, endian, True)
             dumpLine(it, moduleData, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
-                     objectTable, indirectTable, declarationTable, args.verbose, line, output_file=output_file)
+                     objectTable, indirectTable, declarationTable, verbose, line, output_file=output_file)
     except Exception as e:
         print('Error: {}.'.format(e), file=sys.stderr)
     return it
 
-def processProject(vbaParser, args, output_file = sys.stdout):
+def processProject(vbaParser, disasmOnly=False, verbose=False, output_file=sys.stdout):
     results = []
     try:
         vbaProjects = vbaParser.find_vba_projects()
@@ -1207,13 +1207,13 @@ def processProject(vbaParser, args, output_file = sys.stdout):
             win_unicode_console.enable()
         for vbaRoot, _, dirPath in vbaProjects:
             print('=' * 79, file=output_file)
-            if not args.disasmOnly:
+            if not disasmOnly:
                 print('dir stream: {}'.format(dirPath), file=output_file)
-            dirData, codeModules, is64bit = processDir(vbaParser, dirPath, args, output_file=output_file)
+            dirData, codeModules, is64bit = processDir(vbaParser, dirPath, disasmOnly, verbose, output_file=output_file)
             vbaProjectPath = vbaRoot + 'VBA/_VBA_PROJECT'
-            vbaProjectData = process_VBA_PROJECT(vbaParser, vbaProjectPath, args, output_file=output_file)
+            vbaProjectData = process_VBA_PROJECT(vbaParser, vbaProjectPath, disasmOnly, verbose, output_file=output_file)
             identifiers = getTheIdentifiers(vbaProjectData)
-            if not args.disasmOnly:
+            if not disasmOnly:
                 print('Identifiers:', file=output_file)
                 print('', file=output_file)
                 i = 0
@@ -1235,7 +1235,7 @@ def processProject(vbaParser, args, output_file = sys.stdout):
                     modulePath_unicode = modulePath
                 moduleData = vbaParser.ole_file.openstream(modulePath_unicode).read()
                 #print ('{} - {:d} bytes'.format(modulePath, len(moduleData)), file=output_file)
-                result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, args, output_file=output_file)
+                result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file=output_file)
                 if len(result) > 0:
                     results.append(result)
         if output_file.isatty() and WIN_UNICODE_CONSOLE:
@@ -1245,7 +1245,8 @@ def processProject(vbaParser, args, output_file = sys.stdout):
 
     return results
 
-def processFile(fileName, args, output_file=sys.stdout):
+def processFile(fileName):
+    output_file=sys.stdout
     result = None
     # TODO - Handle VBA3 documents
     print('Processing file: {}'.format(fileName), file=output_file)
@@ -1254,9 +1255,9 @@ def processFile(fileName, args, output_file=sys.stdout):
         vbaParser = VBA_Parser(fileName)
         if vbaParser.ole_file is None:
             for subFile in vbaParser.ole_subfiles:
-                result = processProject(subFile, args, output_file=output_file)
+                result = processProject(subFile, output_file=output_file)
         else:
-            result = processProject(vbaParser, args, output_file=output_file)
+            result = processProject(vbaParser, output_file=output_file)
     except Exception as e:
         print('Error: {}.'.format(e), file=sys.stderr)
     if vbaParser:
@@ -1287,13 +1288,13 @@ def main():
                 for name, subdirList, fileList in os.walk(name):
                     for fname in fileList:
                         fullName = os.path.join(name, fname)
-                        results = processFile(fullName, args, output_file=output_file)
+                        results = processFile(fullName)
                         mprint(results)
                     if args.norecurse:
                         while len(subdirList) > 0:
                             del(subdirList[0])
             elif os.path.isfile(name):
-                results = processFile(name, args, output_file=output_file)
+                results = processFile(name)
                 mprint(results)
             else:
                 print('{} does not exist.'.format(name), file=sys.stderr)
