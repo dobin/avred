@@ -16,7 +16,7 @@ def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=Fals
     return matchesIntervalTree
 
 
-def augmentFilePe(filePe, matchesIntervalTree):
+def augmentFilePe(filePe, matches):
     matches = []
 
     conv = Ansi2HTMLConverter()
@@ -28,14 +28,13 @@ def augmentFilePe(filePe, matchesIntervalTree):
     baseAddr = int(baddr, 16)
 
     MORE = 16
-    idx = 0
-    for m in matchesIntervalTree:
-        data = filePe.data[m.begin:m.end]
+    for match in matches:
+        data = filePe.data[match.start():match.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
-        sectionName = filePe.findSectionNameFor(m.begin)
+        sectionName = filePe.findSectionNameFor(match.fileOffset)
 
-        addrDisasm = baseAddr + m.begin - MORE
-        sizeDisasm = m.end - m.begin + MORE + MORE
+        addrDisasm = baseAddr + match.fileOffset - MORE
+        sizeDisasm = match.size + MORE + MORE
 
         detail = None
         if sectionName == ".text":
@@ -45,17 +44,16 @@ def augmentFilePe(filePe, matchesIntervalTree):
             for a in asm:
                 relOffset = a['offset'] - baseAddr
 
-                if relOffset >= m.begin and relOffset < m.end:
+                if relOffset >= match.start() and relOffset < match.end():
                     a['part'] = True
 
                 a['textHtml'] = conv.convert(a['text'], full=False)
             detail = asm
 
-        match = Match(idx, data, dataHexdump, m.begin, m.end-m.begin, sectionName, detail)
-        matches.append(match)
-        idx += 1
-
-    return matches
+        match.setData(data)
+        match.setDataHexdump(dataHexdump)
+        match.setInfo(sectionName)
+        match.setDetail(detail)
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):

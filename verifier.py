@@ -31,6 +31,7 @@ def verify(filePe, matches, scanner):
 
     verificationRun = Verification(index=2, type=TestType.MIDDLE, 
         info="One match after another, additive")
+    logging.info("One match after another, additive")
     peCopy = deepcopy(filePe)
     for match in matches:
         offset = match.fileOffset + int((match.size) // 2)
@@ -42,6 +43,7 @@ def verify(filePe, matches, scanner):
 
     verificationRun = Verification(index=3, type=TestType.MIDDLE, 
         info="Each individually")
+    logging.info("Each individually: MIDDLE")
     for match in matches:
         peCopy = deepcopy(filePe)
         offset = match.fileOffset + int((match.size) // 2)

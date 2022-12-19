@@ -39,19 +39,41 @@ class Scanner:
 
 
 class Match():
-    def __init__(self, idx, data, dataHexdump, fileOffset, size, info, detail):
+    def __init__(self, idx, fileOffset, size):
         self.idx = idx
-        self.data = data
-        self.dataHexdump = dataHexdump
         self.fileOffset = fileOffset
         self.size = size
+        
+        self.data = None
+        self.dataHexdump = None
+        self.info = None
+        self.detail = None
+
+    def start(self):
+        return self.fileOffset
+
+    def end(self):
+        return self.fileOffset + self.size
+
+    def setData(self, data):
+        self.data = data
+
+    def setDataHexdump(self, dataHexdump):
+        self.dataHexdump = dataHexdump
+
+    def setInfo(self, info):
         self.info = info
+
+    def setDetail(self, detail):
         self.detail = detail
 
     def __str__(self):
         s = ""
-        s += "{} {} {} {}\n".format(self.idx, self.fileOffset, self.size, self.info)
-        s += "{}\n".format(self.detail)
+        s += "id:{}  offset:{}  len:{}\n".format(self.idx, self.fileOffset, self.size)
+        if self.info is not None:
+            s += "  {}\n".format(self.info)
+        if self.detail is not None:
+            s += "  {}\n".format(self.detail)
         return s
 
 
@@ -69,11 +91,11 @@ class Verification():
 
     def __str__(self):
         s = ""
-        s += "{} {} {}\n".format(self.index, self,type, self.info)
+        s += "{} {} {}\n".format(self.index, self.type, self.info)
         for entry in self.testEntries:
             s += "  {}".format(entry)
         s += "\n"
-        return ""
+        return s
     
 
 class FileData():
@@ -83,8 +105,12 @@ class FileData():
         self.matchesIt: IntervalTree = matchesIt
 
     def __str__(self):
-        s = "Matches:"
+        s = "Matches: \n"
         for match in self.matches:
             s += str(match)
+
+        s += "Verification: \n"
+        for v in self.verifications:
+            s += str(v)        
 
         return s
