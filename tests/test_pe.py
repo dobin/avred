@@ -1,5 +1,5 @@
 from plugins.analyzer_pe import analyzeFileExe
-from model import TestDetection, Scanner
+from model.model import TestDetection, Scanner
 from pprint import pprint
 
 def test0():

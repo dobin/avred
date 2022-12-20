@@ -10,12 +10,12 @@ import logging
 from utils import saveMatchesToFile
 from verifier import verify
 from plugins.file_pe import FilePe
-from model import FileData
+from model.model import FileData
 import pickle
 from plugins.file_office import FileOffice
 import os
 import sys
-from model import Match
+from model.model import Match
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 

@@ -4,9 +4,9 @@ import logging
 from re import I
 
 from reducer import scanData
-from packers import PackerWord
+from plugins.packer_word import PackerWord
 from utils import *
-from model import Match
+from model.model import Match
 import pcodedmp.pcodedmp as pcodedmp
 
 

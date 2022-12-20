@@ -1,6 +1,6 @@
 from copy import deepcopy
 from plugins.file_pe import FilePe
-from model import TestType, Verification
+from model.model import TestType, Verification
 from utils import FillType
 import logging
 

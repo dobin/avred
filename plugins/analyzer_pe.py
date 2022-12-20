@@ -6,7 +6,7 @@ from utils import *
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
-from model import Match
+from model.model import Match
 
 
 def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):

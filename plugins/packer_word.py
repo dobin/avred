@@ -1,5 +1,5 @@
 from plugins.file_office import FileOffice
-from model import Packer
+from model.model import Packer
 
 class PackerWord(Packer):
     def __init__(self, fileOffice: FileOffice):

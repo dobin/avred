@@ -9,7 +9,7 @@ import subprocess
 import glob
 import pickle
 from app  import app
-from model import FileData
+from model.model import FileData
 
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
