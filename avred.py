@@ -137,7 +137,8 @@ def scanFile(args, scanner):
     printVerifyData(verifications)
 
     # augment information
-    augmenter(fileData, matches)
+    if augmenter is not None:
+        augmenter(fileData, matches)
     
     # save
     allData = FileData(matches, verifications, matchesIt)

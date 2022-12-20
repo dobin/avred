@@ -3,7 +3,8 @@ from re import S
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 from intervaltree import Interval, IntervalTree
-
+import os
+from utils import patchData, FillType
 
 class TestDetection():
     def __init__(self, refPos, refData):
@@ -114,3 +115,20 @@ class FileData():
             s += str(v)        
 
         return s
+
+
+class FileFormat():
+    def parseFile(self) -> bool:
+        pass
+
+
+    def loadFromFile(self, filepath: str):
+        self.filepath = filepath
+        self.filename = os.path.basename(filepath)
+
+        with open(self.filepath, "rb") as f:
+            self.data = f.read()
+
+
+    def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
+        self.data = patchData(self.data, base, size, fillType)

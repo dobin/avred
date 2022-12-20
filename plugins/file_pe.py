@@ -1,9 +1,9 @@
 import logging
 import os
-from dataclasses import dataclass
-import copy 
+import pefile
 
-from utils import patchData, FillType
+from dataclasses import dataclass
+from model.model import FileFormat
 
 
 @dataclass
@@ -13,7 +13,7 @@ class Section:
     size: int
 
 
-class FilePe():
+class FilePe(FileFormat):
     def __init__(self):
         self.filepath = None
         self.filename = None
@@ -22,17 +22,7 @@ class FilePe():
         self.sections = []
         
 
-    def loadFromFile(self, filepath: str):
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
-
-        with open(self.filepath, "rb") as f:
-            self.data = f.read()
-
-        self._parseSections()
-
-
-    def _parseSections(self):
+    def parseFile(self) -> bool:
         pepe = pefile.PE(data=self.data)
 
         # Normal sections
@@ -86,9 +76,6 @@ class FilePe():
             if section.name != sectionName:
                 self.hidePart(section.addr, section.size)
 
-
-    def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
-        self.data = patchData(self.data, base, size, fillType)
 
 
     def findSectionNameFor(self, address: int):

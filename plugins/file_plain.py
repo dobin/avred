@@ -1,17 +1,10 @@
 import logging
 import os
+from model.model import FileFormat
 
 
-class FilePlain():
+class FilePlain(FileFormat):
     def __init__(self):
         self.filepath = None
         self.filename = None
         self.data = b""
-
-
-    def loadFromFile(self, filepath: str):
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
-
-        with open(self.filepath, "rb") as f:
-            self.data = f.read()

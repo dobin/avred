@@ -1,12 +1,12 @@
 import os
 import zipfile
 import io
-
+from model.model import FileFormat
 
 MAKRO_PATH = 'word/vbaProject.bin'
 
 
-class FileOffice():
+class FileOffice(FileFormat):
     def __init__(self):
         self.filepath: str = None 
         self.filename: str = None
@@ -33,7 +33,7 @@ class FileOffice():
         return self._loadData()
 
 
-    def _loadData(self) -> bool:
+    def parseFile(self) -> bool:
         # get the relevant part (makro)
         with zipfile.ZipFile(io.BytesIO(self.dataFile)) as thezip:
             for zipinfo in thezip.infolist():
