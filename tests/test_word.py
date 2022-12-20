@@ -4,9 +4,9 @@ import unittest
 import pcodedmp.pcodedmp as pcodedmp
 import argparse
 import pickle
-from analyzer_office import augmentFileWord
+from plugins.analyzer_office import augmentFileWord
 from intervaltree import Interval, IntervalTree
-from file_office import FileOffice
+from plugins.file_office import FileOffice
 from utils import printMatches
 
 

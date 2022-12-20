@@ -1,4 +1,4 @@
-from file_office import FileOffice
+from plugins.file_office import FileOffice
 from model import Packer
 
 class PackerWord(Packer):

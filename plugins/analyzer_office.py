@@ -7,7 +7,6 @@ from reducer import scanData
 from packers import PackerWord
 from utils import *
 from model import Match
-import argparse
 import pcodedmp.pcodedmp as pcodedmp
 
 

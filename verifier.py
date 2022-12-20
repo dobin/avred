@@ -1,11 +1,12 @@
 from copy import deepcopy
-from file_pe import FilePe
+from plugins.file_pe import FilePe
 from model import TestType, Verification
 from utils import FillType
 import logging
 
 def verify(filePe, matches, scanner):
     verificationRuns = []
+    logging.info(f"Verify {len(matches)} matches")
 
     verificationRun = Verification(index=0, type=TestType.FULL, 
         info="One match after another, additive")

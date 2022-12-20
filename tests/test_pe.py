@@ -1,4 +1,4 @@
-from analyzer_pe import analyzeFileExe
+from plugins.analyzer_pe import analyzeFileExe
 from model import TestDetection, Scanner
 from pprint import pprint
 

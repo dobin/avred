@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
-import test_pe
-import test_office
+import tests.test_pe as test_pe
+import tests.test_office as test_office
 
 def main():
     parser = argparse.ArgumentParser()

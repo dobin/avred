@@ -1,7 +1,7 @@
-from analyzer_office import analyzeFileWord
+from plugins.analyzer_office import analyzeFileWord
 from model import TestDetection, Scanner
 from pprint import pprint
-from file_office import FileOffice
+from plugins.file_office import FileOffice
 from scanner import ScannerRest
 
 def testDocx():
