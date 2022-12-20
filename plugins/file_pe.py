@@ -1,5 +1,4 @@
 import logging
-import pefile
 import os
 from dataclasses import dataclass
 import copy 
@@ -98,6 +97,7 @@ class FilePe():
                 return section.name
 
         return ""
+
 
     def printSections(self):
         for section in self.sections:

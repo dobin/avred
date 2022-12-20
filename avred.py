@@ -2,20 +2,24 @@
 
 import argparse
 from scanner import ScannerRest
-from plugins.analyzer_office import analyzeFileWord, augmentFileWord
-from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
-from analyzer_plain import analyzeFilePlain
-from config import Config
-import logging
-from utils import saveMatchesToFile
-from verifier import verify
-from plugins.file_pe import FilePe
-from model.model import FileData
+
 import pickle
-from plugins.file_office import FileOffice
 import os
 import sys
+import logging
+
+from config import Config
+from utils import saveMatchesToFile
+from verifier import verify
+from model.model import FileData
 from model.model import Match
+
+from plugins.analyzer_office import analyzeFileWord, augmentFileWord
+from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
+from plugins.analyzer_plain import analyzeFilePlain
+from plugins.file_pe import FilePe
+from plugins.file_office import FileOffice
+from plugins.file_plain import FilePlain
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -104,6 +108,10 @@ def scanFile(args, scanner):
         analyzerOptions["isolate"] = args.isolate
         analyzerOptions["remove"] = args.remove
         analyzerOptions["ignoreText"] = args.ignoreText
+
+    else:
+        logging.error("File ending not supported")
+        os.exit(1)
 
     # matches
     if os.path.exists(filenameMatches):
