@@ -118,16 +118,37 @@ class FileData():
 
 
 class FileFormat():
+    def __init__(self):
+        self.filepath = None
+        self.filename = None
+        self.fileData = b""  # The content of the file
+        self.data = b""      # The data we work on
+        
+
     def parseFile(self) -> bool:
-        pass
+        self.data = self.fileData  # Default: File is Data
 
 
-    def loadFromFile(self, filepath: str):
+    def getData(self):
+        return self.data
+
+
+    def getFileWithExternalData(self, data):
+        return data  # Default: Data is the File. No need to modify.
+
+
+    def getFileWithInternalData(self):
+        return self.data  # Default: Data is the File. No need to modify.
+
+
+    def loadFromFile(self, filepath: str) -> bool:
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
 
         with open(self.filepath, "rb") as f:
-            self.data = f.read()
+            self.fileData = f.read()
+
+        return self.parseFile()
 
 
     def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):

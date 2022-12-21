@@ -8,6 +8,7 @@ class ScannerRest(Scanner):
     def __init__(self, url, name):
         self.scanner_path = url
         self.scanner_name = name
+        
 
     def scan(self, data, filename):
         params = { 'filename': filename }

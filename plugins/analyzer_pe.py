@@ -10,8 +10,6 @@ import json
 
 def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):
     matchesIntervalTree = investigate(filePe, scanner, isolate, remove, ignoreText)
-    #printMatches(filePe.data, matchesIntervalTree)
-    #matches = augmentMatches(filePe, matchesIntervalTree)
     return matchesIntervalTree
 
 
@@ -103,9 +101,6 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
 
         # new algo
         match = scanData(scanner, filePe.data, filePe.filename, section.addr, section.addr+section.size)
-        # original algo
-        #match = bytes_detection(pe.data, scanner, section.addr, section.addr+section.size)
-
         matches += match
 
     return sorted(matches)
@@ -145,23 +140,3 @@ def findDetectedSections(filePe, scanner):
 
     return detected_sections
 
-
-def verifyFile(filePe, matches, scanner):
-    print("Patching file with results...")
-    logging.info("Patching file with results...")
-
-    filePeCopy = deepcopy(filePe)
-
-    for i in matches:
-        size = i.end - i.begin
-        print(f"Patch: {i.begin}-{i.end} size {size}")
-        logging.info(f"Patch: {i.begin}-{i.end} size {size}")
-        filePeCopy.hidePart(i.begin, size, fillType=FillType.lowentropy)
-
-        if not scanner.scan(filePeCopy.data, filePeCopy.filename):
-            print("Success, not detected!")
-            logging.info("Success, not detected!")
-            return
-
-    print("Still detected? :-(")
-    logging.info("Still detected? :-(")

@@ -2,15 +2,12 @@
 
 import unittest
 import pcodedmp.pcodedmp as pcodedmp
-import argparse
-import pickle
 from plugins.analyzer_office import augmentFileWord
 from intervaltree import Interval, IntervalTree
 from plugins.file_office import FileOffice
-from utils import printMatches
 
 
-class OfficeTest(unittest.TestCase):
+class DisasmMakroTest(unittest.TestCase):
     def test_disasm(self):
         results = pcodedmp.processFile("tests/data/test.docm")
 

@@ -15,14 +15,13 @@ class Section:
 
 class FilePe(FileFormat):
     def __init__(self):
-        self.filepath = None
-        self.filename = None
-        
-        self.data = b""
+        super().__init__()
         self.sections = []
         
 
     def parseFile(self) -> bool:
+        self.data = self.fileData
+
         pepe = pefile.PE(data=self.data)
 
         # Normal sections
@@ -75,7 +74,6 @@ class FilePe(FileFormat):
         for section in self.sections:
             if section.name != sectionName:
                 self.hidePart(section.addr, section.size)
-
 
 
     def findSectionNameFor(self, address: int):

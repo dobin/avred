@@ -1,17 +1,24 @@
+#!/usr/bin/env python
+
+import unittest
 from plugins.analyzer_office import analyzeFileWord
 from model.model import TestDetection, Scanner
 from pprint import pprint
 from plugins.file_office import FileOffice
 from scanner import ScannerRest
 
-def testDocx():
-    filename = "test/word.docm"
-    detections = []
-    detections.append( TestDetection(10656, b"e VB_Nam\x00e = ") )
 
-    scanner = ScannerTestDocx(detections)
-    pe, matches = analyzeFileWord(filename, scanner)
-    return pe, matches
+class OfficeTest(unittest.TestCase):
+    def testDocx(self):
+        fileOffice = FileOffice()
+        fileOffice.loadFromFile("tests/data/test.docm")
+        detections = []
+        detections.append( TestDetection(10656, b"e VB_Nam\x00e = ") )
+
+        scanner = ScannerTestDocx(detections)
+        matches = analyzeFileWord(fileOffice, scanner)
+        # [Interval(0, 13312)]
+        self.assertTrue(len(matches) == 1)
 
 
 class ScannerTestDocx(Scanner):
@@ -35,11 +42,3 @@ class ScannerTestDocx(Scanner):
 
         return True
 
-
-def testWordMain():
-    scanner = ScannerRest("http://192.168.88.127:8001/", "Defender")
-    analyzeFileWord("testing/office/word.docm", scanner)
-
-
-if __name__ == "__main__":
-    testWordMain()
