@@ -4,7 +4,6 @@ import logging
 from re import I
 
 from reducer import Reducer
-from plugins.packer_word import PackerWord
 from utils import *
 from model.model import Match
 import pcodedmp.pcodedmp as pcodedmp
@@ -12,9 +11,6 @@ import pcodedmp.pcodedmp as pcodedmp
 
 def analyzeFileWord(fileOffice, scanner, verify=True):
     makroData = fileOffice.data
-
-    packer = PackerWord(fileOffice)
-    scanner.setPacker(packer)
 
     reducer = Reducer(fileOffice, scanner)
     matchesIntervalTree = reducer.scan(0, len(makroData))

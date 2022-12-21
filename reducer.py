@@ -20,7 +20,8 @@ class Reducer():
 
 
     def _scanData(self, data):
-        return self.scanner.scan(data, self.file.filename)
+        newFile = self.file.getFileWithNewData(data)
+        return self.scanner.scan(newFile, self.file.filename)
 
 
     # recursive

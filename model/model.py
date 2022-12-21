@@ -8,24 +8,12 @@ from utils import patchData, FillType
 
 
 @dataclass
-class Packer:
-    data: bytes = None
-
-    def pack(self, data) -> bytes:
-        pass
-
-
-@dataclass
 class Scanner:
     scanner_path: str = ""
     scanner_name: str = ""
-    packer: Packer = None
 
     def scan(self, data, filename):
-        return False
-
-    def setPacker(self, packer):
-        self.packer = packer
+        pass
 
 
 
@@ -123,12 +111,8 @@ class FileFormat():
         return self.data
 
 
-    def getFileWithExternalData(self, data):
+    def getFileWithNewData(self, data):
         return data  # Default: Data is the File. No need to modify.
-
-
-    def getFileWithInternalData(self):
-        return self.data  # Default: Data is the File. No need to modify.
 
 
     def loadFromFile(self, filepath: str) -> bool:

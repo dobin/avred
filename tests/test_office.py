@@ -29,12 +29,9 @@ class ScannerTestDocx(Scanner):
 
 
     def scan(self, data, filename):
-        # make an office file of it again
-        fileOfficeSend = self.packer.pack(data)
-
         # unpack office file
         fileOffice = FileOffice()
-        fileOffice.loadFromMem(fileOfficeSend)
+        fileOffice.loadFromMem(data)
 
         for detection in self.detections:
             fileData = fileOffice.data[detection.refPos:detection.refPos+len(detection.refData)] 

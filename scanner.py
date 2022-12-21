@@ -13,9 +13,6 @@ class ScannerRest(Scanner):
     def scan(self, data, filename):
         params = { 'filename': filename }
 
-        if self.packer is not None:
-            data = self.packer.pack(data)
-
         res = req.post(f"{self.scanner_path}/scan", params=params, data=data)
         jsonRes = res.json()
 

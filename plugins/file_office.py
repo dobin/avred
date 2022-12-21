@@ -29,6 +29,10 @@ class FileOffice(FileFormat):
         return False
 
 
+    def getFileWithNewData(self, data):
+        return self.getPatchedByReplacement(data)
+
+
     def getPatchedByReplacement(self, data: bytes) -> bytes:
         outData = io.BytesIO()
 
