@@ -100,8 +100,8 @@ class ScannerTest(Scanner):
 
     def scan(self, data, filename):
         for detection in self.detections:
-            fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if fileData != detection.refData:
+            data = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if data != detection.refData:
                 return False
 
         return True    
@@ -115,8 +115,8 @@ class ScannerTestWeighted(Scanner):
     def scan(self, data, filename):
         n = 0
         for detection in self.detections:
-            fileData = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if fileData == detection.refData:
+            data = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if data == detection.refData:
                 n += 1
 
         if n > int(len(self.detections) // 2):

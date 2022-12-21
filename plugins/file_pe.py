@@ -3,7 +3,7 @@ import os
 import pefile
 
 from dataclasses import dataclass
-from model.model import FileFormat
+from model.model import PluginFileFormat
 
 
 @dataclass
@@ -13,14 +13,14 @@ class Section:
     size: int
 
 
-class FilePe(FileFormat):
+class FilePe(PluginFileFormat):
     def __init__(self):
         super().__init__()
         self.sections = []
         
 
     def parseFile(self) -> bool:
-        self.data = self.fileData
+        self.data = self.fileData  # no container, file is the data
 
         pepe = pefile.PE(data=self.data)
 

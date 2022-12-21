@@ -11,7 +11,7 @@ import logging
 from config import Config
 from utils import saveMatchesToFile
 from verifier import verify
-from model.model import FileData
+from model.model import Outcome
 from model.model import Match
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
@@ -79,29 +79,29 @@ def scanFile(args, scanner):
     matchesIt = None
     matches = None
     verifications = None
-    fileData = None
+    file = None
     analyzer = None
     analyzerOptions = {}
     augmenter = None
 
     filenameMatches = args.file + ".matches"
-    filenameAugment = args.file + ".augment"
+    filenameOutcome = args.file + ".outcome"
 
     if args.file.endswith('.ps1'):
-        fileData = FilePlain()
-        fileData.loadFromFile(args.file)
+        file = FilePlain()
+        file.loadFromFile(args.file)
         analyzer = analyzeFilePlain
         augmenter = None
 
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
-        fileData = FileOffice()
-        fileData.loadFromFile(args.file)
+        file = FileOffice()
+        file.loadFromFile(args.file)
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
 
     elif args.file.endswith('.exe'):
-        fileData = FilePe()
-        fileData.loadFromFile(args.file)
+        file = FilePe()
+        file.loadFromFile(args.file)
         analyzer = analyzeFileExe
         augmenter = augmentFilePe
 
@@ -121,7 +121,7 @@ def scanFile(args, scanner):
             matchesIt = pickle.load(handle)
     else:
         # analyze file on avred server to get matches
-        matchesIt = analyzer(fileData, scanner)
+        matchesIt = analyzer(file, scanner, analyzerOptions)
         with open(filenameMatches, 'wb') as handle:
             pickle.dump(matchesIt, handle)
 
@@ -133,18 +133,18 @@ def scanFile(args, scanner):
         matches.append(match)
 
     # verify our analysis
-    verifications = verify(fileData, matches, scanner)
+    verifications = verify(file, matches, scanner)
     printVerifyData(verifications)
 
     # augment information
     if augmenter is not None:
-        augmenter(fileData, matches)
+        augmenter(file, matches)
     
     # save
-    allData = FileData(matches, verifications, matchesIt)
-    with open(filenameAugment, 'wb') as handle:
+    allData = Outcome(matches, verifications, matchesIt)
+    with open(filenameOutcome, 'wb') as handle:
         pickle.dump(allData, handle)
-        logging.info(f"Wrote results to {filenameAugment}")
+        logging.info(f"Wrote results to {filenameOutcome}")
 
 
 # Check if file gets detected by the scanner

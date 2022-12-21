@@ -1,12 +1,12 @@
 import os
 import zipfile
 import io
-from model.model import FileFormat
+from model.model import PluginFileFormat
 
 MAKRO_PATH = 'word/vbaProject.bin'
 
 
-class FileOffice(FileFormat):
+class FileOffice(PluginFileFormat):
     def __init__(self):
         super().__init__()
 

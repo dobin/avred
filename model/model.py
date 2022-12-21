@@ -77,7 +77,7 @@ class Verification():
         return s
     
 
-class FileData():
+class Outcome():
     def __init__(self, matches, verifications, matchesIt=None):
         self.matches: List[Match] = matches
         self.verifications: List[Verification] = verifications
@@ -95,7 +95,7 @@ class FileData():
         return s
 
 
-class FileFormat():
+class PluginFileFormat():
     def __init__(self):
         self.filepath = None
         self.filename = None

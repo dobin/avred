@@ -25,7 +25,7 @@ class Reducer():
 
 
     # recursive
-    def _scanSection(self, fileData, sectionStart, sectionEnd, it):
+    def _scanSection(self, data, sectionStart, sectionEnd, it):
         size = sectionEnd - sectionStart
         chunkSize = int(size // 2)
         
@@ -37,8 +37,8 @@ class Reducer():
             logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
             return
 
-        chunkTopNull = makeWithPatch(fileData, sectionStart, chunkSize)
-        chunkBotNull = makeWithPatch(fileData, sectionStart+chunkSize, chunkSize)
+        chunkTopNull = makeWithPatch(data, sectionStart, chunkSize)
+        chunkBotNull = makeWithPatch(data, sectionStart+chunkSize, chunkSize)
 
         detectTopNull = self._scanData(chunkTopNull)
         detectBotNull = self._scanData(chunkBotNull)
@@ -58,15 +58,15 @@ class Reducer():
             if chunkSize < SIG_SIZE:
                 # Small enough, no more detections
                 logging.debug("No more detection")
-                data = fileData[sectionStart:sectionStart+size]
+                data = data[sectionStart:sectionStart+size]
 
                 logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdump.hexdump(data, result='return'))
                 it.add ( Interval(sectionStart, sectionStart+size) )
             else: 
                 # make it smaller still. Take complete data (not nulled)
                 logging.debug("--> No detections anymore, but too big. Continue anyway...")
-                self._scanSection(fileData, sectionStart, sectionStart+chunkSize, it)
-                self._scanSection(fileData, sectionStart+chunkSize, sectionEnd, it)
+                self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
+                self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
 
             #print("TopNull:")
             #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
@@ -79,16 +79,16 @@ class Reducer():
         elif not detectTopNull:
             # Detection in the top half
             logging.debug("--> Do Top")
-            self._scanSection(fileData, sectionStart, sectionStart+chunkSize, it)
+            self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
         elif not detectBotNull:
             # Detection in the bottom half
             logging.debug("--> Do Bot")
-            self._scanSection(fileData, sectionStart+chunkSize, sectionEnd, it)
+            self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
 
         return
 
 
-def makeWithPatch(fileData, offset, size):
+def makeWithPatch(data, offset, size):
     patch = bytes(chr(0),'ascii') * int(size)
-    goat = fileData[:offset] + patch + fileData[offset+size:]
+    goat = data[:offset] + patch + data[offset+size:]
     return goat

@@ -8,8 +8,9 @@ import json
 from reducer import Reducer
 
 
-def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):
-    matchesIntervalTree = investigate(filePe, scanner, isolate, remove, ignoreText)
+def analyzeFileExe(filePe, scanner, analyzerOptions):
+    matchesIntervalTree = investigate(filePe, scanner, 
+        analyzerOptions["isolate"], analyzerOptions["remove"], analyzerOptions["ignoreText"])
     return matchesIntervalTree
 
 

@@ -34,8 +34,8 @@ class ScannerTestDocx(Scanner):
         fileOffice.loadFromMem(data)
 
         for detection in self.detections:
-            fileData = fileOffice.data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if fileData != detection.refData:
+            data = fileOffice.data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if data != detection.refData:
                 return False
 
         return True

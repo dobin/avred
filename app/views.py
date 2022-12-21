@@ -9,7 +9,7 @@ import subprocess
 import glob
 import pickle
 from app  import app
-from model.model import FileData
+from model.model import Outcome
 
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
@@ -61,7 +61,7 @@ def file(filename):
     verifyDataFile = filename + EXT_INFO
     logFilename = filename + EXT_LOG
 
-    fileData: FileData = None
+    outcome: Outcome = None
     logData: str = None
 
     # Main file
@@ -79,15 +79,15 @@ def file(filename):
 
     # VerifyData
     verifyDataFile = filename + EXT_INFO
-    fileData: FileData = None
+    outcome: Outcome = None
     if os.path.isfile(verifyDataFile):
         with open(verifyDataFile, "rb") as input_file:
-            fileData = pickle.load(input_file)
+            outcome = pickle.load(input_file)
 
     return render_template('file.html', 
         filename=filename, 
-        matches=fileData.matches, 
-        verifications=fileData.verifications,
+        matches=outcome.matches, 
+        verifications=outcome.verifications,
         logData=logData)
 
 
