@@ -3,7 +3,7 @@ import copy
 import logging
 from re import I
 
-from reducer import scanData
+from reducer import Reducer
 from plugins.packer_word import PackerWord
 from utils import *
 from model.model import Match
@@ -16,7 +16,8 @@ def analyzeFileWord(fileOffice, scanner, verify=True):
     packer = PackerWord(fileOffice)
     scanner.setPacker(packer)
 
-    matchesIntervalTree = scanData(scanner, makroData, fileOffice.filename, 0, len(makroData))
+    reducer = Reducer(fileOffice, scanner)
+    matchesIntervalTree = reducer.scan(0, len(makroData))
     return matchesIntervalTree
 
 

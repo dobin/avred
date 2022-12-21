@@ -5,77 +5,86 @@ from intervaltree import Interval, IntervalTree
 SIG_SIZE = 128
 
 
-# just a wrapper for scanSection()
-# to collect its result, and merge it
-def scanData(scanner, fileData, filename, sectionStart, sectionEnd) -> IntervalTree:
-    it = IntervalTree()
-    scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it)
-    it.merge_overlaps(strict=False)
-    return sorted(it)
+class Reducer():
+    def __init__(self, file, scanner):
+        self.file = file
+        self.scanner = scanner
 
 
-# recursive
-def scanSection(scanner, fileData, filename, sectionStart, sectionEnd, it):
-    size = sectionEnd - sectionStart
-    chunkSize = int(size // 2)
-    
-    logging.debug(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
-    #logging.debug(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
-    #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
+    def scan(self, offsetStart, offsetEnd):
+        it = IntervalTree()
+        data = self.file.getData()
+        self._scanSection(data, offsetStart, offsetEnd, it)
+        it.merge_overlaps(strict=False)
+        return sorted(it)
 
-    if chunkSize < 2:
-        logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
-        return
 
-    chunkTopNull = makeWithPatch(fileData, sectionStart, chunkSize)
-    chunkBotNull = makeWithPatch(fileData, sectionStart+chunkSize, chunkSize)
+    def _scanData(self, data):
+        return self.scanner.scan(data, self.file.filename)
 
-    detectTopNull = scanner.scan(chunkTopNull, filename)
-    detectBotNull = scanner.scan(chunkBotNull, filename)
 
-    if detectTopNull and detectBotNull:
-        # Both halves are detected
-        # Continue scanning both halves independantly, but with each other halve
-        # zeroed out (instead of the complete file)
-        logging.debug("--> Both halves are detected!")
+    # recursive
+    def _scanSection(self, fileData, sectionStart, sectionEnd, it):
+        size = sectionEnd - sectionStart
+        chunkSize = int(size // 2)
         
-        scanSection(scanner, chunkBotNull, filename, sectionStart, sectionStart+chunkSize, it)
-        scanSection(scanner, chunkTopNull, filename, sectionStart+chunkSize, sectionEnd, it)
+        logging.debug(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
+        #logging.debug(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
+        #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
 
-    elif not detectTopNull and not detectBotNull:
-        # both parts arent detected anymore
+        if chunkSize < 2:
+            logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
+            return
 
-        if chunkSize < SIG_SIZE:
-            # Small enough, no more detections
-            logging.debug("No more detection")
-            data = fileData[sectionStart:sectionStart+size]
+        chunkTopNull = makeWithPatch(fileData, sectionStart, chunkSize)
+        chunkBotNull = makeWithPatch(fileData, sectionStart+chunkSize, chunkSize)
 
-            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdump.hexdump(data, result='return'))
-            it.add ( Interval(sectionStart, sectionStart+size) )
-        else: 
-            # make it smaller still. Take complete data (not nulled)
-            logging.debug("--> No detections anymore, but too big. Continue anyway...")
-            scanSection(scanner, fileData, filename, sectionStart, sectionStart+chunkSize, it)
-            scanSection(scanner, fileData, filename, sectionStart+chunkSize, sectionEnd, it)
+        detectTopNull = self._scanData(chunkTopNull)
+        detectBotNull = self._scanData(chunkBotNull)
 
-        #print("TopNull:")
-        #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
-        #print(hexdump.hexdump(data, result='return'))
+        if detectTopNull and detectBotNull:
+            # Both halves are detected
+            # Continue scanning both halves independantly, but with each other halve
+            # zeroed out (instead of the complete file)
+            logging.debug("--> Both halves are detected!")
+            
+            self._scanSection(chunkBotNull, sectionStart, sectionStart+chunkSize, it)
+            self._scanSection(chunkTopNull, sectionStart+chunkSize, sectionEnd, it)
 
-        #print("BotNull:")
-        #data = chunkTopNull[sectionStart+chunkSize:sectionStart+chunkSize+chunkSize]
-        #print(hexdump.hexdump(data, result='return'))
+        elif not detectTopNull and not detectBotNull:
+            # both parts arent detected anymore
 
-    elif not detectTopNull:
-        # Detection in the top half
-        logging.debug("--> Do Top")
-        scanSection(scanner, fileData, filename, sectionStart, sectionStart+chunkSize, it)
-    elif not detectBotNull:
-        # Detection in the bottom half
-        logging.debug("--> Do Bot")
-        scanSection(scanner, fileData, filename, sectionStart+chunkSize, sectionEnd, it)
+            if chunkSize < SIG_SIZE:
+                # Small enough, no more detections
+                logging.debug("No more detection")
+                data = fileData[sectionStart:sectionStart+size]
 
-    return
+                logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdump.hexdump(data, result='return'))
+                it.add ( Interval(sectionStart, sectionStart+size) )
+            else: 
+                # make it smaller still. Take complete data (not nulled)
+                logging.debug("--> No detections anymore, but too big. Continue anyway...")
+                self._scanSection(fileData, sectionStart, sectionStart+chunkSize, it)
+                self._scanSection(fileData, sectionStart+chunkSize, sectionEnd, it)
+
+            #print("TopNull:")
+            #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
+            #print(hexdump.hexdump(data, result='return'))
+
+            #print("BotNull:")
+            #data = chunkTopNull[sectionStart+chunkSize:sectionStart+chunkSize+chunkSize]
+            #print(hexdump.hexdump(data, result='return'))
+
+        elif not detectTopNull:
+            # Detection in the top half
+            logging.debug("--> Do Top")
+            self._scanSection(fileData, sectionStart, sectionStart+chunkSize, it)
+        elif not detectBotNull:
+            # Detection in the bottom half
+            logging.debug("--> Do Bot")
+            self._scanSection(fileData, sectionStart+chunkSize, sectionEnd, it)
+
+        return
 
 
 def makeWithPatch(fileData, offset, size):

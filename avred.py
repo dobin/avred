@@ -48,16 +48,16 @@ def main():
         logfile = args.file + ".log"
         print(f"Logging to file: {logfile}")
         logging.basicConfig(filename=logfile,
-                        filemode='a',
-                        format=log_format,
-                        datefmt='%Y/%m/%d %H:%M',
-                        level=logging.INFO
-                )
+            filemode='a',
+            format=log_format,
+            datefmt='%Y/%m/%d %H:%M',
+            level=logging.INFO
+        )
     else:
         logging.basicConfig(
-                format=log_format,
-                datefmt='%Y/%m/%d %H:%M',
-                level=logging.INFO
+            format=log_format,
+            datefmt='%Y/%m/%d %H:%M',
+            level=logging.INFO
         )
 
     config = Config()
@@ -163,6 +163,7 @@ def printVerifyData(verifications):
     print("Verification results: ")
     for verification in verifications:
         print(str(verification))
+
 
 def printMatches(matches):
     for match in matches:

@@ -3,7 +3,8 @@
 import unittest
 from webbrowser import get
 from plugins.analyzer_pe import analyzeFileExe
-from model.model import TestDetection, Scanner
+from model.model import Scanner
+from tests.helpers import TestDetection
 from pprint import pprint
 from plugins.file_pe import FilePe
 

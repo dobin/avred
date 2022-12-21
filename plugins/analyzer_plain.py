@@ -1,6 +1,7 @@
-from reducer import scanData
+from reducer import Reducer
 
 # no PE file, just check its content
 def analyzeFilePlain(filePlain, scanner):
-    matchesIntervalTree = scanData(scanner, filePlain.data, filePlain.filename, 0, len(filePlain.data))
+    reducer = Reducer(filePlain, scanner)
+    matchesIntervalTree = reducer.scan(0, len(filePlain.data))
     return matchesIntervalTree

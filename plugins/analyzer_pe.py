@@ -1,11 +1,11 @@
 
 import logging
-from reducer import scanData
 from copy import deepcopy
 from utils import *
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
+from reducer import Reducer
 
 
 def analyzeFileExe(filePe, scanner, isolate=False, remove=False, ignoreText=False):
@@ -91,6 +91,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
         return []
 
     # analyze each detected section
+    reducer = Reducer(filePe, scanner)
     matches = []
     for section in detected_sections:
         # reducing .text may not work well
@@ -100,7 +101,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
         logging.info(f"Launching bytes analysis on section {section.name}")
 
         # new algo
-        match = scanData(scanner, filePe.data, filePe.filename, section.addr, section.addr+section.size)
+        match = reducer.scan(section.addr, section.addr+section.size)
         matches += match
 
     return sorted(matches)
