@@ -644,3 +644,73 @@ def processProject(vbaParser, disasmOnly=False, verbose=False, output_file=sys.s
                 result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, 
                     is64bit, disasmOnly, verbose, output_file=output_file)
 
+----+------+-------+----------------------+-----+-----+-----+--------+------
+id  |Status|Type   |Name                  |Left |Right|Child|1st Sect|Size
+----+------+-------+----------------------+-----+-----+-----+--------+------
+0   |<Used>|Root   |Root Entry            |-    |-    |13   |3       |9088
+1   |<Used>|Storage|VBA                   |-    |-    |4    |0       |0
+2   |<Used>|Stream |ThisDocument          |-    |8    |-    |0       |1127
+3   |<Used>|Stream |__SRP_2               |11   |-    |-    |12      |356
+4   |<Used>|Stream |__SRP_3               |10   |5    |-    |18      |106
+5   |<Used>|Stream |NewMacros             |6    |2    |-    |1A      |1253
+6   |<Used>|Stream |__SRP_5               |7    |-    |-    |2E      |169
+7   |<Used>|Stream |__SRP_4               |-    |-    |-    |31      |156
+8   |<Used>|Stream |_VBA_PROJECT          |-    |-    |-    |34      |2564
+9   |<Used>|Stream |dir                   |-    |-    |-    |5D      |570
+10  |<Used>|Stream |__SRP_0               |9    |3    |-    |66      |1746
+11  |<Used>|Stream |__SRP_1               |-    |-    |-    |82      |186
+12  |<Used>|Stream |PROJECTwm             |-    |-    |-    |85      |71
+13  |<Used>|Stream |PROJECT               |1    |12   |-    |87      |405
+14  |unused|Empty  |                      |-    |-    |-    |0       |0
+15  |unused|Empty  |                      |-    |-    |-    |0       |0
+
+----+----------------------------+------+--------------------------------------
+id  |Name                        |Size  |CLSID
+----+----------------------------+------+--------------------------------------
+0   |Root Entry                  |-     |
+13  |PROJECT                     |405   |
+12  |PROJECTwm                   |71    |
+1   |VBA                         |-     |
+5   |  NewMacros                 |1253  |
+2   |  ThisDocument              |1127  |
+8   |  _VBA_PROJECT              |2564  |
+10  |  __SRP_0                   |1746  |
+11  |  __SRP_1                   |186   |
+3   |  __SRP_2                   |356   |
+4   |  __SRP_3                   |106   |
+7   |  __SRP_4                   |156   |
+6   |  __SRP_5                   |169   |
+9   |  dir                       |570   |
+
+
+FAT:
++--------+------------+--------+--------+
+|Sector #|Type        |Offset  |Next #  |
++--------+------------+--------+--------+
+|       0|FAT Sector  |00000200|FFFFFFFD|
+|       1|<Data>      |00000400|       6|
+|       2|<Data>      |00000600|      14|
+|       3|<Data>      |00000800|       4| in file:  0x800  = +0
+|       4|<Data>      |00000A00|       5| 
+|       5|<Data>      |00000C00|       7|
+|       6|<Data>      |00000E00|       B|
+|       7|<Data>      |00001000|       8| in file: 0x1080 = +1664
+|       8|<Data>      |00001200|       9|
+|       9|<Data>      |00001400|       A|
+|       A|<Data>      |00001600|       C|
+|       B|<Data>      |00001800|      17|
+|       C|<Data>      |00001A00|       D|
+|       D|<Data>      |00001C00|       E|
+|       E|<Data>      |00001E00|       F|
+|       F|<Data>      |00002000|      10|
+|      10|<Data>      |00002200|      11|
+|      11|<Data>      |00002400|      12|
+|      12|<Data>      |00002600|      13|
+|      13|<Data>      |00002800|      15|
+|      14|End of Chain|00002A00|FFFFFFFE|
+|      15|<Data>      |00002C00|      16|
+|      16|<Data>      |00002E00|      18|
+|      17|End of Chain|00003000|FFFFFFFE|
+|      18|End of Chain|00003200|FFFFFFFE|
++--------+------------+--------+--------+
+
