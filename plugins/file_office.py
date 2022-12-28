@@ -2,6 +2,7 @@ import os
 import zipfile
 import io
 from model.model import PluginFileFormat
+import olefile
 
 MAKRO_PATH = 'word/vbaProject.bin'
 
@@ -57,3 +58,51 @@ class FileOffice(PluginFileFormat):
     def getPatchedByOffset(self, offset: int, patch: bytes) -> bytes:
         goat = self.data[:offset] + patch + self.data[offset+len(patch):]
         return self.getPatchedByReplacement(goat)
+
+
+class VbaAddressConverter():
+	def __init__(self, ole: olefile.olefile.OleFileIO):
+		self.ole = ole
+		self.correlation = None
+		self.sectorsize: int = None
+		self.init()
+
+	def init(self):
+		arr = {}
+		ole = self.ole
+
+		# find initial sector for VBA: Root+VBA
+		initialSector: int = self._findSectorForDir("Root Entry").isectStart # usually 2048
+		initialSector += self._findSectorForDir("VBA").isectStart # usually 0
+
+		# create offset -> physical addr correlation table
+		nextSector: int = initialSector
+		nextAddress: int = 0  # multiple of sectorsize
+		for i in range(len(ole.fat)):
+			if i == nextSector:
+				arr[nextAddress] = ole.sectorsize * (i+1)
+				nextSector = ole.fat[i]
+				nextAddress += ole.sectorsize
+
+				if ole.fat[i] == olefile.ENDOFCHAIN:
+					break
+
+		self.correlation = arr
+
+
+	def _findSectorForDir(self, name:str) -> olefile.olefile.OleDirectoryEntry:
+		for id in range(len(self.ole.direntries)):
+			d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
+			if d.name == name:
+				return d
+
+
+	def physicalAddressFor(self, offset: int) -> int:
+		# e.g. offset = 1664
+		# roundDown = 1536 (multiple of 512)
+		# use roundDown to find effective sector in file via self.correlation,
+		# and add the remainding offset to that address
+		roundDown: int = self.ole.sectorsize * round(offset/self.ole.sectorsize)
+		physBase: int = self.correlation[roundDown]
+		result: int = physBase + (offset - roundDown)
+		return result

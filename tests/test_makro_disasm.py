@@ -4,10 +4,19 @@ import unittest
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.analyzer_office import augmentFileWord
 from intervaltree import Interval, IntervalTree
-from plugins.file_office import FileOffice
-
+from plugins.file_office import FileOffice, VbaAddressConverter
+import olefile
 
 class DisasmMakroTest(unittest.TestCase):
+    def test_addressConverter(self):
+        file = 'tests/data/test.docm.vbaProject.bin'
+        ole = olefile.OleFileIO(file)
+
+        ac = VbaAddressConverter(ole)
+        self.assertEqual(ac.physicalAddressFor(0), 2048)
+        self.assertEqual(ac.physicalAddressFor(1664), 4224)
+
+
     def test_disasm(self):
         results = pcodedmp.processFile("tests/data/test.docm")
 
