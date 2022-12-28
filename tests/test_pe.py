@@ -8,7 +8,6 @@ from tests.helpers import TestDetection
 from pprint import pprint
 from plugins.file_pe import FilePe
 
-
 class PeTest(unittest.TestCase):
     def test_pe0(self):
         # simple, 1
@@ -100,8 +99,8 @@ class ScannerTest(Scanner):
 
     def scan(self, data, filename):
         for detection in self.detections:
-            data = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if data != detection.refData:
+            dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if dataSnippet != detection.refData:
                 return False
 
         return True    
@@ -115,8 +114,8 @@ class ScannerTestWeighted(Scanner):
     def scan(self, data, filename):
         n = 0
         for detection in self.detections:
-            data = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if data == detection.refData:
+            dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
+            if dataSnippet == detection.refData:
                 n += 1
 
         if n > int(len(self.detections) // 2):

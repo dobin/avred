@@ -9,7 +9,7 @@ from model.model import Match
 import pcodedmp.pcodedmp as pcodedmp
 
 
-def analyzeFileWord(fileOffice, scanner, analyzerOptions):
+def analyzeFileWord(fileOffice, scanner, analyzerOptions={}):
     makroData = fileOffice.data
 
     reducer = Reducer(fileOffice, scanner)
