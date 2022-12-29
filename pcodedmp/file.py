@@ -75,7 +75,7 @@ def processProject(vbaParser, disasmOnly=False, verbose=False, output_file=sys.s
                     modulePath_unicode = modulePath
                 moduleData = vbaParser.ole_file.openstream(modulePath_unicode).read()
                 #print ('{} - {:d} bytes'.format(modulePath, len(moduleData)), file=output_file)
-                result = pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file=output_file)
+                result = pcodeDump(moduleData, vbaProjectData, modulePath_unicode, identifiers, is64bit, disasmOnly, verbose, output_file=output_file)
                 if len(result) > 0:
                     results.append(result)
         if output_file.isatty() and WIN_UNICODE_CONSOLE:

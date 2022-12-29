@@ -62,7 +62,7 @@ def mprint(results):
     print("Results:")
     for result in results:
         for ite in sorted(result):
-            print("{} {} {} \n{}".format(ite.begin, ite.end, ite.data.lineNr, ite.data.text))
+            print("{}: {} {} {} \n{}".format(ite.data.modulename, ite.begin, ite.end, ite.data.lineNr, ite.data.text))
 
 if __name__ == '__main__':
     main()

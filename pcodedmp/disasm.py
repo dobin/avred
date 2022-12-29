@@ -4,7 +4,8 @@ from lowlevel import *
 
 
 class DisasmEntry():
-    def __init__(self, line, lineStart, lineEnd, text):
+    def __init__(self, modulename, line, lineStart, lineEnd, text):
+        self.modulename = modulename
         self.lineNr = line
         self.begin = lineStart
         self.end = lineEnd
@@ -15,7 +16,7 @@ def myPrint(append, file=None, end="\n"):
     return append + end
 
 
-def dumpLine(moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
+def dumpLine(moduleData, modulename, lineStart, lineLength, endian, vbaVer, is64bit,
              identifiers, objectTable, indirectTable, declarationTable, verbose, line, output_file=sys.stdout):
     varTypesLong = ['Var', '?', 'Int', 'Lng', 'Sng', 'Dbl', 'Cur', 'Date', 'Str', 'Obj', 'Err', 'Bool', 'Var']
     specials = ['False', 'True', 'Null', 'Empty']
@@ -128,11 +129,11 @@ def dumpLine(moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
         disasmEntry += "\n"
 
     #print("{}-{}: {}".format(lineStart, lineStart+lineLength, disasmEntry))
-    entry = DisasmEntry(line, lineStart, lineStart+lineLength, disasmEntry)
+    entry = DisasmEntry(modulename, line, lineStart, lineStart+lineLength, disasmEntry)
     return entry
 
 
-def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file = sys.stdout):
+def pcodeDump(moduleData, vbaProjectData, modulepath, identifiers, is64bit, disasmOnly, verbose, output_file = sys.stdout):
     it = IntervalTree()
 
     if verbose and not disasmOnly:
@@ -225,11 +226,10 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmO
             offset, lineLength = getVar(moduleData, offset, endian, False)
             offset += 2
             offset, lineOffset = getVar(moduleData, offset, endian, True)
-            disasmEntry = dumpLine(moduleData, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
+            disasmEntry = dumpLine(moduleData, modulepath, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
                      objectTable, indirectTable, declarationTable, verbose, line, output_file=output_file)
 
             it.add(Interval(disasmEntry.begin, disasmEntry.end, disasmEntry))
-
 
     except Exception as e:
         print('Error: {}.'.format(e), file=sys.stderr)
