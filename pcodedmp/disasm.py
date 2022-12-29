@@ -1,3 +1,4 @@
+import sys
 from intervaltree import Interval, IntervalTree
 from lowlevel import *
 
@@ -14,7 +15,7 @@ def myPrint(append, file=None, end="\n"):
     return append + end
 
 
-def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
+def dumpLine(moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
              identifiers, objectTable, indirectTable, declarationTable, verbose, line, output_file=sys.stdout):
     varTypesLong = ['Var', '?', 'Int', 'Lng', 'Sng', 'Dbl', 'Cur', 'Date', 'Str', 'Obj', 'Err', 'Bool', 'Var']
     specials = ['False', 'True', 'Null', 'Empty']
@@ -46,6 +47,7 @@ def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
         if verbose:
             disasmEntry += myPrint('{:04X} '.format(opcode), end='', file=output_file)
         disasmEntry += myPrint('{} '.format(mnemonic), end='', file=output_file)
+        
         if mnemonic in ['Coerce', 'CoerceVar', 'DefType']:
             if opType < len(varTypesLong):
                 disasmEntry += myPrint('({}) '.format(varTypesLong[opType]), end='', file=output_file)
@@ -79,6 +81,7 @@ def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
         elif mnemonic in ['Redim', 'RedimAs']:
             if opType & 16:
                 disasmEntry += myPrint('(Preserve) ', end='', file=output_file)
+
         for arg in instruction['args']:
             if arg == 'name':
                 offset, word = getVar(moduleData, offset, endian, False)
@@ -113,6 +116,7 @@ def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
                 if is64bit and (arg == 'context_'):
                     offset, dword = getVar(moduleData, offset, endian, True)
                     disasmEntry += myPrint('{:08X} '.format(dword), end='', file=output_file)
+        
         if instruction['varg']:
             offset, wLength = getVar(moduleData, offset, endian, False)
             theVarArg = disasmVarArg(moduleData, identifiers, offset, wLength, mnemonic, endian, vbaVer, is64bit)
@@ -120,12 +124,12 @@ def dumpLine(it, moduleData, lineStart, lineLength, endian, vbaVer, is64bit,
             offset += wLength
             if wLength & 1:
                 offset += 1
+
         disasmEntry += "\n"
 
-    entry = DisasmEntry(line, lineStart, lineStart+lineLength, disasmEntry)
-    it.add(Interval(lineStart, lineStart+lineLength, entry))
     #print("{}-{}: {}".format(lineStart, lineStart+lineLength, disasmEntry))
-
+    entry = DisasmEntry(line, lineStart, lineStart+lineLength, disasmEntry)
+    return entry
 
 
 def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmOnly, verbose, output_file = sys.stdout):
@@ -195,6 +199,7 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmO
             offs += 4
             objectTable = moduleData[offs:offs + dwLength]
             offset += 77
+
         if verbose:
             if len(declarationTable):
                 print('Declaration table:', file=output_file)
@@ -205,6 +210,7 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmO
             if len(objectTable):
                 print('Object table:', file=output_file)
                 print(hexdump(objectTable), file=output_file)
+
         dwLength = getDWord(moduleData, offset, endian)
         offset = dwLength + 0x003C
         offset, magic = getVar(moduleData, offset, endian, False)
@@ -213,13 +219,19 @@ def pcodeDump(moduleData, vbaProjectData, dirData, identifiers, is64bit, disasmO
         offset += 2
         offset, numLines = getVar(moduleData, offset, endian, False)
         pcodeStart = offset + numLines * 12 + 10
+
         for line in range(numLines):
             offset += 4
             offset, lineLength = getVar(moduleData, offset, endian, False)
             offset += 2
             offset, lineOffset = getVar(moduleData, offset, endian, True)
-            dumpLine(it, moduleData, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
+            disasmEntry = dumpLine(moduleData, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
                      objectTable, indirectTable, declarationTable, verbose, line, output_file=output_file)
+
+            it.add(Interval(disasmEntry.begin, disasmEntry.end, disasmEntry))
+
+
     except Exception as e:
         print('Error: {}.'.format(e), file=sys.stderr)
+
     return it
