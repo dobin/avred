@@ -53,6 +53,8 @@ class Match():
             s += "  {}\n".format(self.info)
         if self.detail is not None:
             s += "  {}\n".format(self.detail)
+        if self.dataHexdump is not None:
+            s += "  {}\n".format(self.dataHexdump)
         return s
 
 
@@ -88,9 +90,11 @@ class Outcome():
         for match in self.matches:
             s += str(match)
 
-        s += "Verification: \n"
+        s += "\nVerification: \n"
         for v in self.verifications:
-            s += str(v)        
+            s += str(v)    
+
+        s += "\n"    
 
         return s
 
