@@ -34,7 +34,7 @@ def main():
 
     # debug
     parser.add_argument("--checkOnly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
-    parser.add_argument("--augmentOnly", help="Debug: Load matches from .augmented, and perform augmentation again", default=False, action='store_true')
+    parser.add_argument("--loadVerify", help="Debug: Load matches from .augmented, and perform augmentation again", default=False, action='store_true')
 
     # analyzer options
     parser.add_argument("--isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
@@ -126,15 +126,28 @@ def scanFile(args, scanner):
             pickle.dump(matchesIt, handle)
 
     # convert IntervalTree Matches
+    logging.info("Found {} matches".format(len(matchesIt)))
     matches = []
     idx = 0
     for m in matchesIt:
         match = Match(idx, m.begin, m.end-m.begin)
         matches.append(match)
 
-    # verify our analysis
-    verifications = verify(file, matches, scanner)
-    printVerifyData(verifications)
+    verifications = None
+    if args.loadVerify:
+        # For testing purposes.
+        # Basically an offline version if .matches and .augment with verify data exists
+        if os.path.exists(filenameOutcome):
+            with open(filenameOutcome, 'rb') as handle:
+                outcome = pickle.load(handle)
+                verifications = outcome.verifications
+        else:
+            logging.error("--loadVerify given, but no {} file found. Abort.".format(filenameOutcome))
+            sys.exit(1)
+    else:
+        # verify our analysis
+        verifications = verify(file, matches, scanner)
+        printVerifyData(verifications)
 
     # augment information
     if augmenter is not None:
