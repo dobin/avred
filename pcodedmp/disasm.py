@@ -229,7 +229,10 @@ def pcodeDump(moduleData, vbaProjectData, modulepath, identifiers, is64bit, disa
             disasmEntry = dumpLine(moduleData, modulepath, pcodeStart + lineOffset, lineLength, endian, vbaVer, is64bit, identifiers,
                      objectTable, indirectTable, declarationTable, verbose, line, output_file=output_file)
 
-            it.add(Interval(disasmEntry.begin, disasmEntry.end, disasmEntry))
+            if disasmEntry is None:
+                print("Error: When dissemble line {}".format(lineOffset))
+            else:
+                it.add(Interval(disasmEntry.begin, disasmEntry.end, disasmEntry))
 
     except Exception as e:
         print('Error: {}.'.format(e), file=sys.stderr)
