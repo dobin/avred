@@ -97,7 +97,24 @@ class VbaAddressConverter():
 				return d
 
 
-	def physicalAddressFor(self, offset: int) -> int:
+	def physicalAddressFor(self, modulepath: str, offset: int) -> int:
+		# sanity checks
+		mp = modulepath.split('/')
+		if len (mp) != 2:
+			return 0
+		if mp[0] != 'VBA':
+			return 0
+		moduleName = mp[1]
+
+		# find offset of module into VBA/ storage
+		# these are mini-sectors (usually 64 byte)
+		moduleOffsetSect = self._findSectorForDir(moduleName).isectStart
+		moduleOffset = moduleOffsetSect * self.ole.minisectorsize
+
+		# offset is originally relative to its module (e.g. "VBA/Thisdocument") 
+		# make it an offset into "VBA/"" storage
+		offset += moduleOffset
+
 		# e.g. offset = 1664
 		# roundDown = 1536 (multiple of 512)
 		# use roundDown to find effective sector in file via self.correlation,
@@ -106,3 +123,4 @@ class VbaAddressConverter():
 		physBase: int = self.correlation[roundDown]
 		result: int = physBase + (offset - roundDown)
 		return result
+        
