@@ -61,66 +61,67 @@ class FileOffice(PluginFileFormat):
 
 
 class VbaAddressConverter():
-	def __init__(self, ole: olefile.olefile.OleFileIO):
-		self.ole = ole
-		self.correlation = None
-		self.sectorsize: int = None
-		self.init()
+    def __init__(self, ole: olefile.olefile.OleFileIO):
+        self.ole = ole
+        self.correlation = None
+        self.sectorsize: int = None
+        self.init()
 
-	def init(self):
-		arr = {}
-		ole = self.ole
+    def init(self):
+        arr = {}
+        ole = self.ole
 
-		# find initial sector for VBA: Root+VBA
-		initialSector: int = self._findSectorForDir("Root Entry").isectStart # usually 2048
-		initialSector += self._findSectorForDir("VBA").isectStart # usually 0
+        # find initial sector for VBA: Root+VBA
+        initialSector: int = self._findSectorForDir("Root Entry").isectStart # usually 2048
+        initialSector += self._findSectorForDir("VBA").isectStart # usually 0
 
-		# create offset -> physical addr correlation table
-		nextSector: int = initialSector
-		nextAddress: int = 0  # multiple of sectorsize
-		for i in range(len(ole.fat)):
-			if i == nextSector:
-				arr[nextAddress] = ole.sectorsize * (i+1)
-				nextSector = ole.fat[i]
-				nextAddress += ole.sectorsize
+        # create offset -> physical addr correlation table
+        nextSector: int = initialSector
+        nextAddress: int = 0  # multiple of sectorsize
+        for i in range(len(ole.fat)):
+            if i == nextSector:
+                arr[nextAddress] = ole.sectorsize * (i+1)
+                nextSector = ole.fat[i]
+                nextAddress += ole.sectorsize
 
-				if ole.fat[i] == olefile.ENDOFCHAIN:
-					break
+                if ole.fat[i] == olefile.ENDOFCHAIN:
+                    break
 
-		self.correlation = arr
-
-
-	def _findSectorForDir(self, name:str) -> olefile.olefile.OleDirectoryEntry:
-		for id in range(len(self.ole.direntries)):
-			d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
-			if d.name == name:
-				return d
+        self.correlation = arr
 
 
-	def physicalAddressFor(self, modulepath: str, offset: int) -> int:
-		# sanity checks
-		mp = modulepath.split('/')
-		if len (mp) != 2:
-			return 0
-		if mp[0] != 'VBA':
-			return 0
-		moduleName = mp[1]
+    def _findSectorForDir(self, name: str) -> olefile.olefile.OleDirectoryEntry:
+        for id in range(len(self.ole.direntries)):
+            d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
+            if d.name == name:
+                return d
 
-		# find offset of module into VBA/ storage
-		# these are mini-sectors (usually 64 byte)
-		moduleOffsetSect = self._findSectorForDir(moduleName).isectStart
-		moduleOffset = moduleOffsetSect * self.ole.minisectorsize
+        print("Error: could not find directory entry for name {}".format(name))
+        return None
+    
+    def physicalAddressFor(self, modulepath: str, offset: int) -> int:
+        # sanity checks
+        mp = modulepath.split('/')
+        if len (mp) != 2:
+            return 0
+        if mp[0] != 'VBA':
+            return 0
+        moduleName = mp[1]
 
-		# offset is originally relative to its module (e.g. "VBA/Thisdocument") 
-		# make it an offset into "VBA/"" storage
-		offset += moduleOffset
+        # find offset of module into VBA/ storage
+        # these are mini-sectors (usually 64 byte)
+        moduleOffsetSect = self._findSectorForDir(moduleName).isectStart
+        moduleOffset = moduleOffsetSect * self.ole.minisectorsize
 
-		# e.g. offset = 1664
-		# roundDown = 1536 (multiple of 512)
-		# use roundDown to find effective sector in file via self.correlation,
-		# and add the remainding offset to that address
-		roundDown: int = self.ole.sectorsize * round(offset/self.ole.sectorsize)
-		physBase: int = self.correlation[roundDown]
-		result: int = physBase + (offset - roundDown)
-		return result
-        
+        # offset is originally relative to its module (e.g. "VBA/Thisdocument") 
+        # make it an offset into "VBA/"" storage
+        offset += moduleOffset
+
+        # e.g. offset = 1664
+        # roundDown = 1536 (multiple of 512)
+        # use roundDown to find effective sector in file via self.correlation,
+        # and add the remainding offset to that address
+        roundDown: int = self.ole.sectorsize * round(offset/self.ole.sectorsize)
+        physBase: int = self.correlation[roundDown]
+        result: int = physBase + (offset - roundDown)
+        return result
