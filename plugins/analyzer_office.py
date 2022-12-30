@@ -3,7 +3,7 @@ import copy
 import logging
 from re import I
 import olefile
-
+from typing import List
 from reducer import Reducer
 from utils import *
 from model.model import Match
@@ -37,9 +37,7 @@ def convertResults(ole, results) -> IntervalTree:
     return it
 
 
-def augmentFileWord(fileOffice: FileOffice, matchesIntervalTree):
-    matches = []
-
+def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
     # dump makros as disassembled code
     results = pcodedmp.processFile(fileOffice.filepath)
 
@@ -49,25 +47,19 @@ def augmentFileWord(fileOffice: FileOffice, matchesIntervalTree):
     results = convertResults(oleFile, results)
 
     # correlate the matches with the dumped code
-    idx = 0
-    for m in matchesIntervalTree:
-        data = fileOffice.data[m.begin:m.end]
+    for m in matches:
+        data = fileOffice.data[m.start():m.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
         sectionName = 'word/vbaProject.bin'
         detail = ''
 
-        itemSet = results.at(m.begin)
+        itemSet = results.at(m.fileOffset)
         if len(itemSet) > 0:
             item = next(iter(itemSet))
             detail = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
-        
-        match = Match(idx, m.begin, m.end-m.begin)
-        match.setData(data)
-        match.setDataHexdump(dataHexdump)
-        match.setInfo(sectionName)
-        match.setDetail(detail)
 
-        matches.append(match)
-        idx += 1
+        m.setData(data)
+        m.setDataHexdump(dataHexdump)
+        m.setInfo(sectionName)
+        m.setDetail(detail)
 
-    return matches
