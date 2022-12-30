@@ -1,7 +1,7 @@
 import itertools
 
-from constants import *
-from utils import *
+from pcodedmp.constants import *
+from pcodedmp.utils import *
 
 def translateOpcode(opcode, vbaVer, is64bit):
     if   vbaVer == 3:

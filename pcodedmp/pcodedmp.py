@@ -7,7 +7,7 @@ import os
 import sys
 import argparse
 
-from file import *
+from pcodedmp.file import *
 
 __description__ = 'A VBA p-code disassembler'
 __license__ = 'GPL'

@@ -7,9 +7,9 @@ import itertools
 from oletools.olevba import VBA_Parser, decompress_stream
 from oletools.common import codepages
 
-from utils import *
-from constants import *
-from disasm import *
+from pcodedmp.utils import *
+from pcodedmp.constants import *
+from pcodedmp.disasm import *
 
 try:
     import win_unicode_console

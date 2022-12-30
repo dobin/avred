@@ -1,6 +1,6 @@
 import sys
 from intervaltree import Interval, IntervalTree
-from lowlevel import *
+from pcodedmp.lowlevel import *
 
 
 class DisasmEntry():
