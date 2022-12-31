@@ -20,12 +20,21 @@
         <td>{{verificationRun.type}}</td>
 
         {% for testEntry in verificationRun.testEntries %}
-        <td>
-            {{testEntry}}
-        </td>
+            {% if testEntry %}
+            <td style="background-color:red">
+            {% else %}
+            <td style="background-color:green">
+            {% endif %}
+                {{testEntry}}
+            </td>
         {% endfor %}
     
     </tr>
     {% endfor %}
 
 </table>
+
+<p>
+    Result of detection. True means detected, false means not detected. 
+</p>
+
