@@ -39,7 +39,9 @@ def convertResults(ole, results) -> IntervalTree:
 
 def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
     # dump makros as disassembled code
-    results = pcodedmp.processFile(fileOffice.filepath)
+    fd = open('/dev/null', 'w')
+    results = pcodedmp.processFile(fileOffice.filepath, output_file=fd)
+    fd.close()
 
     # the output of pcodedmp is wrong. Convert results to real physical addresses.
     # use the extracted vbaProject.bin from fileOffice.data

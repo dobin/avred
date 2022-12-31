@@ -9,7 +9,6 @@ import sys
 import logging
 
 from config import Config
-from utils import saveMatchesToFile
 from verifier import verify
 from model.model import Outcome
 from model.model import Match

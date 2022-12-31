@@ -17,8 +17,7 @@ try:
 except ImportError:
     WIN_UNICODE_CONSOLE = False
 
-def processFile(fileName):
-    output_file=sys.stdout
+def processFile(fileName, output_file=sys.stdout):
     result = None
     # TODO - Handle VBA3 documents
     print('Processing file: {}'.format(fileName), file=output_file)
