@@ -131,6 +131,7 @@ def scanFile(args, scanner):
     for m in matchesIt:
         match = Match(idx, m.begin, m.end-m.begin)
         matches.append(match)
+        idx += 1
 
     verifications = None
     if args.loadVerify:

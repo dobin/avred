@@ -56,12 +56,16 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
         detail = ''
 
         itemSet = results.at(m.fileOffset)
-        if len(itemSet) > 0:
+        details = []
+        for item in iter(itemSet):
             item = next(iter(itemSet))
-            detail = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
+            detail = {}
+            detail['part'] = True
+            detail['textHtml'] = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
+            details.append(detail)
 
         m.setData(data)
         m.setDataHexdump(dataHexdump)
         m.setInfo(sectionName)
-        m.setDetail(detail)
+        m.setDetail(details)
 

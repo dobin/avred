@@ -13,7 +13,7 @@ from model.model import Outcome
 
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
-EXT_INFO = ".pickle"
+EXT_INFO = ".outcome"
 EXT_LOG = ".log"
 
 
@@ -64,12 +64,10 @@ def file(filename):
     outcome: Outcome = None
     logData: str = None
 
-    # Main file
+    # Main file (exe, docx etc.)
     if not os.path.isfile(filename):
         print("File does not exist")
         return 'File not found: ' + filename, 500
-    #with open(filename, 'rb') as f:
-    #    fileContent = f.read()
 
     # log file
     logData = ""
@@ -77,7 +75,7 @@ def file(filename):
         with open(logFilename) as f:
             logData = f.read()
 
-    # VerifyData
+    # Outcome
     verifyDataFile = filename + EXT_INFO
     outcome: Outcome = None
     if os.path.isfile(verifyDataFile):
@@ -119,8 +117,8 @@ def upload_file():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            subprocess.Popen(["./avred.py", "--server", "Defender", "--file", filepath, 
-                "--save", "--logtofile", "--verify"])
+            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, 
+                "--logtofile" ])
 
             return redirect(url_for('view_file', filename=filename))
 
