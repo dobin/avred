@@ -6,9 +6,11 @@ from plugins.analyzer_office import augmentFileWord
 from intervaltree import Interval, IntervalTree
 from plugins.file_office import FileOffice, VbaAddressConverter
 import olefile
+from model.model import Match
+
 
 class DisasmMakroTest(unittest.TestCase):
-    def test_addressConverter(self):
+    def test_addressConverterMiniStream(self):
         # Only the VbaAddressConverter
         file = 'tests/data/test.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
@@ -26,7 +28,17 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.physicalAddressFor("VBA/NewMacros", 1092), 5316)
 
 
-    def test_disasm(self):
+    def test_addressConverterStream(self):
+        # Only the VbaAddressConverter
+        file = 'tests/data/word.docm.vbaProject.bin'
+        ole = olefile.OleFileIO(file)
+        ac = VbaAddressConverter(ole)
+        self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 0), 6144)
+        self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 1024), 7168)
+        self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 1024+1), 7168+1)
+
+
+    def test_disasm_pcodedmp(self):
         # Only the Pcodedmp dumping, docm
         results = pcodedmp.processFile("tests/data/test.docm")
 
@@ -45,15 +57,18 @@ class DisasmMakroTest(unittest.TestCase):
         fileOffice = FileOffice()
         fileOffice.loadFromFile(filename)
 
-        # 7 5316 5326: 
-        #	0020 Ld msg 
-        #	0041 ArgsCall MsgBox 0x0001 
+        # VBA/NewMacros: 1092 1102 7 
+        #   Ld msg 
+        #   ArgsCall MsgBox 0x0001 
+        # -> 5316
 
-        it = IntervalTree()
-        it.add(Interval(5316, 5316+16))
-        matches = augmentFileWord(fileOffice, it)
+        matches = []
+        match = Match(0, 5316, 16)
+        matches.append(match)
+        augmentFileWord(fileOffice, matches)
 
         self.assertEqual(len(matches), 1)
         match = matches[0]
-        self.assertTrue("Ld msg" in match.detail)
-        self.assertTrue("ArgsCall MsgBox 0x0001" in match.detail)
+        detail = match.detail[0]['textHtml']
+        self.assertTrue("Ld msg" in detail)
+        self.assertTrue("ArgsCall MsgBox 0x0001" in detail)

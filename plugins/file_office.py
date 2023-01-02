@@ -63,42 +63,43 @@ class FileOffice(PluginFileFormat):
 class VbaAddressConverter():
     def __init__(self, ole: olefile.olefile.OleFileIO):
         self.ole = ole
-        self.correlation = None
+        self.ministream = None
         self.sectorsize: int = None
         self.init()
+
 
     def init(self):
         arr = {}
         ole = self.ole
 
-        # find initial sector for VBA: Root+VBA
-        initialSector: int = self._findSectorForDir("Root Entry").isectStart # usually 2048
-        initialSector += self._findSectorForDir("VBA").isectStart # usually 0
+        # find initial sector for ministream
+        initialSector: int = self._getDirForName("Root Entry").isectStart
 
-        # create offset -> physical addr correlation table
-        nextSector: int = initialSector
-        nextAddress: int = 0  # multiple of sectorsize
-        for i in range(len(ole.fat)):
-            if i == nextSector:
-                arr[nextAddress] = ole.sectorsize * (i+1)
-                nextSector = ole.fat[i]
-                nextAddress += ole.sectorsize
+        # create offset -> physical addr ministream table
+        sector: int = initialSector
+        address: int = 0  # multiple of sectorsize (typically 512)
+        while sector < len(self.ole.fat):
+            arr[address] = ole.sectorsize * (sector+1)
 
-                if ole.fat[i] == olefile.ENDOFCHAIN:
-                    break
+            address += ole.sectorsize
+            sector = ole.fat[sector]
 
-        self.correlation = arr
+        self.ministream = arr
 
 
-    def _findSectorForDir(self, name: str) -> olefile.olefile.OleDirectoryEntry:
+    def _getDirForName(self, name:str) -> olefile.olefile.OleDirectoryEntry:
         for id in range(len(self.ole.direntries)):
             d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
+            if d is None:
+                continue
             if d.name == name:
                 return d
 
-        print("Error: could not find directory entry for name {}".format(name))
-        return None
-    
+
+    def print(self):
+        pprint(self.ministream)
+
+
     def physicalAddressFor(self, modulepath: str, offset: int) -> int:
         # sanity checks
         mp = modulepath.split('/')
@@ -108,20 +109,40 @@ class VbaAddressConverter():
             return 0
         moduleName = mp[1]
 
-        # find offset of module into VBA/ storage
-        # these are mini-sectors (usually 64 byte)
-        moduleOffsetSect = self._findSectorForDir(moduleName).isectStart
-        moduleOffset = moduleOffsetSect * self.ole.minisectorsize
+        # If the stream is >4096: use normal sectors
+        # else: use ministream sectors
+        dir = self._getDirForName(moduleName)
+        if dir is None: 
+            return -1
 
-        # offset is originally relative to its module (e.g. "VBA/Thisdocument") 
-        # make it an offset into "VBA/"" storage
+        if dir.size > self.ole.minisectorcutoff:
+            return self._streamAddr(moduleName, offset)
+        else:
+            return self._ministreamAddr(moduleName, offset)
+
+
+    def _streamAddr(self, moduleName, offset):
+        sector = self._getDirForName(moduleName).isectStart
+        consumed = 0
+
+        while consumed < offset:
+            sector = self.ole.fat[sector]
+            consumed += self.ole.sectorsize
+
+        offset = ((sector+1) * self.ole.sectorsize) + (offset-consumed)
+        return offset
+
+    def _ministreamAddr(self, moduleName, offset):
+        # add module offset into ministream
+        moduleOffsetSect = self._getDirForName(moduleName).isectStart
+        moduleOffset = moduleOffsetSect * self.ole.minisectorsize
         offset += moduleOffset
 
         # e.g. offset = 1664
         # roundDown = 1536 (multiple of 512)
-        # use roundDown to find effective sector in file via self.correlation,
+        # use roundDown to find effective sector in file via self.ministream,
         # and add the remainding offset to that address
         roundDown: int = self.ole.sectorsize * round(offset/self.ole.sectorsize)
-        physBase: int = self.correlation[roundDown]
+        physBase: int = self.ministream[roundDown]
         result: int = physBase + (offset - roundDown)
         return result
