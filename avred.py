@@ -134,16 +134,12 @@ def scanFile(args, scanner):
         idx += 1
 
     verifications = None
-    if args.loadVerify:
+    if args.loadVerify and os.path.exists(filenameOutcome):
         # For testing purposes.
         # Basically an offline version if .matches and .augment with verify data exists
-        if os.path.exists(filenameOutcome):
-            with open(filenameOutcome, 'rb') as handle:
-                outcome = pickle.load(handle)
-                verifications = outcome.verifications
-        else:
-            logging.error("--loadVerify given, but no {} file found. Abort.".format(filenameOutcome))
-            sys.exit(1)
+        with open(filenameOutcome, 'rb') as handle:
+            outcome = pickle.load(handle)
+            verifications = outcome.verifications
     else:
         # verify our analysis
         verifications = verify(file, matches, scanner)
