@@ -68,6 +68,7 @@ def main():
     url = config.get("server")[args.server]
     scanner = ScannerRest(url, args.server)
 
+    logging.info("Using file: {}".format(args.file))
     if args.checkOnly:
         checkFile(args.file, scanner)
     else:
@@ -146,11 +147,12 @@ def scanFile(args, scanner):
         printVerifyData(verifications)
 
     # augment information
+    fileInfo = None
     if augmenter is not None:
-        augmenter(file, matches)
+        fileInfo = augmenter(file, matches)
     
     # save
-    allData = Outcome(matches, verifications, matchesIt)
+    allData = Outcome(fileInfo, matches, verifications, matchesIt)
     with open(filenameOutcome, 'wb') as handle:
         pickle.dump(allData, handle)
         logging.info(f"Wrote results to {filenameOutcome}")

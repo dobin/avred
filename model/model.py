@@ -16,7 +16,6 @@ class Scanner:
         pass
 
 
-
 class Match():
     def __init__(self, idx, fileOffset, size):
         self.idx = idx
@@ -79,14 +78,27 @@ class Verification():
         return s
     
 
+class FileInfo():
+    def __init__(self, name, size, fileStructure):
+        self.name = name
+        self.size = size
+        self.fileStructure = fileStructure
+
+
 class Outcome():
-    def __init__(self, matches, verifications, matchesIt=None):
+    def __init__(self, fileInfo, matches, verifications, matchesIt=None):
+        self.fileInfo: FileInfo = fileInfo
         self.matches: List[Match] = matches
         self.verifications: List[Verification] = verifications
         self.matchesIt: IntervalTree = matchesIt
 
     def __str__(self):
-        s = "Matches: \n"
+        s = ''
+
+        s += 'FileInfo: \n'
+        s += self.fileInfo.fileStructure
+
+        s += "Matches: \n"
         for match in self.matches:
             s += str(match)
 

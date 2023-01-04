@@ -9,7 +9,7 @@ import subprocess
 import glob
 import pickle
 from app  import app
-from model.model import Outcome
+from model.model import Outcome, FileInfo
 
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
@@ -86,6 +86,7 @@ def file(filename):
         filename=filename, 
         matches=outcome.matches, 
         verifications=outcome.verifications,
+        fileInfo=outcome.fileInfo,
         logData=logData)
 
 

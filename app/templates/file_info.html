@@ -1,0 +1,48 @@
+<h2>Info</h2>
+
+<table>
+    <tr>
+        <td>Filename: </td>
+        <td>{{filename}}</td>
+    </tr><tr>
+        <td>File Size: </td>
+        <td></td>
+    </tr><tr>
+        <td>File Type: </td>
+        <td></td>
+    </tr><tr>
+        <td>File Hash: </td>
+        <td></td>
+    </tr>
+</table>
+
+
+<h2>Matches</h2>
+
+<table>
+    <tr>
+        <th>#</th>
+        <th>Offset</th>
+        <th>Size</th>
+        <th>Section</th>
+    </tr>
+
+    {% for match in matches %}
+    <tr>
+        <td>{{match.idx}}</td>
+        <td>{{match.fileOffset}}</td>
+        <td>{{match.size}}</td>
+        <td>{{match.info}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<h2>Verification</h2>
+
+Assessment: 
+
+
+<h2>File Structure</h2>
+
+<pre>{{fileInfo.fileStructure}}</pre>

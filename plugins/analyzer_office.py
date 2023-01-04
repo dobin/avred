@@ -6,7 +6,7 @@ import olefile
 from typing import List
 from reducer import Reducer
 from utils import *
-from model.model import Match
+from model.model import Match, FileInfo
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.file_office import FileOffice, VbaAddressConverter, AddressConverter
 from pcodedmp.disasm import DisasmEntry
@@ -74,3 +74,5 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
         m.setInfo(sectionName)
         m.setDetail(details)
 
+    fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())
+    return fileInfo
