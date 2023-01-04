@@ -3,22 +3,17 @@
 import unittest
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.analyzer_office import augmentFileWord
-from intervaltree import Interval, IntervalTree
-from plugins.file_office import FileOffice, VbaAddressConverter
+from plugins.file_office import FileOffice, AddressConverter, VbaAddressConverter
 import olefile
 from model.model import Match
 
-
 class DisasmMakroTest(unittest.TestCase):
-    def test_addressConverterMiniStream(self):
+    def test_VbaAddressConverterMiniStream(self):
         # Only the VbaAddressConverter
         file = 'tests/data/test.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
-
         ac = VbaAddressConverter(ole)
-
         self.assertEqual(ac.physicalAddressFor("VBA/NewMacros", 0), 4224)
-
         # VBA/NewMacros: virt:1092 phys:5316 line:7 
         #    0020 Ld msg 
         #    0041 ArgsCall MsgBox 0x0001 
@@ -28,7 +23,7 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.physicalAddressFor("VBA/NewMacros", 1092), 5316)
 
 
-    def test_addressConverterStream(self):
+    def test_VbaAddressConverterStream(self):
         # Only the VbaAddressConverter
         file = 'tests/data/word.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
@@ -36,6 +31,19 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 0), 6144)
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 1024), 7168)
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 1024+1), 7168+1)
+
+
+    def test_AddressConverter(self):
+        # Only the VbaAddressConverter
+        file = 'tests/data/test.docm.vbaProject.bin'
+        ole = olefile.OleFileIO(file)
+        ac = AddressConverter(ole)
+        self.assertEqual(ac.getSectionForAddr(0), "Header")
+        self.assertEqual(ac.getSectionForAddr(1), "Header")
+        self.assertEqual(ac.getSectionForAddr(512), "FAT Sector")
+        self.assertEqual(ac.getSectionForAddr(513), "FAT Sector")
+        self.assertEqual(ac.getSectionForAddr(3072), "ThisDocument")
+        self.assertEqual(ac.getSectionForAddr(3572), "__SRP_2")
 
 
     def test_disasm_pcodedmp(self):
