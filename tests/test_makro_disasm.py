@@ -35,8 +35,8 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 4093), 10237)
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 4125), 1565)  # not: smaller address
 
-    def test_AddressConverter(self):
-        # Only the VbaAddressConverter
+
+    def test_AddressConverterGetSection(self):
         file = 'tests/data/test.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
         ac = AddressConverter(ole)
@@ -46,6 +46,19 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.getSectionForAddr(513), "FAT Sector")
         self.assertEqual(ac.getSectionForAddr(3072), "ThisDocument")
         self.assertEqual(ac.getSectionForAddr(3572), "__SRP_2")
+
+
+    def test_AddressConverterGetSections(self):
+        file = 'tests/data/test.docm.vbaProject.bin'
+        ole = olefile.OleFileIO(file)
+        ac = AddressConverter(ole)
+        
+        sections = ac.getSectionsForAddr(3584, 1024)
+        print(str(sections))
+        self.assertEqual(len(sections), 3)
+        self.assertTrue('Directory' in sections)
+        self.assertTrue('__SRP_3' in sections)
+        self.assertTrue('NewMacros' in sections)
 
 
     def test_disasm_pcodedmp(self):

@@ -207,6 +207,19 @@ class AddressConverter():
             return self.sector[sector]
 
 
+    def getSectionsForAddr(self, addr, size):
+        res = {}
+
+        # just brute force it...
+        offset = addr
+        while offset < addr+size:
+            section = self.getSectionForAddr(offset)
+            res[section] = ''
+            offset += self.ole.mini_sector_size
+
+        return list(res.keys())
+
+
     def _paintMinistreamSectorChain(self, ministreamSectStart, name, sector, size):
         # offset into the ministream
         offset = sector * self.ole.mini_sector_size
@@ -244,7 +257,7 @@ class AddressConverter():
         for c in self.sector:
             res += "{} {}: {}\n".format(c, ((c+1) * 512), self.sector[c])
         return res
-        
+
 
     def _getDirForName(self, name:str) -> olefile.olefile.OleDirectoryEntry:
         for id in range(len(self.ole.direntries)):
@@ -253,7 +266,6 @@ class AddressConverter():
                 continue
             if d.name == name:
                 return d
-
 
 
 def roundTo(number, multiple):

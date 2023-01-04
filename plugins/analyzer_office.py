@@ -57,7 +57,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
     for m in matches:
         data = fileOffice.data[m.start():m.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
-        sectionName = ac.getSectionForAddr(m.start())
+        sectionName = ac.getSectionsForAddr(m.start(), m.size)
         detail = ''
 
         itemSet = results.at(m.fileOffset)
