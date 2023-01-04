@@ -97,10 +97,6 @@ class VbaAddressConverter():
                 return d
 
 
-    def print(self):
-        pprint(self.ministream)
-
-
     def physicalAddressFor(self, modulepath: str, offset: int) -> int:
         # sanity checks
         mp = modulepath.split('/')

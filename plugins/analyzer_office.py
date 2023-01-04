@@ -8,7 +8,7 @@ from reducer import Reducer
 from utils import *
 from model.model import Match
 import pcodedmp.pcodedmp as pcodedmp
-from plugins.file_office import FileOffice, VbaAddressConverter
+from plugins.file_office import FileOffice, VbaAddressConverter, AddressConverter
 from pcodedmp.disasm import DisasmEntry
 from intervaltree import Interval, IntervalTree
 
@@ -32,7 +32,11 @@ def convertResults(ole, results) -> IntervalTree:
             physEnd = ac.physicalAddressFor(ite.data.modulename, ite.end)
             ite.data.begin = physBegin
             ite.data.end = physEnd
-            it.add(Interval(physBegin, physEnd, ite.data))
+
+            if physBegin > physEnd:
+                logging.warn("Physical addresses: {}-{}, cant add interval".format(physBegin, physEnd))
+            else:
+                it.add(Interval(physBegin, physEnd, ite.data))
       
     return it
 
@@ -47,12 +51,13 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
     # use the extracted vbaProject.bin from fileOffice.data
     oleFile = olefile.OleFileIO(fileOffice.data)
     results = convertResults(oleFile, results)
+    ac = AddressConverter(oleFile)
 
     # correlate the matches with the dumped code
     for m in matches:
         data = fileOffice.data[m.start():m.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
-        sectionName = 'word/vbaProject.bin'
+        sectionName = ac.getSectionForAddr(m.start())
         detail = ''
 
         itemSet = results.at(m.fileOffset)
