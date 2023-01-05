@@ -33,7 +33,7 @@ class DisasmMakroTest(unittest.TestCase):
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 1024+1), 7168+1)
 
         self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 4093), 10237)
-        self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 4125), 1565)  # not: smaller address
+        self.assertEqual(ac.physicalAddressFor("VBA/ThisDocument", 4125), 10269)
 
 
     def test_AddressConverterGetSection(self):

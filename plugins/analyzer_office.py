@@ -60,10 +60,9 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
         sectionName = ac.getSectionsForAddr(m.start(), m.size)
         detail = ''
 
-        itemSet = results.at(m.fileOffset)
+        itemSet = results.overlap(m.fileOffset, m.fileOffset+m.size)
         details = []
         for item in iter(itemSet):
-            item = next(iter(itemSet))
             detail = {}
             detail['part'] = True
             detail['textHtml'] = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
