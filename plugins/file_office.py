@@ -122,12 +122,13 @@ class VbaAddressConverter():
         sector = self._getDirForName(moduleName).isectStart
         consumed = 0
 
-        while consumed < offset:
+        while consumed < (offset - self.ole.sectorsize):
             sector = self.ole.fat[sector]
             consumed += self.ole.sectorsize
 
         offset = ((sector+1) * self.ole.sectorsize) + (offset-consumed)
         return offset
+
 
     def _ministreamAddr(self, moduleName, offset):
         # add module offset into ministream
