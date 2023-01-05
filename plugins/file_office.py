@@ -1,14 +1,18 @@
-import os
 import zipfile
 import io
 from model.model import PluginFileFormat
 import olefile
 from math import floor
+from typing import List
 
 MAKRO_PATH = 'word/vbaProject.bin'
 
 
 class FileOffice(PluginFileFormat):
+    # Represents an office file.
+    #   - fileData: the complete file content
+    #   - data: vbaProject.bin file content 
+
     def __init__(self):
         super().__init__()
 
@@ -31,8 +35,15 @@ class FileOffice(PluginFileFormat):
         return False
 
 
-    def getFileWithNewData(self, data):
+    def getFileWithNewData(self, data: bytes) -> bytes:
+        # get office file with vbaProject replaced
         return self.getPatchedByReplacement(data)
+
+
+    def getPatchedByOffset(self, offset: int, patch: bytes) -> bytes:
+        # get office file with parts of vbaProject replaced
+        goat = self.data[:offset] + patch + self.data[offset+len(patch):]
+        return self.getPatchedByReplacement(goat)
 
 
     def getPatchedByReplacement(self, data: bytes) -> bytes:
@@ -56,12 +67,10 @@ class FileOffice(PluginFileFormat):
         return outData.getvalue()
 
 
-    def getPatchedByOffset(self, offset: int, patch: bytes) -> bytes:
-        goat = self.data[:offset] + patch + self.data[offset+len(patch):]
-        return self.getPatchedByReplacement(goat)
-
-
 class VbaAddressConverter():
+    # Given a OLE file, it can convert section-relative addresses 
+    # (e.g. those from pcodedmp output) into file-based offset addresses
+
     def __init__(self, ole: olefile.olefile.OleFileIO):
         self.ole = ole
         self.ministream = None
@@ -88,22 +97,15 @@ class VbaAddressConverter():
         self.ministream = arr
 
 
-    def _getDirForName(self, name:str) -> olefile.olefile.OleDirectoryEntry:
-        for id in range(len(self.ole.direntries)):
-            d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
-            if d is None:
-                continue
-            if d.name == name:
-                return d
-
-
     def physicalAddressFor(self, modulepath: str, offset: int) -> int:
+        # return the physical address of offset of modulepath (e.g. "VBA/ThisDocument")
+
         # sanity checks
         mp = modulepath.split('/')
         if len (mp) != 2:
-            return 0
+            return -1
         if mp[0] != 'VBA':
-            return 0
+            return -1
         moduleName = mp[1]
 
         # If the stream is >4096: use normal sectors
@@ -146,7 +148,19 @@ class VbaAddressConverter():
         return result
 
 
-class AddressConverter():
+    def _getDirForName(self, name:str) -> olefile.olefile.OleDirectoryEntry:
+        for id in range(len(self.ole.direntries)):
+            d: olefile.olefile.OleDirectoryEntry = self.ole.direntries[id]
+            if d is None:
+                continue
+            if d.name == name:
+                return d
+
+
+class OleStructurizer():
+    # Parses an OLE file, so it is possible to find the section
+    # of an address/offset into the file
+
     def __init__(self, ole: olefile.olefile.OleFileIO):
         self.ole = ole
         self.sector = None
@@ -189,7 +203,9 @@ class AddressConverter():
                 self._paintMinistreamSectorChain(ministreamSect, d.name, d.isectStart, d.size)
 
 
-    def getSectionForAddr(self, addr):
+    def getSectionForAddr(self, addr: int) -> str:
+        # given an offset into the OLE file, find the section containing it
+
         # find sector
         sector = roundTo(addr, self.ole.sectorsize) // self.ole.sector_size
         if sector == 0:
@@ -208,7 +224,8 @@ class AddressConverter():
             return self.sector[sector]
 
 
-    def getSectionsForAddr(self, addr, size):
+    def getSectionsForAddr(self, addr: int, size: int) -> List[str]:
+        # given a offset and its size into a file, find all sections covered by it
         res = {}
 
         # just brute force it...

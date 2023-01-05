@@ -3,7 +3,7 @@
 import unittest
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.analyzer_office import augmentFileWord
-from plugins.file_office import FileOffice, AddressConverter, VbaAddressConverter
+from plugins.file_office import FileOffice, OleStructurizer, VbaAddressConverter
 import olefile
 from model.model import Match
 
@@ -39,7 +39,7 @@ class DisasmMakroTest(unittest.TestCase):
     def test_AddressConverterGetSection(self):
         file = 'tests/data/test.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
-        ac = AddressConverter(ole)
+        ac = OleStructurizer(ole)
         self.assertEqual(ac.getSectionForAddr(0), "Header")
         self.assertEqual(ac.getSectionForAddr(1), "Header")
         self.assertEqual(ac.getSectionForAddr(512), "FAT Sector")
@@ -51,7 +51,7 @@ class DisasmMakroTest(unittest.TestCase):
     def test_AddressConverterGetSections(self):
         file = 'tests/data/test.docm.vbaProject.bin'
         ole = olefile.OleFileIO(file)
-        ac = AddressConverter(ole)
+        ac = OleStructurizer(ole)
         
         sections = ac.getSectionsForAddr(3584, 1024)
         print(str(sections))

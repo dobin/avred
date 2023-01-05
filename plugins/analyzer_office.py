@@ -1,19 +1,19 @@
 
-import copy
 import logging
-from re import I
 import olefile
 from typing import List
 from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo
+from model.model import Match, FileInfo, Scanner
 import pcodedmp.pcodedmp as pcodedmp
-from plugins.file_office import FileOffice, VbaAddressConverter, AddressConverter
+from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
 from intervaltree import Interval, IntervalTree
 
 
-def analyzeFileWord(fileOffice: FileOffice, scanner, analyzerOptions={}):
+def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> IntervalTree:
+    # Scans a office file given with fileOffice with Scanner scanner. 
+    # Returns all matches.
     makroData = fileOffice.data
 
     reducer = Reducer(fileOffice, scanner)
@@ -21,7 +21,46 @@ def analyzeFileWord(fileOffice: FileOffice, scanner, analyzerOptions={}):
     return matchesIntervalTree
 
 
-def convertResults(ole, results) -> IntervalTree:
+def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
+    # Augment the matches with VBA decompilation and section information.
+    # Returns a FileInfo object with detailed file information too.
+
+    # dump all makros as disassembled code
+    fd = open('/dev/null', 'w')
+    disasmList = pcodedmp.processFile(fileOffice.filepath, output_file=fd)
+    fd.close()
+
+    oleFile = olefile.OleFileIO(fileOffice.data)
+    disasmList = convertDisasmAddr(oleFile, disasmList)
+    ac = OleStructurizer(oleFile)
+
+    # correlate the matches with the dumped code
+    m: Match
+    for m in matches:
+        data = fileOffice.data[m.start():m.end()]
+        dataHexdump = hexdump.hexdump(data, result='return')
+        sectionName = ac.getSectionsForAddr(m.start(), m.size)
+
+        disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)
+        details = []
+        for item in iter(disasmMatches):
+            detail = {}
+            detail['part'] = True
+            detail['textHtml'] = "{}-{} (line #{}): ".format(item.data.begin, item.data.end, item.data.lineNr) + "\n" + item.data.text
+            details.append(detail)
+
+        m.setData(data)
+        m.setDataHexdump(dataHexdump)
+        m.setInfo(sectionName)
+        m.setDetail(details)
+
+    fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())
+    return fileInfo
+
+
+def convertDisasmAddr(ole: olefile.olefile.OleFileIO, results: List[DisasmEntry]) -> IntervalTree:
+    # the output of pcodedmp is wrong. Convert results to real physical addresses.
+    # use the extracted vbaProject.bin from fileOffice.data
     ac = VbaAddressConverter(ole)
     it = IntervalTree()
 
@@ -39,39 +78,3 @@ def convertResults(ole, results) -> IntervalTree:
                 it.add(Interval(physBegin, physEnd, ite.data))
       
     return it
-
-
-def augmentFileWord(fileOffice: FileOffice, matches: List[Match]):
-    # dump makros as disassembled code
-    fd = open('/dev/null', 'w')
-    results = pcodedmp.processFile(fileOffice.filepath, output_file=fd)
-    fd.close()
-
-    # the output of pcodedmp is wrong. Convert results to real physical addresses.
-    # use the extracted vbaProject.bin from fileOffice.data
-    oleFile = olefile.OleFileIO(fileOffice.data)
-    results = convertResults(oleFile, results)
-    ac = AddressConverter(oleFile)
-
-    # correlate the matches with the dumped code
-    for m in matches:
-        data = fileOffice.data[m.start():m.end()]
-        dataHexdump = hexdump.hexdump(data, result='return')
-        sectionName = ac.getSectionsForAddr(m.start(), m.size)
-        detail = ''
-
-        itemSet = results.overlap(m.fileOffset, m.fileOffset+m.size)
-        details = []
-        for item in iter(itemSet):
-            detail = {}
-            detail['part'] = True
-            detail['textHtml'] = "{} {} {}: ".format(item.data.lineNr, item.data.begin, item.data.end) + "\n" + item.data.text
-            details.append(detail)
-
-        m.setData(data)
-        m.setDataHexdump(dataHexdump)
-        m.setInfo(sectionName)
-        m.setDetail(details)
-
-    fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())
-    return fileInfo
