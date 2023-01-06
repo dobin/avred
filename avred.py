@@ -115,11 +115,17 @@ def scanFile(args, scanner):
 
     # matches
     if os.path.exists(filenameMatches):
+        # load previous matches (offline mode)
         logging.info("Loading matches from file")
-        # load previous matches
         with open(filenameMatches, 'rb') as handle:
             matchesIt = pickle.load(handle)
     else:
+        # check if its really being detected first
+        detected = scanner.scan(file.data, file.filename)
+        if not detected:
+            logging.error(f"{file.filename} is not detected by {scanner.scanner_name}")
+            sys.exit(1)
+
         # analyze file on avred server to get matches
         matchesIt = analyzer(file, scanner, analyzerOptions)
         with open(filenameMatches, 'wb') as handle:

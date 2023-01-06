@@ -6,9 +6,15 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
+from model.model import Match, FileInfo, Scanner
+from plugins.file_pe import FilePe
+from intervaltree import Interval, IntervalTree
+from typing import List
 
 
-def analyzeFileExe(filePe, scanner, analyzerOptions={}):
+def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> IntervalTree:
+    # Scans a PE file given with filePe with Scanner scanner. 
+    # Returns all matches.
     isolate = analyzerOptions.get("isolate", False)
     remove = analyzerOptions.get("remove", False)
     ignoreText = analyzerOptions.get("ignoreText", False)
@@ -17,8 +23,9 @@ def analyzeFileExe(filePe, scanner, analyzerOptions={}):
     return matchesIntervalTree
 
 
-def augmentFilePe(filePe, matches):
-    matches = []
+def augmentFilePe(filePe: FilePe, matches: List[Match]):
+    # Augment the matches with R2 decompilation and section information.
+    # Returns a FileInfo object with detailed file information too.
 
     conv = Ansi2HTMLConverter()
     r2 = r2pipe.open(filePe.filepath)
@@ -32,28 +39,29 @@ def augmentFilePe(filePe, matches):
     for match in matches:
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
-        sectionName = filePe.findSectionNameFor(match.fileOffset)
+        section = filePe.findSectionFor(match.fileOffset)
 
-        addrDisasm = baseAddr + match.fileOffset - MORE
+        # offset from .text segment (in file)
+        offset = match.start() - section.addr
+        # base=0x400000 + .text=0x1000 + offset=0x123
+        addrDisasm = baseAddr + section.virtaddr + offset - MORE
         sizeDisasm = match.size + MORE + MORE
 
         detail = None
-        if sectionName == ".text":
+        if section.name == ".text":
             # r2: Print Dissabled (by bytes)
             asm = r2.cmd("pDJ {} @{}".format(sizeDisasm, addrDisasm))
             asm = json.loads(asm)
             for a in asm:
-                relOffset = a['offset'] - baseAddr
-
-                if relOffset >= match.start() and relOffset < match.end():
+                relOffset = a['offset'] - baseAddr - section.virtaddr
+                if relOffset >= offset and relOffset < offset+match.size:
                     a['part'] = True
-
                 a['textHtml'] = conv.convert(a['text'], full=False)
             detail = asm
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
-        match.setInfo(sectionName)
+        match.setInfo(section.name)
         match.setDetail(detail)
 
 
@@ -62,12 +70,6 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
         logging.info("Remove: Ressources, Versioninfo")
         filePe.hideSection("Ressources")
         filePe.hideSection("VersionInfo")
-
-    # check if its really being detected first
-    detected = scanner.scan(filePe.data, filePe.filename)
-    if not detected:
-        logging.error(f"{filePe.filename} is not detected by {scanner.scanner_name}")
-        return []
 
     # identify which sections get detected
     detected_sections = []

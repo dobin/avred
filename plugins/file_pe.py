@@ -11,6 +11,7 @@ class Section:
     name: str
     addr: int
     size: int
+    virtaddr: int
 
 
 class FilePe(PluginFileFormat):
@@ -29,10 +30,11 @@ class FilePe(PluginFileFormat):
             name = section.Name.decode("ascii").rstrip("\x00") # its always padded to 8 bytes with \x00
             addr = section.PointerToRawData
             size = section.SizeOfRawData
+            virtaddr = section.VirtualAddress_adj
 
             if addr != 0 and size != 0:
                 self.sections += [
-                    Section(name, addr, size)
+                    Section(name, addr, size, virtaddr)
                 ]
 
         # (not necessary?) version information
@@ -55,7 +57,7 @@ class FilePe(PluginFileFormat):
             base = d.VirtualAddress
             size = d.Size
             self.sections.append(
-                Section("Ressources", base, size)
+                Section("Ressources", base, size, virtaddr)
             )
 
 
@@ -82,6 +84,14 @@ class FilePe(PluginFileFormat):
                 return section.name
 
         return ""
+
+
+    def findSectionFor(self, address: int) -> Section:
+        for section in self.sections:
+            if address >= section.addr and address <= section.addr + section.size:
+                return section
+
+        return None
 
 
     def printSections(self):
