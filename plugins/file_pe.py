@@ -45,7 +45,7 @@ class FilePe(PluginFileFormat):
                 base = vim.get_file_offset()
                 size = vim.Length
                 self.sections.append(
-                    Section("VersionInfo", base, size)
+                    Section("VersionInfo", base, size, virtaddr)
                 )
 
         # (not necessary?) resources
