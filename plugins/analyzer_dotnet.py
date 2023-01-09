@@ -1,5 +1,66 @@
-
 from intervaltree import Interval, IntervalTree
+import logging
+from typing import List
+from model.model import Match, FileInfo, Scanner
+from plugins.file_pe import FilePe
+import os
+from utils import *
+
+
+def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
+    fileIl = filePe.filepath + '.il'
+
+    if not os.path.exists(fileIl):
+        cmdline = "ilspycmd -il {} > {}".format(filePe.filepath, fileIl)
+        os.system(cmdline)
+
+        if not os.path.exists(fileIl):
+            logging.error("Could not decompile")
+            return None
+    
+    ilspyParser = IlspyParser()
+    ilspyParser.parseFile(fileIl)
+    #ilspyParser.print()
+
+    for match in matches:
+        data = filePe.data[match.start():match.end()]
+        dataHexdump = hexdump.hexdump(data, result='return')
+        section = filePe.findSectionFor(match.fileOffset)
+       
+        addrOffset = 0x1E00
+
+        detail = []
+        if section.name == ".text":
+            addr = match.start() + addrOffset
+            ilMethod = ilspyParser.query(addr, addr+match.size)
+
+            if ilMethod is not None:
+                print("-> Found!: " + str(match.start()))
+
+                addrBase = addr - ilMethod.addr
+
+                addrTightStart = addrBase
+                addrTightEnd = addrBase + match.size
+
+                addrWideStart = addrTightStart - 16
+                addrWideEnd = addrTightEnd + 16
+
+                for instrOff in sorted(ilMethod.instructions.keys()):
+                    if instrOff > addrWideStart and instrOff < addrWideEnd:
+                        d = ilMethod.instructions[instrOff]
+                        res = {}
+                        if instrOff > addrTightStart and instrOff < addrTightEnd:
+                            res['part'] = True
+                        else: 
+                            res['part'] = False
+                        res['textHtml'] = d
+                        res['text'] = d
+                        detail.append(res)
+
+        match.setData(data)
+        match.setDataHexdump(dataHexdump)
+        match.setInfo(section.name)
+        match.setDetail(detail)
 
 
 class IlMethod():
@@ -8,7 +69,7 @@ class IlMethod():
         self.addr = None
         self.size = None
         self.className = None
-        self.il = []
+        self.instructions = {}
 
     def setName(self, name, className=''):
         self.name = name
@@ -20,15 +81,19 @@ class IlMethod():
     def setSize(self, size):
         self.size = size
 
-    def addIl(self, il):
-        self.il.append(il)
+    def addInstruction(self, instructionLine):
+        # IL_0005: stloc.0
+        s = instructionLine.split(' ')
+        nr = s[0].lstrip('IL_').rstrip(':')
+        nrInt = int(nr, 16)
+        self.instructions[nrInt] = instructionLine
 
     def __str__(self):
         s = ''
         s += "Func {}::{} at {} with size {}:\n".format(
             self.className, self.name, self.addr, self.size)
-        for il in self.il:
-            s += "  {}\n".format(il)
+        for instruction in self.instructions:
+            s += "  {}\n".format(instruction)
         return s
 
 
@@ -66,23 +131,27 @@ class IlspyParser():
             if line.startswith('IL_'):
                 self.newIl(line)
 
-            if count > 120:
-                break
             count += 1
 
         file.close()
 
         # convert
         for method in self.methods:
-            methodIt = Interval(method.addr, method.addr+method.size, method)
-            self.methodsIt.add(methodIt)
+            if method.addr is None or method.size is None:
+                #logging.error("Error in parsing: " + str(method))
+                pass
+            else:
+                methodIt = Interval(method.addr, method.addr+method.size, method)
+                self.methodsIt.add(methodIt)
 
 
-    def query(self, addr):
-        res = self.methodsIt.at(addr)
+    def query(self, begin, end) -> List[IlMethod]:
+        res = self.methodsIt.overlap(begin, end)
+        if len(res) == 0:
+            return None
         res = list(res)[0].data
-        print("BBBB: " + str(res.name))
         return res
+
 
     def print(self):
         for method in self.methods:
@@ -129,5 +198,5 @@ class IlspyParser():
     def newIl(self, line):
         # IL_0000: ldarg.0
         l = line.split(': ')
-        self.currentMethod.addIl(line)
+        self.currentMethod.addInstruction(line)
 

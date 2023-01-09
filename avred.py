@@ -15,6 +15,7 @@ from model.model import Match
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
+from plugins.analyzer_dotnet import augmentFileDotnet
 from plugins.analyzer_plain import analyzeFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
@@ -102,8 +103,13 @@ def scanFile(args, scanner):
     elif args.file.endswith('.exe'):
         file = FilePe()
         file.loadFromFile(args.file)
+
         analyzer = analyzeFileExe
-        augmenter = augmentFilePe
+
+        if file.isDotNet:
+            augmenter = augmentFileDotnet
+        else:
+            augmenter = augmentFilePe
 
         analyzerOptions["isolate"] = args.isolate
         analyzerOptions["remove"] = args.remove

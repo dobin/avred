@@ -18,12 +18,18 @@ class FilePe(PluginFileFormat):
     def __init__(self):
         super().__init__()
         self.sections = []
+        self.isDotNet = False
         
 
     def parseFile(self) -> bool:
         self.data = self.fileData  # no container, file is the data
 
         pepe = pefile.PE(data=self.data)
+
+        # https://stackoverflow.com/questions/45574925/is-there-a-way-to-check-if-an-exe-is-dot-net-with-python-pefile
+        isDotNet = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[14]
+        if isDotNet.VirtualAddress != 0 and isDotNet.Size != 0:
+            self.isDotNet = True
 
         # Normal sections
         for section in pepe.sections:
