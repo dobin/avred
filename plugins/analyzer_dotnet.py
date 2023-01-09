@@ -26,11 +26,10 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
         section = filePe.findSectionFor(match.fileOffset)
-       
-        addrOffset = 0x1E00
 
         detail = []
         if section.name == ".text":
+            addrOffset = section.virtaddr - section.addr
             addr = match.start() + addrOffset
             ilMethod = ilspyParser.query(addr, addr+match.size)
 

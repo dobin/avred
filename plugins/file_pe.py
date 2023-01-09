@@ -19,6 +19,7 @@ class FilePe(PluginFileFormat):
         super().__init__()
         self.sections = []
         self.isDotNet = False
+        self.baseAddr = 0
         
 
     def parseFile(self) -> bool:
@@ -30,6 +31,8 @@ class FilePe(PluginFileFormat):
         isDotNet = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[14]
         if isDotNet.VirtualAddress != 0 and isDotNet.Size != 0:
             self.isDotNet = True
+
+        self.baseAddr = pepe.OPTIONAL_HEADER.ImageBase
 
         # Normal sections
         for section in pepe.sections:
