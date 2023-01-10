@@ -47,7 +47,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
         addrDisasm = baseAddr + section.virtaddr + offset - MORE
         sizeDisasm = match.size + MORE + MORE
 
-        detail = None
+        detail = []
         if section.name == ".text":
             # r2: Print Dissabled (by bytes)
             asm = r2.cmd("pDJ {} @{}".format(sizeDisasm, addrDisasm))

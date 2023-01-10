@@ -1,4 +1,3 @@
-
 import logging
 import olefile
 from typing import List

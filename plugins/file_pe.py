@@ -91,7 +91,6 @@ class FilePe(PluginFileFormat):
         for section in self.sections:
             if address >= section.addr and address <= section.addr + section.size:
                 return section.name
-
         return ""
 
 
@@ -99,7 +98,13 @@ class FilePe(PluginFileFormat):
         for section in self.sections:
             if address >= section.addr and address <= section.addr + section.size:
                 return section
+        return None
 
+
+    def getSectionByName(self, sectionName: str) -> Section:
+        for section in self.sections:
+            if section.name == sectionName:
+                return section
         return None
 
 
