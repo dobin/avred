@@ -10,6 +10,7 @@ from utils import *
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
     fileIl = filePe.filepath + '.il'
 
+    # reload existing .il disassembly if already exists
     if not os.path.exists(fileIl):
         cmdline = "ilspycmd -il {} > {}".format(filePe.filepath, fileIl)
         os.system(cmdline)
@@ -32,13 +33,13 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         textSection.virtaddr, textSection.addr, addrOffset))
 
     for match in matches:
+        detail = []
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdump.hexdump(data, result='return')
-        section = filePe.findSectionFor(match.fileOffset)
-        detail = []
-        info = section.name
+        sectionName = filePe.findSectionNameFor(match.fileOffset)
+        info = sectionName
 
-        if section.name == ".text":  # only disassemble in .text
+        if sectionName == ".text":  # only disassemble in .text
             # We have the physical file offset/address given in match
             # What we need is the RVA, as used by ilspy
             addr = match.start() + addrOffset
@@ -54,13 +55,14 @@ def getDotNetDisassembly(match, addr, ilspyParser):
     detail = []
 
     ilMethod = ilspyParser.query(addr, addr+match.size)
-    logging.info("Match at physical 0x{:X} converted to 0x{:X} disassembly found: {}".format(
+    logging.info("Match physical 0x{:X} (converted to 0x{:X}), disassembly found: {}".format(
         match.start(), addr, ilMethod))
     if ilMethod is None:
         return detail, '.text'
 
-    # The method has RVA addresses
-    # Its instructions have addresses relative to the method start
+    # The "method" has RVA addresses
+    # But the method's instructions have addresses relative to the method start (in bytes)
+    # e.g. addrBase is between 0 - len(method)
     addrBase = addr - ilMethod.addr
 
     # all relevant instructions
@@ -84,7 +86,8 @@ def getDotNetDisassembly(match, addr, ilspyParser):
             res['text'] = d
             detail.append(res)
 
-    return detail, '.text: ' + ilMethod.getName()
+    info = ".text: {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
+    return detail, info
 
 
 class IlMethod():
