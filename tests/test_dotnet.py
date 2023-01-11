@@ -26,6 +26,11 @@ class DotnetDisasmTest(unittest.TestCase):
             method = ilspyParser.query(155210, 155210+10)
 
             # Headersize: 1
+            # Codesize: 21
+            self.assertEqual(method.headerSize, 1)
+            self.assertEqual(method.codeSize, 21)
+            self.assertEqual(method.getSize(), 1+21)
+
             # IL_0006: ldc.i4.s 32
             instr = method.instructions[6+1]
             self.assertTrue(instr == 'IL_0006: ldc.i4.s 32')
@@ -81,11 +86,13 @@ class DotnetDisasmTest(unittest.TestCase):
             Offset in decompile:  0x209c
             Difference:           0x1E00
             """
+            headerSize = 1
 
             matches = []
             match = Match(0, 669, 16)
             matches.append(match)
 
             augmentFileDotnet(filePe, matches)
-            self.assertEqual(matches[0].detail[0+1]['text'], 'IL_0000: ldarg.1')
-            self.assertEqual(matches[0].detail[5+1]['text'], 'IL_0007: ldstr "A"')
+            self.assertEqual(matches[0].detail[0+headerSize]['text'], '0x29D: IL_0000: ldarg.1')
+            self.assertEqual(matches[0].detail[5+headerSize]['text'], '0x2A4: IL_0007: ldstr "A"')
+
