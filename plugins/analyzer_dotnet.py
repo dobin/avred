@@ -43,7 +43,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
             # We have the physical file offset/address given in match
             # What we need is the RVA, as used by ilspy
             addr = match.start() + addrOffset
-            detail, info = getDotNetDisassembly(match, addr, ilspyParser)
+            detail, info = getDotNetDisassembly(match, addr, ilspyParser, addrOffset)
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
@@ -51,7 +51,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         match.setDetail(detail)
 
 
-def getDotNetDisassembly(match, addr, ilspyParser):
+def getDotNetDisassembly(match, addr, ilspyParser, addrOffset):
     detail = []
 
     ilMethod = ilspyParser.query(addr, addr+match.size)
@@ -82,6 +82,7 @@ def getDotNetDisassembly(match, addr, ilspyParser):
                 res['part'] = True
             else: 
                 res['part'] = False
+            d = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
             res['textHtml'] = d
             res['text'] = d
             detail.append(res)
@@ -114,7 +115,7 @@ class IlMethod():
 
     def setHeaderSize(self, size):
         self.headerSize = size
-        self.instructions[0] = 'Header'
+        self.instructions[0] = "Header (size {})".format(size)
 
     def getSize(self):
         return self.codeSize + self.headerSize
