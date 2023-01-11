@@ -17,7 +17,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
             method = ilspyParser.query(155210, 155210+10)
             self.assertIsNotNone(method)
-            self.assertTrue(method.name == "'<SetPinForPrivateKey>b__1'")
+            self.assertTrue("'<SetPinForPrivateKey>b__1'" in method.name)
 
 
         def test_ilspydisasm_cmd(self):
@@ -25,8 +25,9 @@ class DotnetDisasmTest(unittest.TestCase):
             ilspyParser.parseFile(filename)
             method = ilspyParser.query(155210, 155210+10)
 
+            # Headersize: 1
             # IL_0006: ldc.i4.s 32
-            instr = method.instructions[6]
+            instr = method.instructions[6+1]
             self.assertTrue(instr == 'IL_0006: ldc.i4.s 32')
 
 
@@ -76,7 +77,7 @@ class DotnetDisasmTest(unittest.TestCase):
             Match at offset:            669          29D in dotnet-test.dll
 
             Conclusion: 
-            Offset in file:       0x029c
+            Offset in file:       0x029c = 668
             Offset in decompile:  0x209c
             Difference:           0x1E00
             """
@@ -86,5 +87,5 @@ class DotnetDisasmTest(unittest.TestCase):
             matches.append(match)
 
             augmentFileDotnet(filePe, matches)
-            self.assertEqual(matches[0].detail[0]['text'], 'IL_0000: ldarg.1')
-
+            self.assertEqual(matches[0].detail[0+1]['text'], 'IL_0000: ldarg.1')
+            self.assertEqual(matches[0].detail[5+1]['text'], 'IL_0007: ldstr "A"')

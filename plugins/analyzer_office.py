@@ -37,7 +37,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
     m: Match
     for m in matches:
         data = fileOffice.data[m.start():m.end()]
-        dataHexdump = hexdump.hexdump(data, result='return')
+        dataHexdump = hexdmp(data, offset=m.start())
         sectionName = ac.getSectionsForAddr(m.start(), m.size)
 
         disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)

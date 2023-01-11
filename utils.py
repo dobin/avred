@@ -4,7 +4,6 @@ import random
 import os
 from enum import Enum
 import base64
-import hexdump
 
 def saveMatchesToFile(filename, matches):
     # convert first
@@ -55,6 +54,17 @@ def printMatches(data, matches):
         dataDump = data[i.begin:i.end]
 
         print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-        print(hexdump.hexdump(dataDump, result='return'))
+        print(hexdmp(dataDump, offset=i.begin))
 
-        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdump.hexdump(dataDump, result='return'))
+        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
+
+
+def hexdmp(src, offset=0, length=16):
+    result = []
+    digits = 4 if isinstance(src, str) else 2
+    for i in range(0, len(src), length):
+        s = src[i:i+length]
+        hexa = ' '.join(["%0*X" % (digits, x)  for x in s])
+        text = ''.join([chr(x) if 0x20 <= x < 0x7F else '.'  for x in s])
+        result.append("%08X   %-*s   %s" % (i+offset, length*(digits + 1), hexa, text) )
+    return('\n'.join(result))

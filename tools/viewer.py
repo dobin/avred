@@ -3,7 +3,7 @@ import json
 import pprint
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
-import hexdump
+from utils import *
 
 PREV = 16
 POST = 16
@@ -22,7 +22,7 @@ def convertMatches(fileContent: bytes, matches, filename):
         match['idx'] = str(idx)
 
         data = fileContent[match['start']:match['end']]
-        match['textHex'] = hexdump.hexdump(data, result='return')
+        match['textHex'] = hexdmp(data, offset=match['start'])
 
         match['startHex'] = str(hex(baseAddr + match['start']))
         match['endHex'] = str(hex(baseAddr + match['end']))

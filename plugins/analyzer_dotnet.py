@@ -35,7 +35,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
     for match in matches:
         detail = []
         data = filePe.data[match.start():match.end()]
-        dataHexdump = hexdump.hexdump(data, result='return')
+        dataHexdump = hexdmp(data, offset=match.start())
         sectionName = filePe.findSectionNameFor(match.fileOffset)
         info = sectionName
 
@@ -55,10 +55,10 @@ def getDotNetDisassembly(match, addr, ilspyParser):
     detail = []
 
     ilMethod = ilspyParser.query(addr, addr+match.size)
-    logging.info("Match physical 0x{:X} (converted to 0x{:X}), disassembly found: {}".format(
-        match.start(), addr, ilMethod))
     if ilMethod is None:
         return detail, '.text'
+    logging.info("Match physical {}/0x{:X} (converted to {}/0x{:X}), disassembly found: {}".format(
+        match.start(), match.start(), addr, addr, ilMethod))
 
     # The "method" has RVA addresses
     # But the method's instructions have addresses relative to the method start (in bytes)
@@ -94,7 +94,8 @@ class IlMethod():
     def __init__(self):
         self.name = None
         self.addr = None
-        self.size = None
+        self.codeSize = None
+        self.headerSize = None
         self.className = None
         self.instructions = {}
 
@@ -108,20 +109,28 @@ class IlMethod():
     def setAddr(self, addr):
         self.addr = addr
 
-    def setSize(self, size):
-        self.size = size
+    def setCodeSize(self, size):
+        self.codeSize = size
+
+    def setHeaderSize(self, size):
+        self.headerSize = size
+        self.instructions[0] = 'Header'
+
+    def getSize(self):
+        return self.codeSize + self.headerSize
 
     def addInstruction(self, instructionLine):
         # IL_0005: stloc.0
         s = instructionLine.split(' ')
         nr = s[0].lstrip('IL_').rstrip(':')
         nrInt = int(nr, 16)
+        nrInt += self.headerSize
         self.instructions[nrInt] = instructionLine
 
     def __str__(self):
         s = ''
         s += "Func {}::{} at {} with size {}\n".format(
-            self.className, self.name, self.addr, self.size)
+            self.className, self.name, self.addr, self.getSize())
         #for instruction in self.instructions:
         #    s += "  {}\n".format(instruction)
         return s
@@ -168,11 +177,14 @@ class IlspyParser():
 
         # convert
         for method in self.methods:
-            if method.addr is None or method.size is None:
+            if method.addr is None or method.codeSize is None or method.headerSize is None:
                 #logging.error("Error in parsing: " + str(method))
                 pass
             else:
-                methodIt = Interval(method.addr, method.addr+method.size, method)
+                methodIt = Interval(
+                    method.addr, 
+                    method.addr+method.getSize(), 
+                    method)
                 self.methodsIt.add(methodIt)
 
 
@@ -242,10 +254,14 @@ class IlspyParser():
             addr = l[5]
             addr = int(addr, 16)
             self.currentMethod.setAddr(addr)
+        if line.startswith('// Header size: '):
+            size = l[3]
+            size = int(size)
+            self.currentMethod.setHeaderSize(size)
         if line.startswith('// Code size: '):
             size = l[3]
             size = int(size)
-            self.currentMethod.setSize(size)
+            self.currentMethod.setCodeSize(size)
 
 
     def newIl(self, line):

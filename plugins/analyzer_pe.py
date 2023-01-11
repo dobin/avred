@@ -38,7 +38,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
     MORE = 16
     for match in matches:
         data = filePe.data[match.start():match.end()]
-        dataHexdump = hexdump.hexdump(data, result='return')
+        dataHexdump = hexdmp(data, offset=match.start())
         section = filePe.findSectionFor(match.fileOffset)
 
         # offset from .text segment (in file)

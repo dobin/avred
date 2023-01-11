@@ -1,6 +1,6 @@
-import hexdump
 import logging
 from intervaltree import Interval, IntervalTree
+from utils import *
 
 SIG_SIZE = 128
 
@@ -60,7 +60,7 @@ class Reducer():
                 logging.debug("No more detection")
                 data = data[sectionStart:sectionStart+size]
 
-                logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdump.hexdump(data, result='return'))
+                logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" + "\n" + hexdmp(data, offset=sectionStart))
                 it.add ( Interval(sectionStart, sectionStart+size) )
             else: 
                 # make it smaller still. Take complete data (not nulled)
