@@ -1,18 +1,40 @@
 # avred
 
-Based on: https://github.com/scrt/avdebugger
+Avred is being used to identify which parts of a file are identified
+by a Antivirus, and tries to show as much possible information and context about each match. 
+
+It is mainly used to make it easier for RedTeamers to obfuscate their
+tools. 
+
+
+## Background
 
 Most antivirus engines rely on strings or other bytes sequences to recognize malware.
 This project helps to automatically recover these signatures.
 
-Similar to matterpreter/DefenderCheck and rasta-mouse/ThreatCheck, but working on individual
-PE sections, more modular, and in python.
+The difference to similar projects is: 
+* Knowledge of internal file structures. 
+  * Can extract vbaProject.bin and modify it 
+  * Knows about PE sections and scan each one individually
+* Supports any Antivirus (thanks to AMSI server via HTTP)
+* Shows detailed information about each match
+* Verifies the results
+
+
+## Inspiration
+
+* Similar to matterpreter/DefenderCheck and rasta-mouse/ThreatCheck
+* Based on: https://github.com/scrt/avdebugger
 
 
 ## Supports
 
-* PE files (exe, .NET)
-* Office (2007+ formats)
+* PE (EXE) files
+* PE .NET files 
+* Word files
+
+This includes: 
+* Code decompilation (assembly, .NET IL, and makros)
 
 
 ## Install 
@@ -55,6 +77,7 @@ if the AV still detects it.
 *If there are a lot of matches in `.text`*, use `--ignoreText` to skip analyzing this section.
 The findings in the other sections are usually good enough. 
 
+
 ## Tested with: 
 
 * pe/
@@ -69,6 +92,7 @@ The findings in the other sections are usually good enough.
   * Seatbelt.exe
   * SharpHound.exe
   * SharpSploit.dll
+
 
 # Web server
 

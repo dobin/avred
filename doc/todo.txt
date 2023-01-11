@@ -1,3 +1,4 @@
+# Todo
 
 + MIN_LEAP = 4
   + merge adjectant matches
@@ -17,26 +18,48 @@
     + once every sections 
     + one byte every section
 + show decompile stuff 
++ .net: decompile is useless, and wrong (offset)?
+  + detect if its .net
+  + use a .net IL decompiler  https://github.com/icsharpcode/ILSpy
++ make radare, .net decompile optional
++ unify verifvFile in analyzer_office, analyzer_pe?
++ make all command line options a class or struct
+
 
 ---------------------------------------------------
 
+* make source overview document 
+
+
+* my own hexprint implemntation which takes an addr as argument
+* make match.detail an object
+
+dotnet: 
+* match could cover multiple methods - handle that
+* add other, more detailed references (not just .code, but the other possible sections)
+* are the instructions really calculated correctly?
+  * add header size too?
+  * output individual instructions with offset (RVA)
+* add file structure (nice layout of offsets n stuff like office)
+
+verification: 
+* make enum out of info ("one match after another"...)
+flask:
 * Upload with no file is hard error
 
-* .net: decompile is useless, and wrong (offset)?
-  * detect if its .net
-  * use a .net IL decompiler  https://github.com/icsharpcode/ILSpy
+general: 
+* handle ctrl-c gracefully 
 
-* make radare, .net decompile optional
 
+---------------------------------------------------
     
 * other office formats
   * https://en.wikipedia.org/wiki/List_of_Microsoft_Office_filename_extensions
   * do dotm, xlsm, xltm, pptm, potm, ppsm, sldm all work the same?
   * support for doc, xls? (not a zip)
 
-* unify verifvFile in analyzer_office, analyzer_pe?
+pe:
 * --isolate will isolate on identify section, but not upon scan...
-* handle ctrl-c gracefully 
 * remove sections which dont start with a "."? (e.g. test.exe)
 
 ------------------------------------------------
@@ -44,7 +67,6 @@
 # Handle later
 
 ? versioninfo/resources really necessary?
-* make all command line options a class or struct
 * automagically handle too many results in text (and other sections?)
 * whats up with the small chunksize?
   * e.g. lazagne
@@ -53,50 +75,3 @@
 
 
 ------------------------------------------------
-
-# Analysis results
-
-* msf/test3 does never end, and needs --isolate?
-
-
-## Mimikatz 
-
-mimikatz.exe: normal args: Will detect two sections in .rodata
--> create mimikatz-patched.exe
-
-mimikatz-patched.exe: 
-  <none>: 
-    * will detect 7 sections (all except .text)
-    * bug in copying or modifying?
-    * its in "Ressources", why does it trigger otherwise?
-  --isolate:
-    * detects .rdata
-    * can't pinpoint it?!
-  --remove:
-    * undetected! (its in "Ressources")
-
-  notes: 
-    * removing .rdata works too
-    * removing .pdata works too...
-    * changing 1 byte in .reloc works (+0, +100)
-    * changing 1 byte in .pdata works too (+100)
-
-solution:
-I patched with the same bytes as before ("AAAAA"...). 
-Seems defender somehow realized it is malicious again!
-
-
-## PetitePotatom
-
-* <none>:
-  * many, many detections - many in .code 
-* --isolate:
-  * no detections!
-
-* patch:
-  * in .text, .rdata, .data one byte: no difference, still detected 
-
-solution:
-Just ignore .text...
-
- 

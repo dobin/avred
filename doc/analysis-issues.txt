@@ -1,0 +1,47 @@
+
+# Analysis results
+
+* msf/test3 does never end, and needs --isolate?
+
+
+## Mimikatz 
+
+mimikatz.exe: normal args: Will detect two sections in .rodata
+-> create mimikatz-patched.exe
+
+mimikatz-patched.exe: 
+  <none>: 
+    * will detect 7 sections (all except .text)
+    * bug in copying or modifying?
+    * its in "Ressources", why does it trigger otherwise?
+  --isolate:
+    * detects .rdata
+    * can't pinpoint it?!
+  --remove:
+    * undetected! (its in "Ressources")
+
+  notes: 
+    * removing .rdata works too
+    * removing .pdata works too...
+    * changing 1 byte in .reloc works (+0, +100)
+    * changing 1 byte in .pdata works too (+100)
+
+solution:
+I patched with the same bytes as before ("AAAAA"...). 
+Seems defender somehow realized it is malicious again!
+
+
+## PetitePotatom
+
+* <none>:
+  * many, many detections - many in .code 
+* --isolate:
+  * no detections!
+
+* patch:
+  * in .text, .rdata, .data one byte: no difference, still detected 
+
+solution:
+Just ignore .text...
+
+ 
