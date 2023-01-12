@@ -3,8 +3,8 @@
     <thead>
         <tr>
             <td>Test #</td>
-            <td>Info</td>
-            <td>Type</td>
+            <td>ModifyOrder</td>
+            <td>ModifyPosition</td>
 
             {% for testEntry in verifications[0].testEntries %}
             <td>Match {{loop.index0}}</td>
@@ -34,7 +34,25 @@
 
 </table>
 
+<h2>ModifyOrder:</h2>
 <p>
     Result of detection. True means detected, false means not detected. 
 </p>
 
+<p>
+    INCREMENTAL: Each match will be modified, starting from the first. 
+
+</p>
+
+<p>
+    INDEPENDANT: Each match is modified by itself, without touching others. 
+</p>
+
+<h2>ModifyPosition</h2>
+<p>
+    FULL: Complete match will be modified
+</p>
+
+<p>
+    MIDDLE: Only a few bytes in the middle will be modified
+</p>

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from model.model import TestType, Verification
+from model.model import TestModifyPosition, TestModifyOrder, Verification
 from utils import FillType
 import logging
 
@@ -7,8 +7,8 @@ def verify(file, matches, scanner):
     verificationRuns = []
     logging.info(f"Verify {len(matches)} matches")
 
-    verificationRun = Verification(index=0, type=TestType.FULL, 
-        info="One match after another, additive")
+    verificationRun = Verification(index=0, type=TestModifyPosition.FULL, 
+        info=TestModifyOrder.INCREMENTAL)
     logging.info("One match after another, additive")
     fileCopy = deepcopy(file)
     for match in matches:
@@ -18,8 +18,8 @@ def verify(file, matches, scanner):
         verificationRun.testEntries.append(result)
     verificationRuns.append(verificationRun)
 
-    verificationRun = Verification(index=1, type=TestType.FULL, 
-        info="Each individually")
+    verificationRun = Verification(index=1, type=TestModifyPosition.FULL, 
+        info=TestModifyOrder.INDEPENDANT)
     logging.info("Each individually")
     for match in matches:
         fileCopy = deepcopy(file)
@@ -29,8 +29,8 @@ def verify(file, matches, scanner):
         verificationRun.testEntries.append(result)
     verificationRuns.append(verificationRun)
 
-    verificationRun = Verification(index=2, type=TestType.MIDDLE, 
-        info="One match after another, additive")
+    verificationRun = Verification(index=2, type=TestModifyPosition.MIDDLE, 
+        info=TestModifyOrder.INCREMENTAL)
     logging.info("One match after another, additive")
     fileCopy = deepcopy(file)
     for match in matches:
@@ -41,8 +41,8 @@ def verify(file, matches, scanner):
         verificationRun.testEntries.append(result)
     verificationRuns.append(verificationRun)
 
-    verificationRun = Verification(index=3, type=TestType.MIDDLE, 
-        info="Each individually")
+    verificationRun = Verification(index=3, type=TestModifyPosition.MIDDLE, 
+        info=TestModifyOrder.INDEPENDANT)
     logging.info("Each individually: MIDDLE")
     for match in matches:
         fileCopy = deepcopy(file)

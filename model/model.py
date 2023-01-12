@@ -66,7 +66,12 @@ class Match():
         return s
 
 
-class TestType(Enum):
+class TestModifyOrder(Enum):
+    INCREMENTAL = 1
+    INDEPENDANT = 2
+
+
+class TestModifyPosition(Enum):
     FULL = 1
     MIDDLE = 2
 
@@ -74,8 +79,8 @@ class TestType(Enum):
 class Verification():
     def __init__(self, index, type, info):
         self.index: int = index
-        self.type: TestType = type
-        self.info: str = info
+        self.type: TestModifyPosition = type
+        self.info: TestModifyOrder = info
         self.testEntries: List[bool] = []
 
     def __str__(self):
