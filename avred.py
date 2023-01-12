@@ -10,8 +10,7 @@ import logging
 
 from config import Config
 from verifier import verify
-from model.model import Outcome
-from model.model import Match
+from model.model import *
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe

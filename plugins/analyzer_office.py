@@ -43,11 +43,11 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
         disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)
         details = []
         for item in iter(disasmMatches):
-            text =  "{}-{} (line #{}): ".format(
-                item.data.begin, item.data.end, item.data.lineNr)
+            text =  "line #{} (0x{:X}-0x{:X}): ".format(
+                item.data.lineNr, item.data.begin, item.data.end)
             text += "\n" + item.data.text
             disasmLine = DisasmLine(
-                m.fileOffset, 
+                item.data.begin, 
                 item.data.begin,
                 False,
                 text,

@@ -62,7 +62,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
                 textHtml = conv.convert(text, full=False)
             
                 disasmLine = DisasmLine(
-                    relOffset, 
+                    relOffset + section.addr, 
                     a['offset'],
                     isPart,
                     text, 

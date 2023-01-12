@@ -81,7 +81,8 @@ def getDotNetDisassembly(match: Match, addr: int, ilspyParser, addrOffset: int):
             isPart = False
             if instrOff > addrTightStart and instrOff < addrTightEnd:
                 isPart = True
-            line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
+            #line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
+            line = d
 
             disasmLine = DisasmLine(
                 ilMethod.addr+instrOff-addrOffset,

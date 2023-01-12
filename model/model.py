@@ -18,7 +18,7 @@ class Scanner:
 
 class DisasmLine():
     def __init__(self, fileOffset, rva, part, text, textHtml):
-        self.offset = fileOffset  # offset in file (as identified by avred)
+        self.offset = str(hex(fileOffset))  # offset in file (as identified by avred)
         self.rva = rva  # relative offset (usually created by external disasm tool)
         self.part = part  # is this part of the data, or supplemental?
         self.text = text  # the actual disassembled data
@@ -75,6 +75,11 @@ class TestModifyPosition(Enum):
     FULL = 1
     MIDDLE = 2
 
+
+# TEMP
+class TestType(Enum):
+    FULL = 1
+    MIDDLE = 2
 
 class Verification():
     def __init__(self, index, type, info):
