@@ -9,8 +9,7 @@ import subprocess
 import glob
 import pickle
 from app  import app
-from model.model import Outcome, FileInfo
-
+from model.model import *
 
 ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
 EXT_INFO = ".outcome"
@@ -51,7 +50,7 @@ def files():
     for example in examples:
         name = os.path.basename(example[:-len(EXT_INFO)])
         res.append(name)
-    return render_template('file_list.html',
+    return render_template('list_files.html',
         filenames=res)
 
 

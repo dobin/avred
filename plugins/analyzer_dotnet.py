@@ -1,7 +1,7 @@
 from intervaltree import Interval, IntervalTree
 import logging
 from typing import List
-from model.model import Match, FileInfo, Scanner
+from model.model import Match, FileInfo, Scanner, DisasmLine
 from plugins.file_pe import FilePe
 import os
 from utils import *
@@ -51,7 +51,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         match.setDetail(detail)
 
 
-def getDotNetDisassembly(match, addr, ilspyParser, addrOffset):
+def getDotNetDisassembly(match: Match, addr: int, ilspyParser, addrOffset: int):
     detail = []
 
     ilMethod = ilspyParser.query(addr, addr+match.size)
@@ -77,15 +77,20 @@ def getDotNetDisassembly(match, addr, ilspyParser, addrOffset):
     for instrOff in sorted(ilMethod.instructions.keys()):
         if instrOff > addrWideStart and instrOff < addrWideEnd:
             d = ilMethod.instructions[instrOff]
-            res = {}
+
+            isPart = False
             if instrOff > addrTightStart and instrOff < addrTightEnd:
-                res['part'] = True
-            else: 
-                res['part'] = False
-            d = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
-            res['textHtml'] = d
-            res['text'] = d
-            detail.append(res)
+                isPart = True
+            line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
+
+            disasmLine = DisasmLine(
+                ilMethod.addr+instrOff-addrOffset,
+                ilMethod.addr+instrOff,
+                isPart, 
+                line, 
+                line
+            )
+            detail.append(disasmLine)
 
     info = ".text: {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
     return detail, info

@@ -92,6 +92,6 @@ class DisasmMakroTest(unittest.TestCase):
 
         self.assertEqual(len(matches), 1)
         match = matches[0]
-        detail = match.detail[0]['textHtml']
+        detail = match.detail[0].textHtml
         self.assertTrue("Ld msg" in detail)
         self.assertTrue("ArgsCall MsgBox 0x0001" in detail)

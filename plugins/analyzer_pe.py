@@ -6,7 +6,7 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
-from model.model import Match, FileInfo, Scanner
+from model.model import Match, FileInfo, Scanner, DisasmLine
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
 from typing import List
@@ -54,10 +54,21 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
             asm = json.loads(asm)
             for a in asm:
                 relOffset = a['offset'] - baseAddr - section.virtaddr
+                isPart = False
                 if relOffset >= offset and relOffset < offset+match.size:
-                    a['part'] = True
-                a['textHtml'] = conv.convert(a['text'], full=False)
-            detail = asm
+                    isPart = True
+                
+                text = a['text']
+                textHtml = conv.convert(text, full=False)
+            
+                disasmLine = DisasmLine(
+                    relOffset, 
+                    a['offset'],
+                    isPart,
+                    text, 
+                    textHtml
+                )
+                detail.append(disasmLine)
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
@@ -85,15 +96,15 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
         return []
 
     print(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
+
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         print(f"  section: {section.name}")
         logging.info(f"  section: {section.name}")
 
     if len(detected_sections) > 3:
-        print("More than 3 sections detected. That cant be right.")
-        print("Try --isolate")
-        logging.info("More than 3 sections detected. That cant be right.")
+        print("More than 3 sections detected. Weird. Maybe try --isolate for better results")
+        logging.info("More than 3 sections detected. Weird. Maybe try --isolate for better results")
         return []
 
     # analyze each detected section

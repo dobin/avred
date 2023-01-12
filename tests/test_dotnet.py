@@ -93,6 +93,6 @@ class DotnetDisasmTest(unittest.TestCase):
             matches.append(match)
 
             augmentFileDotnet(filePe, matches)
-            self.assertEqual(matches[0].detail[0+headerSize]['text'], '0x29D: IL_0000: ldarg.1')
-            self.assertEqual(matches[0].detail[5+headerSize]['text'], '0x2A4: IL_0007: ldstr "A"')
+            self.assertEqual(matches[0].detail[0+headerSize].text, '0x29D: IL_0000: ldarg.1')
+            self.assertEqual(matches[0].detail[5+headerSize].text, '0x2A4: IL_0007: ldstr "A"')
 

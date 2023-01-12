@@ -8,6 +8,7 @@ from tests.helpers import TestDetection
 from pprint import pprint
 from plugins.file_pe import FilePe
 
+
 class PeTest(unittest.TestCase):
     def test_pe0(self):
         # simple, 1

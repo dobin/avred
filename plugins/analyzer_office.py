@@ -3,7 +3,7 @@ import olefile
 from typing import List
 from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo, Scanner
+from model.model import Match, FileInfo, Scanner, DisasmLine
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
@@ -43,10 +43,17 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
         disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)
         details = []
         for item in iter(disasmMatches):
-            detail = {}
-            detail['part'] = True
-            detail['textHtml'] = "{}-{} (line #{}): ".format(item.data.begin, item.data.end, item.data.lineNr) + "\n" + item.data.text
-            details.append(detail)
+            text =  "{}-{} (line #{}): ".format(
+                item.data.begin, item.data.end, item.data.lineNr)
+            text += "\n" + item.data.text
+            disasmLine = DisasmLine(
+                m.fileOffset, 
+                item.data.begin,
+                False,
+                text,
+                text,
+            )
+            details.append(disasmLine)
 
         m.setData(data)
         m.setDataHexdump(dataHexdump)

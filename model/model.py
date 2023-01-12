@@ -16,16 +16,25 @@ class Scanner:
         pass
 
 
+class DisasmLine():
+    def __init__(self, fileOffset, rva, part, text, textHtml):
+        self.offset = fileOffset  # offset in file (as identified by avred)
+        self.rva = rva  # relative offset (usually created by external disasm tool)
+        self.part = part  # is this part of the data, or supplemental?
+        self.text = text  # the actual disassembled data
+        self.textHtml = textHtml  # the actual disassembled data, colored
+
+
 class Match():
-    def __init__(self, idx, fileOffset, size):
-        self.idx = idx
-        self.fileOffset = fileOffset
-        self.size = size
+    def __init__(self, idx: int, fileOffset:int , size: int):
+        self.idx: int = idx
+        self.fileOffset: int = fileOffset
+        self.size: int = size
         
-        self.data = None
-        self.dataHexdump = None
-        self.info = None
-        self.detail = None
+        self.data: bytes = None
+        self.dataHexdump: str = None
+        self.info: str = None
+        self.detail: List[DisasmLine] = []
 
     def start(self):
         return self.fileOffset
@@ -83,6 +92,8 @@ class FileInfo():
         self.name = name
         self.size = size
         self.fileStructure = fileStructure
+        self.type = ''
+        self.date = ''
 
 
 class Outcome():
@@ -91,6 +102,7 @@ class Outcome():
         self.matches: List[Match] = matches
         self.verifications: List[Verification] = verifications
         self.matchesIt: IntervalTree = matchesIt
+
 
     def __str__(self):
         s = ''
