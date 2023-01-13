@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from plugins.analyzer_dotnet import IlspyParser, IlMethod, augmentFileDotnet
+from plugins.analyzer_dotnet import IlspyParser, IlMethod, augmentFileDotnet, getDotNetSections
 from model.model import Match
 from plugins.file_pe import FilePe
 
@@ -96,3 +96,18 @@ class DotnetDisasmTest(unittest.TestCase):
             self.assertTrue('IL_0000: ldarg.1' in matches[0].detail[0+headerSize].text)
             self.assertTrue('IL_0007: ldstr "A"' in matches[0].detail[5+headerSize].text)
 
+
+        def test_dotnetsections(self):
+            filePe = FilePe()
+            filePe.loadFromFile("tests/data/HelloWorld.dll")
+
+            self.assertTrue(filePe.isDotNet)
+            sections = getDotNetSections(filePe)
+
+            self.assertEqual(sections[0].name, 'methods')
+            self.assertEqual(sections[0].addr, 512)
+            self.assertEqual(sections[0].size, 1316)
+
+            self.assertEqual(sections[1].name, '#~')
+            self.assertEqual(sections[1].addr, 720)
+            self.assertEqual(sections[1].size, 424)

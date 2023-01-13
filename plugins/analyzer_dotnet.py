@@ -2,7 +2,7 @@ from intervaltree import Interval, IntervalTree
 import logging
 from typing import List
 from model.model import Match, FileInfo, Scanner, DisasmLine
-from plugins.file_pe import FilePe
+from plugins.file_pe import FilePe, Section
 import os
 from utils import *
 import struct
@@ -33,6 +33,9 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
     logging.info("Section Virt: 0x{:X} - Section Phys: 0x{:X} -> Offset: 0x{:X}".format(
         textSection.virtaddr, textSection.addr, addrOffset))
 
+
+    dotnetSections = getDotNetSections(filePe)
+
     for match in matches:
         detail = []
         data = filePe.data[match.start():match.end()]
@@ -45,6 +48,10 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
             # What we need is the RVA, as used by ilspy
             addr = match.start() + addrOffset
             detail, info = getDotNetDisassembly(match, addr, ilspyParser, addrOffset)
+
+        sections = list(filter(lambda x: match.start() > x.addr and match.start() < x.addr + x.size, dotnetSections))
+        if len(sections) > 0:
+            info = ' '.join(s.name for s in sections)
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
@@ -293,7 +300,14 @@ class DotnetHeader():
 
 
 def getDotNetSections(filePe):
-    DOTNET_HEADER = "<8sIHHIIII48s112s"
+    # Get more details about .net executable (e.g. streams)
+    # as most of it is just in PE .text
+    sections = []
+
+    # References:
+    # https://www.red-gate.com/simple-talk/blogs/anatomy-of-a-net-assembly-clr-metadata-1/
+    # https://www.codeproject.com/Articles/12585/The-NET-File-Format
+    DOTNET_HEADER = "<8sIHHIIII48s112s"  # CLI header
     headerSize = struct.calcsize(DOTNET_HEADER)
 
     textSection = filePe.getSectionByName('.text')
@@ -313,13 +327,77 @@ def getDotNetSections(filePe):
         h.hash,          # 112s
     ) = struct.unpack(DOTNET_HEADER, bytes(filePe.data[textSection.addr:textSection.addr+headerSize]))
 
-    print("Metadata RVA: {}  Size: {}".format(h.metadata_rva, h.metadata_size))
+    if h.len != 72 or h.clr_major != 2 or h.clr_minor != 5:
+        logging.error("Header error: Len: {}  Major: {}  Minor: {}".format( h.len, h.clr_major, h.clr_minor))
+        return
+    
+    #print(".text         {}  Size: {}".format(textSection.addr, textSection.size))
+    #print("Metadata RVA: {}  Size: {}".format(h.metadata_rva, h.metadata_size))
     metaDataOff = h.metadata_rva - addrOffset
-    print("Metadata offset: {}".format(metaDataOff))
+    print("Metadata off: {}   Size: {}".format(metaDataOff, h.metadata_size))
+    if metaDataOff < 0:
+        logging.error("Metadata offset is negative: {}".format(metaDataOff))
+        return
+    # Metadata: Magic
+    md_magic = filePe.data[metaDataOff:metaDataOff+4]
+    if md_magic != b'\x42\x53\x4a\x42':
+        print("Could not find CLR header at {}, got instead: ".format(metaDataOff, hexdmp(md_magic)))
+        return
 
-    # relative to .text: 
-    # header:   0     - 192
-    # methods   192   - metadata-offset
-    # metadata: off   - off+size
+    # Metadata parsing... dear god
+
+    # Metadata: Skip Version Information (Version is a string of arbitrary length...)
+    md_ver_length_Offset = 4 + 2 + 2 + 4 # magic, majorversion, minorversion, reserved
+    md_ver_length_bytes = filePe.data[metaDataOff+md_ver_length_Offset:metaDataOff+md_ver_length_Offset+4]
+    # Metadata: Version String Length
+    md_length = struct.unpack('<L', md_ver_length_bytes)[0]
+
+    # Metadata: Streams Length
+    md_streams_offset = md_ver_length_Offset + 4 + md_length + 2  # version_length, version, flags
+    md_streams_bytes = filePe.data[metaDataOff+md_streams_offset:metaDataOff+md_streams_offset+2]
+    md_streams_count = struct.unpack('<H', md_streams_bytes)[0]
+    if md_streams_count > 32:
+        logging.error("{} is a lot of .net streams... probably something went wrong")
+        return
+
+    s = Section('methods', textSection.addr, metaDataOff - textSection.addr, h.metadata_rva)
+    sections.append(s)
+
+    # Metadata: Streams
+    offset = metaDataOff + md_streams_offset + 2  # find offset of streams table: streams count and its size (word)
+    n = 0
+    while n < md_streams_count:
+        # First DWORD: Offset
+        offset_bytes = filePe.data[offset:offset+4]
+        offset += 4  # offset was DWORD
+        # Second DWORD: Size
+        size_bytes = filePe.data[offset:offset+4]
+        offset += 4  # size was DWORD
+
+        s_offset = struct.unpack('<I', offset_bytes)[0]
+        s_size = struct.unpack('<I', size_bytes)[0]
+
+        # Name: 0 terminated, and padded to next 4-byte...
+        nameStart = offset
+        nameEnd = filePe.data[nameStart:nameStart+32].index(b'\x00') + 1  # +1 as there's always one 0 byte
+        nameEnd += nameStart  # nameEnd was relative to nameStart
+        nameEnd = roundUpToMultiple(nameEnd, 4)  # padding...
+        name = filePe.data[nameStart:nameEnd]
+        name = name.rstrip(b'\x00').decode("utf-8")
+
+        #print("Off: {}  Size: {}   Name: {}".format(s_offset, s_size, name))
+        file_offset = s_offset+metaDataOff
+        #print("File Offset: {}  Size: {}   Name: {}".format(file_offset, s_size, name))
+
+        s = Section('Stream: ' + name, file_offset, s_size, s_offset)
+        sections.append(s)
+
+        offset = nameEnd
+        n += 1
+
+    return sections
 
 
+def roundUpToMultiple(number, multiple):
+    num = number + (multiple - 1)
+    return num - (num % multiple)
