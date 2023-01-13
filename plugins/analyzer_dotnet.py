@@ -5,6 +5,7 @@ from model.model import Match, FileInfo, Scanner, DisasmLine
 from plugins.file_pe import FilePe
 import os
 from utils import *
+import struct
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
@@ -275,4 +276,50 @@ class IlspyParser():
         # IL_0000: ldarg.0
         l = line.split(': ')
         self.currentMethod.addInstruction(line)
+
+
+class DotnetHeader():
+    def __init__(self):
+        self.crl_loader = None
+        self.len = None
+        self.clr_major = None
+        self.clr_minor = None
+        self.metadata_rva = None
+        self.metadata_size = None
+        self.flags = None
+        self.entryPoint = None
+        self.null = None
+        self.hash = None
+
+
+def getDotNetSections(filePe):
+    DOTNET_HEADER = "<8sIHHIIII48s112s"
+    headerSize = struct.calcsize(DOTNET_HEADER)
+
+    textSection = filePe.getSectionByName('.text')
+    addrOffset = textSection.virtaddr - textSection.addr  # usually 0x1E00
+
+    h = DotnetHeader()
+    (
+        h.crl_loader,    # 8s
+        h.len,           # I
+        h.clr_major,     # H
+        h.clr_minor,     # H
+        h.metadata_rva,  # I
+        h.metadata_size, # I
+        h.flags,         # I
+        h.entryPoint,    # I
+        h.null,          # 48s
+        h.hash,          # 112s
+    ) = struct.unpack(DOTNET_HEADER, bytes(filePe.data[textSection.addr:textSection.addr+headerSize]))
+
+    print("Metadata RVA: {}  Size: {}".format(h.metadata_rva, h.metadata_size))
+    metaDataOff = h.metadata_rva - addrOffset
+    print("Metadata offset: {}".format(metaDataOff))
+
+    # relative to .text: 
+    # header:   0     - 192
+    # methods   192   - metadata-offset
+    # metadata: off   - off+size
+
 
