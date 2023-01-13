@@ -24,28 +24,32 @@
 + make radare, .net decompile optional
 + unify verifvFile in analyzer_office, analyzer_pe?
 + make all command line options a class or struct
-
++ are the instructions really calculated correctly?
+  + add header size too?
+  + output individual instructions with offset (RVA)
++ make source overview document 
++ my own hexprint implemntation which takes an addr as argument
++ refactor: make match.detail an object
++ verification: make enum out of info ("one match after another"...)
++ refactor: method instructions to object: 
+  + get offset (including header, based on rva of method)
++ Upload with no file is hard error
 
 ---------------------------------------------------
 
-* make source overview document 
 
+* list files, including date and type, and what analysis it has (.matches etc.)
 
-* my own hexprint implemntation which takes an addr as argument
-* make match.detail an object
 
 dotnet: 
-* match could cover multiple methods - handle that
-* add other, more detailed references (not just .code, but the other possible sections)
-* are the instructions really calculated correctly?
-  * add header size too?
-  * output individual instructions with offset (RVA)
-* add file structure (nice layout of offsets n stuff like office)
+* fix: match could cover multiple methods - handle that
+  * find a file where this happens
+* feature: add other, more detailed references (not just .code, but the other possible sections)
+  * library to access .net streams shit
+  * https://www.red-gate.com/simple-talk/blogs/anatomy-of-a-net-assembly-clr-metadata-1/
+  * ui: add file structure (nice layout of offsets n stuff like office)
 
-verification: 
-* make enum out of info ("one match after another"...)
-flask:
-* Upload with no file is hard error
+
 
 general: 
 * handle ctrl-c gracefully 

@@ -3,6 +3,15 @@
 
 * msf/test3 does never end, and needs --isolate?
 
+## Sharphound 
+
+Lots of detections
+Too many sections
+--isolate does not help?
+
+maybe a big ass fucking signature? Let it run through once
+
+
 
 ## Mimikatz 
 
