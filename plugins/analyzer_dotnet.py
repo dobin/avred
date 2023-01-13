@@ -385,10 +385,7 @@ def getDotNetSections(filePe):
         name = filePe.data[nameStart:nameEnd]
         name = name.rstrip(b'\x00').decode("utf-8")
 
-        #print("Off: {}  Size: {}   Name: {}".format(s_offset, s_size, name))
         file_offset = s_offset+metaDataOff
-        #print("File Offset: {}  Size: {}   Name: {}".format(file_offset, s_size, name))
-
         s = Section('Stream: ' + name, file_offset, s_size, s_offset)
         sections.append(s)
 
