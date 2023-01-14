@@ -33,8 +33,9 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
     logging.info("Section Virt: 0x{:X} - Section Phys: 0x{:X} -> Offset: 0x{:X}".format(
         textSection.virtaddr, textSection.addr, addrOffset))
 
-
     dotnetSections = getDotNetSections(filePe)
+    if dotnetSections is None:
+        logging.warn("No dotNet sections")
 
     for match in matches:
         detail = []
@@ -49,9 +50,10 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
             addr = match.start() + addrOffset
             detail, info = getDotNetDisassembly(match, addr, ilspyParser, addrOffset)
 
-        sections = list(filter(lambda x: match.start() > x.addr and match.start() < x.addr + x.size, dotnetSections))
-        if len(sections) > 0:
-            info = ' '.join(s.name for s in sections)
+        if dotnetSections is not None:
+            sections = list(filter(lambda x: match.start() >= x.addr and match.start() < x.addr + x.size, dotnetSections))
+            if len(sections) > 0:
+                info = ' '.join(s.name for s in sections)
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
@@ -295,8 +297,9 @@ class DotnetHeader():
         self.metadata_size = None
         self.flags = None
         self.entryPoint = None
-        self.null = None
-        self.hash = None
+        self.null1 = None
+        self.signature_rva = None
+        self.null2 = None
 
 
 def getDotNetSections(filePe):
@@ -307,7 +310,7 @@ def getDotNetSections(filePe):
     # References:
     # https://www.red-gate.com/simple-talk/blogs/anatomy-of-a-net-assembly-clr-metadata-1/
     # https://www.codeproject.com/Articles/12585/The-NET-File-Format
-    DOTNET_HEADER = "<8sIHHIIII48s112s"  # CLI header
+    DOTNET_HEADER = "<8sIHHIIII8sI32s"  # CLI header
     headerSize = struct.calcsize(DOTNET_HEADER)
 
     textSection = filePe.getSectionByName('.text')
@@ -323,25 +326,29 @@ def getDotNetSections(filePe):
         h.metadata_size, # I
         h.flags,         # I
         h.entryPoint,    # I
-        h.null,          # 48s
-        h.hash,          # 112s
+        h.null1,         # 8s
+        h.signature_rva, # I
+        h.null2,         # 32s
     ) = struct.unpack(DOTNET_HEADER, bytes(filePe.data[textSection.addr:textSection.addr+headerSize]))
-
     if h.len != 72 or h.clr_major != 2 or h.clr_minor != 5:
         logging.error("Header error: Len: {}  Major: {}  Minor: {}".format( h.len, h.clr_major, h.clr_minor))
         return
-    
-    #print(".text         {}  Size: {}".format(textSection.addr, textSection.size))
-    #print("Metadata RVA: {}  Size: {}".format(h.metadata_rva, h.metadata_size))
+
+    isSigned = False
+    if h.flags & (1 << 3): # COMIMAGE_FLAGS_STRONGNAMESIGNED
+        if h.signature_rva == 0:
+            logging.warn("Signature bit set, but signature address is zero.")
+        else:
+            isSigned = True
+
     metaDataOff = h.metadata_rva - addrOffset
-    print("Metadata off: {}   Size: {}".format(metaDataOff, h.metadata_size))
     if metaDataOff < 0:
         logging.error("Metadata offset is negative: {}".format(metaDataOff))
         return
     # Metadata: Magic
     md_magic = filePe.data[metaDataOff:metaDataOff+4]
     if md_magic != b'\x42\x53\x4a\x42':
-        print("Could not find CLR header at {}, got instead: ".format(metaDataOff, hexdmp(md_magic)))
+        logging.error("Could not find CLR header at {}, got instead: ".format(metaDataOff, hexdmp(md_magic)))
         return
 
     # Metadata parsing... dear god
@@ -360,7 +367,26 @@ def getDotNetSections(filePe):
         logging.error("{} is a lot of .net streams... probably something went wrong")
         return
 
-    s = Section('methods', textSection.addr, metaDataOff - textSection.addr, h.metadata_rva)
+    # CIL header
+    s = Section('DotNet Header', 
+        textSection.addr,       # simply at the beginning of .text
+        headerSize,             # static header size
+        textSection.virtaddr)   # .text virt addr
+    sections.append(s)
+    
+    # Signature (optional)
+    if isSigned:
+        s = Section('Signature', 
+            h.signature_rva - addrOffset,       
+            112,             # always same size
+            0)  
+        sections.append(s)
+
+    # Methods
+    s = Section('methods', 
+        textSection.addr+headerSize,    # skip header
+        metaDataOff - (textSection.addr + headerSize), 
+        0)
     sections.append(s)
 
     # Metadata: Streams
@@ -391,6 +417,12 @@ def getDotNetSections(filePe):
 
         offset = nameEnd
         n += 1
+
+    s = Section('Metadata Header', 
+        metaDataOff,
+        offset - metaDataOff, # can only know its size after we finished parsing
+        0)
+    sections.append(s)
 
     return sections
 

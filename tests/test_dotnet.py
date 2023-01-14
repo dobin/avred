@@ -104,10 +104,30 @@ class DotnetDisasmTest(unittest.TestCase):
             self.assertTrue(filePe.isDotNet)
             sections = getDotNetSections(filePe)
 
-            self.assertEqual(sections[0].name, 'methods')
+            self.assertEqual(sections[0].name, 'DotNet Header')
             self.assertEqual(sections[0].addr, 512)
-            self.assertEqual(sections[0].size, 1316)
+            self.assertEqual(sections[0].size, 76)
 
-            self.assertEqual(sections[1].name, '#~')
-            self.assertEqual(sections[1].addr, 720)
-            self.assertEqual(sections[1].size, 424)
+            self.assertEqual(sections[1].name, 'methods')
+            self.assertEqual(sections[1].addr, 588)
+            self.assertEqual(sections[1].size, 24)
+
+            self.assertEqual(sections[2].name, 'Stream: #~')
+            self.assertEqual(sections[2].addr, 720)
+            self.assertEqual(sections[2].size, 424)
+
+
+        def test_dotnetsections_signed(self):
+            filePe = FilePe()
+            filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
+
+            self.assertTrue(filePe.isDotNet)
+            sections = getDotNetSections(filePe)
+
+            self.assertEqual(sections[1].name, 'Signature')
+            self.assertEqual(sections[1].addr, 2088)
+            self.assertEqual(sections[1].size, 112)
+
+            self.assertEqual(sections[2].name, 'methods')
+            self.assertEqual(sections[2].addr, 588)
+            self.assertEqual(sections[2].size, 24)
