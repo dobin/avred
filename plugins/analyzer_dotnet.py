@@ -6,6 +6,7 @@ from plugins.file_pe import FilePe, Section
 import os
 from utils import *
 import struct
+from dotnetfile import DotNetPE
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
@@ -307,126 +308,57 @@ def getDotNetSections(filePe):
     # as most of it is just in PE .text
     sections = []
 
-    # References:
-    # https://www.red-gate.com/simple-talk/blogs/anatomy-of-a-net-assembly-clr-metadata-1/
-    # https://www.codeproject.com/Articles/12585/The-NET-File-Format
-    DOTNET_HEADER = "<8sIHHIIII8sI32s"  # CLI header
-    headerSize = struct.calcsize(DOTNET_HEADER)
+    dotnet_file = DotNetPE(filePe.filepath)
 
     textSection = filePe.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.addr  # usually 0x1E00
+    addrOffset = textSection.virtaddr - textSection.addr
 
-    h = DotnetHeader()
-    (
-        h.crl_loader,    # 8s
-        h.len,           # I
-        h.clr_major,     # H
-        h.clr_minor,     # H
-        h.metadata_rva,  # I
-        h.metadata_size, # I
-        h.flags,         # I
-        h.entryPoint,    # I
-        h.null1,         # 8s
-        h.signature_rva, # I
-        h.null2,         # 32s
-    ) = struct.unpack(DOTNET_HEADER, bytes(filePe.data[textSection.addr:textSection.addr+headerSize]))
-    if h.len != 72 or h.clr_major != 2 or h.clr_minor != 5:
-        logging.error("Header error: Len: {}  Major: {}  Minor: {}".format( h.len, h.clr_major, h.clr_minor))
-        return
+    cli_header_addr = textSection.addr
+    cli_header_size = dotnet_file.clr_header.HeaderSize.value
 
-    isSigned = False
-    if h.flags & (1 << 3): # COMIMAGE_FLAGS_STRONGNAMESIGNED
-        if h.signature_rva == 0:
-            logging.warn("Signature bit set, but signature address is zero.")
-        else:
-            isSigned = True
+    methods_addr = cli_header_addr + cli_header_size
 
-    metaDataOff = h.metadata_rva - addrOffset
-    if metaDataOff < 0:
-        logging.error("Metadata offset is negative: {}".format(metaDataOff))
-        return
-    # Metadata: Magic
-    md_magic = filePe.data[metaDataOff:metaDataOff+4]
-    if md_magic != b'\x42\x53\x4a\x42':
-        logging.error("Could not find CLR header at {}, got instead: ".format(metaDataOff, hexdmp(md_magic)))
-        return
+    metadata_header_addr = dotnet_file.clr_header.MetaDataDirectoryAddress.value
+    metadata_header_addr -= addrOffset
+    metadata_header_size = dotnet_file.clr_header.MetaDataDirectorySize.value
 
-    # Metadata parsing... dear god
+    methods_size = metadata_header_addr - methods_addr
 
-    # Metadata: Skip Version Information (Version is a string of arbitrary length...)
-    md_ver_length_Offset = 4 + 2 + 2 + 4 # magic, majorversion, minorversion, reserved
-    md_ver_length_bytes = filePe.data[metaDataOff+md_ver_length_Offset:metaDataOff+md_ver_length_Offset+4]
-    # Metadata: Version String Length
-    md_length = struct.unpack('<L', md_ver_length_bytes)[0]
-
-    # Metadata: Streams Length
-    md_streams_offset = md_ver_length_Offset + 4 + md_length + 2  # version_length, version, flags
-    md_streams_bytes = filePe.data[metaDataOff+md_streams_offset:metaDataOff+md_streams_offset+2]
-    md_streams_count = struct.unpack('<H', md_streams_bytes)[0]
-    if md_streams_count > 32:
-        logging.error("{} is a lot of .net streams... probably something went wrong")
-        return
+    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
+    signature_addr -= addrOffset
+    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value
 
     # CIL header
     s = Section('DotNet Header', 
-        textSection.addr,       # simply at the beginning of .text
-        headerSize,             # static header size
-        textSection.virtaddr)   # .text virt addr
+        cli_header_addr,   
+        cli_header_size, 
+        0)
     sections.append(s)
     
-    # Signature (optional)
-    if isSigned:
-        s = Section('Signature', 
-            h.signature_rva - addrOffset,       
-            112,             # always same size
-            0)  
-        sections.append(s)
-
     # Methods
     s = Section('methods', 
-        textSection.addr+headerSize,    # skip header
-        metaDataOff - (textSection.addr + headerSize), 
+        methods_addr,    
+        methods_size, 
         0)
     sections.append(s)
 
-    # Metadata: Streams
-    offset = metaDataOff + md_streams_offset + 2  # find offset of streams table: streams count and its size (word)
-    n = 0
-    while n < md_streams_count:
-        # First DWORD: Offset
-        offset_bytes = filePe.data[offset:offset+4]
-        offset += 4  # offset was DWORD
-        # Second DWORD: Size
-        size_bytes = filePe.data[offset:offset+4]
-        offset += 4  # size was DWORD
+    s = Section('Metadata Header', 
+        metadata_header_addr,
+        metadata_header_size, 
+        0)
+    sections.append(s)
 
-        s_offset = struct.unpack('<I', offset_bytes)[0]
-        s_size = struct.unpack('<I', size_bytes)[0]
-
-        # Name: 0 terminated, and padded to next 4-byte...
-        nameStart = offset
-        nameEnd = filePe.data[nameStart:nameStart+32].index(b'\x00') + 1  # +1 as there's always one 0 byte
-        nameEnd += nameStart  # nameEnd was relative to nameStart
-        nameEnd = roundUpToMultiple(nameEnd, 4)  # padding...
-        name = filePe.data[nameStart:nameEnd]
-        name = name.rstrip(b'\x00').decode("utf-8")
-
-        file_offset = s_offset+metaDataOff
-        s = Section('Stream: ' + name, file_offset, s_size, s_offset)
+    for stream in dotnet_file.dotnet_streams:
+        s = Section('Stream: ' + stream.string_representation,
+            stream.address - addrOffset, 
+            stream.size, 
+            0)
         sections.append(s)
 
-        offset = nameEnd
-        n += 1
-
-    s = Section('Metadata Header', 
-        metaDataOff,
-        offset - metaDataOff, # can only know its size after we finished parsing
+    s = Section('Signature', 
+        signature_addr,
+        signature_size, 
         0)
     sections.append(s)
 
     return sections
-
-
-def roundUpToMultiple(number, multiple):
-    num = number + (multiple - 1)
-    return num - (num % multiple)

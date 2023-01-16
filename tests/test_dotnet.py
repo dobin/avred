@@ -106,15 +106,15 @@ class DotnetDisasmTest(unittest.TestCase):
 
             self.assertEqual(sections[0].name, 'DotNet Header')
             self.assertEqual(sections[0].addr, 512)
-            self.assertEqual(sections[0].size, 76)
+            self.assertEqual(sections[0].size, 72)
 
             self.assertEqual(sections[1].name, 'methods')
-            self.assertEqual(sections[1].addr, 588)
-            self.assertEqual(sections[1].size, 24)
+            self.assertEqual(sections[1].addr, 584)
+            self.assertEqual(sections[1].size, 28)
 
-            self.assertEqual(sections[2].name, 'Stream: #~')
-            self.assertEqual(sections[2].addr, 720)
-            self.assertEqual(sections[2].size, 424)
+            self.assertEqual(sections[3].name, 'Stream: #~')
+            self.assertEqual(sections[3].addr, 720)
+            self.assertEqual(sections[3].size, 424)
 
 
         def test_dotnetsections_signed(self):
@@ -124,10 +124,6 @@ class DotnetDisasmTest(unittest.TestCase):
             self.assertTrue(filePe.isDotNet)
             sections = getDotNetSections(filePe)
 
-            self.assertEqual(sections[1].name, 'Signature')
-            self.assertEqual(sections[1].addr, 2088)
-            self.assertEqual(sections[1].size, 112)
-
-            self.assertEqual(sections[2].name, 'methods')
-            self.assertEqual(sections[2].addr, 588)
-            self.assertEqual(sections[2].size, 24)
+            self.assertEqual(sections[8].name, 'Signature')
+            self.assertEqual(sections[8].addr, 2088)
+            self.assertEqual(sections[8].size, 128)
