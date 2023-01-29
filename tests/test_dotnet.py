@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import unittest
-from plugins.analyzer_dotnet import IlspyParser, IlMethod, augmentFileDotnet, getDotNetSections
+from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections
+from plugins.dncilparser import IlMethod
 from model.model import Match
 from plugins.file_pe import FilePe
 
@@ -9,8 +10,7 @@ filename = 'tests/data/ilspy-rubeus.il'
 
 class DotnetDisasmTest(unittest.TestCase):
         def test_ilspydisasm(self):
-            ilspyParser = IlspyParser()
-            ilspyParser.parseFile(filename)
+            ilspyParser = DncilParser(filename)
 
             method = ilspyParser.query(0, 10)
             self.assertIsNone(method)
@@ -21,8 +21,8 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
         def test_ilspydisasm_cmd(self):
-            ilspyParser = IlspyParser()
-            ilspyParser.parseFile(filename)
+            ilspyParser = DncilParser(filename)
+
             method = ilspyParser.query(155210, 155210+10)
 
             # Headersize: 1
@@ -41,8 +41,6 @@ class DotnetDisasmTest(unittest.TestCase):
             filePe.loadFromFile("tests/data/dotnet-test.dll")
 
             """
-            as seen online: 
-
             private static int MyMethod(string A, int B)
             {
                 locals: int local_0,
@@ -89,12 +87,14 @@ class DotnetDisasmTest(unittest.TestCase):
             headerSize = 1
 
             matches = []
-            match = Match(0, 669, 16)
+            match = Match(0, 669, 16) # 0x29D
             matches.append(match)
 
             augmentFileDotnet(filePe, matches)
-            self.assertTrue('IL_0000: ldarg.1' in matches[0].detail[0+headerSize].text)
-            self.assertTrue('IL_0007: ldstr "A"' in matches[0].detail[5+headerSize].text)
+
+            self.assertNotEqual(0, len(matches[0].detail))
+            self.assertTrue('ldarg.1' in matches[0].detail[0+headerSize].text)
+            self.assertTrue('ldstr          "A"' in matches[0].detail[5+headerSize].text)
 
 
         def test_dotnetsections(self):
