@@ -16,7 +16,7 @@ class DotnetDisasmTest(unittest.TestCase):
             addr = 0x029c # file offset
             ilMethods = dncilParser.query(addr, addr+16)
             self.assertEqual(len(ilMethods), 1)
-            ilMethod = ilMethods[0].data
+            ilMethod = ilMethods[0]
 
             self.assertIsNotNone(ilMethod)
             self.assertTrue('g__MyMethod' in ilMethod.getName())

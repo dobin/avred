@@ -218,4 +218,6 @@ class DncilParser():
         res = self.methodsIt.overlap(begin, end)
         if len(res) == 0:
             return None
-        return list(res)
+
+        res = [r[2] for r in res]
+        return res

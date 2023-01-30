@@ -32,7 +32,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
 
         if sectionName == ".text":  # only disassemble in .text
             # set info: precise disassembly info (e.g. function name)
-            detail, info2 = getDotNetDisassembly(match, dncilParser)
+            detail, info2 = getDotNetDisassembly(match.start(), match.size, dncilParser)
             info += " " + info2
 
         match.setData(data)
@@ -41,13 +41,12 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         match.setDetail(detail)
 
 
-def getDotNetDisassembly(match: Match, dncilParser):
+def getDotNetDisassembly(addrBase, size, dncilParser):
+    """Get section-info and disassembly in dncilParser for addrBase"""
     detail = []
 
-    addrBase = match.start()
-
-    ilMethods = dncilParser.query(addrBase, addrBase+match.size)
-    if ilMethods is None:
+    ilMethods = dncilParser.query(addrBase, addrBase+size)
+    if ilMethods is None or len(ilMethods) == 0:
         logging.debug("No disassembly found for {:X}", addrBase)
         return detail, '.text'
     logging.info("Match physical {}/0x{:X}, method disassemblies found: {}".format(
@@ -55,14 +54,14 @@ def getDotNetDisassembly(match: Match, dncilParser):
 
     # all relevant instructions
     addrTightStart = addrBase
-    addrTightEnd = addrBase + match.size
+    addrTightEnd = addrBase + size
 
     # provide some context
     addrWideStart = addrTightStart - 16
     addrWideEnd = addrTightEnd + 16
 
-    for ilMethod_ in sorted(ilMethods):
-        ilMethod = ilMethod_.data
+    # check each disassembled function if it contains instructions for our offset
+    for ilMethod in sorted(ilMethods):
         # find all instructions of method which are part of the match
         for instrOff in sorted(ilMethod.instructions.keys()):
             addrOff = ilMethod.addr + instrOff
