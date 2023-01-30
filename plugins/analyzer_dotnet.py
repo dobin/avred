@@ -48,7 +48,7 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
     ilMethods = dncilParser.query(addrBase, addrBase+size)
     if ilMethods is None or len(ilMethods) == 0:
         logging.debug("No disassembly found for {:X}", addrBase)
-        return detail, '.text'
+        return detail, ''
     logging.info("Match physical {}/0x{:X}, method disassemblies found: {}".format(
         addrBase, addrBase, len(ilMethods)))
 
@@ -83,7 +83,7 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
                 )
                 detail.append(disasmLine)
 
-    info = ".text: {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
+    info = " {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
     return detail, info
 
 
