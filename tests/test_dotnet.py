@@ -6,34 +6,24 @@ from plugins.dncilparser import IlMethod
 from model.model import Match
 from plugins.file_pe import FilePe
 
-filename = 'tests/data/ilspy-rubeus.il'
 
 class DotnetDisasmTest(unittest.TestCase):
-        def test_ilspydisasm(self):
-            ilspyParser = DncilParser(filename)
+        def test_dncil(self):
+            filePe = FilePe()
+            filePe.loadFromFile("tests/data/dotnet-test.dll")
+            dncilParser = DncilParser(filePe.filepath)
 
-            method = ilspyParser.query(0, 10)
-            self.assertIsNone(method)
+            addr = 0x029c # file offset
+            ilMethods = dncilParser.query(addr, addr+16)
+            self.assertEqual(len(ilMethods), 1)
+            ilMethod = ilMethods[0].data
 
-            method = ilspyParser.query(155210, 155210+10)
-            self.assertIsNotNone(method)
-            self.assertTrue("'<SetPinForPrivateKey>b__1'" in method.name)
-
-
-        def test_ilspydisasm_cmd(self):
-            ilspyParser = DncilParser(filename)
-
-            method = ilspyParser.query(155210, 155210+10)
-
-            # Headersize: 1
-            # Codesize: 21
-            self.assertEqual(method.headerSize, 1)
-            self.assertEqual(method.codeSize, 21)
-            self.assertEqual(method.getSize(), 1+21)
-
-            # IL_0006: ldc.i4.s 32
-            instr = method.instructions[6+1]
-            self.assertTrue(instr == 'IL_0006: ldc.i4.s 32')
+            self.assertIsNotNone(ilMethod)
+            self.assertTrue('g__MyMethod' in ilMethod.getName())
+            self.assertEqual(ilMethod.getSize(), 25)
+            self.assertEqual(ilMethod.getAddr(), addr)
+            self.assertEqual(ilMethod.instructions[0], "Function: <<Main>$>g__MyMethod|0_0")
+            self.assertEqual(ilMethod.instructions[1], "0001    ldarg.1        ")
 
 
         def test_ilspydisasm_offset(self):
@@ -54,7 +44,8 @@ class DotnetDisasmTest(unittest.TestCase):
                 /* 00000263 02             */ ldarg_0 // string A
                 /* 00000264 72 01 00 00 70 */ ldstr "A"
 
-            decompiled: 
+
+            disassembled: 
 
             .method assembly hidebysig static 
                     int32 '<<Main>$>g__MyMethod|0_0' (
@@ -91,10 +82,11 @@ class DotnetDisasmTest(unittest.TestCase):
             matches.append(match)
 
             augmentFileDotnet(filePe, matches)
-
-            self.assertNotEqual(0, len(matches[0].detail))
-            self.assertTrue('ldarg.1' in matches[0].detail[0+headerSize].text)
-            self.assertTrue('ldstr          "A"' in matches[0].detail[5+headerSize].text)
+            self.assertEqual(len(matches), 1)
+            match = matches[0]
+            self.assertNotEqual(0, len(match.detail))
+            self.assertTrue('ldarg.1' in match.detail[0+headerSize].text)
+            self.assertTrue('ldstr          "A"' in match.detail[5+headerSize].text)
 
 
         def test_dotnetsections(self):

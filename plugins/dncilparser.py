@@ -109,6 +109,7 @@ class IlMethod():
 
     def setName(self, name, className=''):
         self.name = name
+        self.instructions[0] = "Function: {}".format(name)
         self.className = className
 
     def getName(self):
@@ -117,12 +118,15 @@ class IlMethod():
     def setAddr(self, addr):
         self.addr = addr
 
+    def getAddr(self):
+        return self.addr
+
     def setCodeSize(self, size):
         self.codeSize = size
 
     def setHeaderSize(self, size):
         self.headerSize = size
-        self.instructions[0] = "Header (size {})".format(size)
+        self.instructions[1] = "Header (size {})".format(size)
 
     def getSize(self):
         return self.codeSize + self.headerSize
@@ -138,6 +142,10 @@ class IlMethod():
         #    s += "  {}\n".format(instruction)
         return s
 
+    def __lt__(self, other):
+        if self.addr < other.addr:
+            return True
+        return False
 
 
 class DncilParser():
@@ -156,31 +164,30 @@ class DncilParser():
             try:
                 body: CilMethodBody = read_method_body(pe, row)
             except MethodBodyFormatError as e:
-                print(e)
+                logging.error(e)
                 continue
 
             if not body.instructions:
                 continue
 
-            
-            a = pe.get_offset_from_rva(row.Rva)
+            # method file offset
+            methodOffset = pe.get_offset_from_rva(row.Rva)
             ilMethod = IlMethod()
             ilMethod.setName(row.Name)
-            ilMethod.setAddr(row.Rva)
-            
+            ilMethod.setAddr(methodOffset)
+
             headerSize = 1
             codeSize = body.code_size
 
             logging.debug(f"\nMethod: {row.Name}")
-            logging.debug("  RVA: _{:X}_  Offset: {:X}".format(row.Rva, a))
+            logging.debug("  RVA: _{:X}_  Offset: {:X}".format(row.Rva, methodOffset))
             logging.debug("   HeaderSize: {} codeSize: {}".format(headerSize, codeSize))
 
             ilMethod.setHeaderSize(headerSize)
             ilMethod.setCodeSize(codeSize)
 
             for insn in body.instructions:
-                b = pe.get_rva_from_offset(insn.offset)
-                offset = b - row.Rva
+                offset = pe.get_rva_from_offset(insn.offset) - row.Rva
 
                 il = "{:04X}".format(offset)
                 il += "    "
@@ -208,9 +215,7 @@ class DncilParser():
 
 
     def query(self, begin, end) -> List[IlMethod]:
-        print("-- query(): {:X}".format(begin))
         res = self.methodsIt.overlap(begin, end)
         if len(res) == 0:
             return None
-        res = list(res)[0].data
-        return res
+        return list(res)

@@ -32,10 +32,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         info = sectionName
 
         if sectionName == ".text":  # only disassemble in .text
-            # We have the physical file offset/address given in match
-            # What we need is the RVA, as used by ilspy
-            addr = match.start() + addrOffset
-            detail, info = getDotNetDisassembly(match, addr, dncilParser, addrOffset)
+            detail, info = getDotNetDisassembly(match, dncilParser)
 
         if dotnetSections is not None:
             sections = list(filter(lambda x: match.start() >= x.addr and match.start() < x.addr + x.size, dotnetSections))
@@ -48,20 +45,17 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         match.setDetail(detail)
 
 
-def getDotNetDisassembly(match: Match, addr: int, ilspyParser, addrOffset: int):
+def getDotNetDisassembly(match: Match, dncilParser):
     detail = []
 
-    ilMethod = ilspyParser.query(addr, addr+match.size)
-    if ilMethod is None:
-        print("NONE")
-        return detail, '.text'
-    logging.info("Match physical {}/0x{:X} (converted to {}/0x{:X}), disassembly found: {}".format(
-        match.start(), match.start(), addr, addr, ilMethod))
+    addrBase = match.start()
 
-    # The "method" has RVA addresses
-    # But the method's instructions have addresses relative to the method start (in bytes)
-    # e.g. addrBase is between 0 - len(method)
-    addrBase = addr - ilMethod.addr
+    ilMethods = dncilParser.query(addrBase, addrBase+match.size)
+    if ilMethods is None:
+        logging.debug("No disassembly found for {:X}", addrBase)
+        return detail, '.text'
+    logging.info("Match physical {}/0x{:X}, method disassemblies found: {}".format(
+        addrBase, addrBase, len(ilMethods)))
 
     # all relevant instructions
     addrTightStart = addrBase
@@ -71,25 +65,28 @@ def getDotNetDisassembly(match: Match, addr: int, ilspyParser, addrOffset: int):
     addrWideStart = addrTightStart - 16
     addrWideEnd = addrTightEnd + 16
 
-    # find all instructions of method which are part of the match
-    for instrOff in sorted(ilMethod.instructions.keys()):
-        if instrOff > addrWideStart and instrOff < addrWideEnd:
-            d = ilMethod.instructions[instrOff]
+    for ilMethod_ in sorted(ilMethods):
+        ilMethod = ilMethod_.data
+        # find all instructions of method which are part of the match
+        for instrOff in sorted(ilMethod.instructions.keys()):
+            addrOff = ilMethod.addr + instrOff
+            if addrOff > addrWideStart and addrOff < addrWideEnd:
+                d = ilMethod.instructions[instrOff]
 
-            isPart = False
-            if instrOff > addrTightStart and instrOff < addrTightEnd:
-                isPart = True
-            #line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
-            line = d
+                isPart = False
+                if addrOff > addrTightStart and addrOff < addrTightEnd:
+                    isPart = True
+                #line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
+                line = d
 
-            disasmLine = DisasmLine(
-                ilMethod.addr+instrOff-addrOffset,
-                ilMethod.addr+instrOff,
-                isPart, 
-                line, 
-                line
-            )
-            detail.append(disasmLine)
+                disasmLine = DisasmLine(
+                    addrOff, 
+                    addrOff,
+                    isPart, 
+                    line, 
+                    line
+                )
+                detail.append(disasmLine)
 
     info = ".text: {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
     return detail, info
