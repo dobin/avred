@@ -9,19 +9,10 @@ from plugins.dncilparser import DncilParser
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
-    # calculate offset for disassembly
-    textSection = filePe.getSectionByName('.text')
-    if textSection is None:
-        logging.error("No text section?")
-        return None
-    addrOffset = textSection.virtaddr - textSection.addr  # usually 0x1E00
-    logging.info("Section Virt: 0x{:X} - Section Phys: 0x{:X} -> Offset: 0x{:X}".format(
-        textSection.virtaddr, textSection.addr, addrOffset))
-
+    """Correlates file offsets in matches with the disassembles filePe methods"""
     dotnetSections = getDotNetSections(filePe)
     if dotnetSections is None:
         logging.warn("No dotNet sections")
-
     dncilParser = DncilParser(filePe.filepath)
     
     for match in matches:
@@ -29,15 +20,20 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdmp(data, offset=match.start())
         sectionName = filePe.findSectionNameFor(match.fileOffset)
-        info = sectionName
 
-        if sectionName == ".text":  # only disassemble in .text
-            detail, info = getDotNetDisassembly(match, dncilParser)
+        # set info: PE section name first
+        info = sectionName + " "
 
         if dotnetSections is not None:
+            # set info: .NET sections/streams name next if found
             sections = list(filter(lambda x: match.start() >= x.addr and match.start() < x.addr + x.size, dotnetSections))
             if len(sections) > 0:
-                info = ' '.join(s.name for s in sections)
+                info += ' '.join(s.name for s in sections)
+
+        if sectionName == ".text":  # only disassemble in .text
+            # set info: precise disassembly info (e.g. function name)
+            detail, info2 = getDotNetDisassembly(match, dncilParser)
+            info += " " + info2
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
