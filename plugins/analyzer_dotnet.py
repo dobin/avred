@@ -42,7 +42,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
 
 
 def getDotNetDisassembly(addrBase, size, dncilParser):
-    """Get section-info and disassembly in dncilParser for addrBase"""
+    """Get section-info & disassembly in dncilParser for addrBase"""
     detail = []
 
     ilMethods = dncilParser.query(addrBase, addrBase+size)
@@ -64,7 +64,7 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
     for ilMethod in sorted(ilMethods):
         # find all instructions of method which are part of the match
         for instrOff in sorted(ilMethod.instructions.keys()):
-            addrOff = ilMethod.addr + instrOff
+            addrOff = ilMethod.getOffset() + instrOff
             if addrOff > addrWideStart and addrOff < addrWideEnd:
                 d = ilMethod.instructions[instrOff]
 
@@ -83,7 +83,8 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
                 )
                 detail.append(disasmLine)
 
-    info = " {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.addr)
+    # we take the last method name atm
+    info = " {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.getOffset())
     return detail, info
 
 

@@ -101,7 +101,8 @@ def format_operand(pe: dnPE, operand: Any) -> str:
 class IlMethod():
     def __init__(self):
         self.name = None
-        self.addr = None
+        self.offset = None
+        self.rva = None
         self.codeSize = None
         self.headerSize = None
         self.className = None
@@ -115,18 +116,31 @@ class IlMethod():
     def getName(self):
         return self.className + '::' + self.name
 
-    def setAddr(self, addr):
-        self.addr = addr
+    def setOffset(self, offset):
+        self.offset = offset
 
-    def getAddr(self):
-        return self.addr
+
+    def getOffset(self):
+        return self.offset
+        
+    def getRva(self):
+        return self.rva
+    
+    def setRva(self, rva):
+        self.rva = rva
 
     def setCodeSize(self, size):
         self.codeSize = size
 
+    def getCodeSize(self):
+        return self.codeSize
+
     def setHeaderSize(self, size):
         self.headerSize = size
         self.instructions[1] = "Header (size {})".format(size)
+
+    def getHeaderSize(self):
+        return self.headerSize
 
     def getSize(self):
         return self.codeSize + self.headerSize
@@ -136,14 +150,14 @@ class IlMethod():
 
     def __str__(self):
         s = ''
-        s += "Func {}::{} at {} with size {}\n".format(
-            self.className, self.name, self.addr, self.getSize())
+        s += "Func {}::{} at offset {} with size {}\n".format(
+            self.className, self.name, self.offset, self.getSize())
         #for instruction in self.instructions:
         #    s += "  {}\n".format(instruction)
         return s
 
     def __lt__(self, other):
-        if self.addr < other.addr:
+        if self.offset < other.offset:
             return True
         return False
 
@@ -174,20 +188,23 @@ class DncilParser():
             methodOffset = pe.get_offset_from_rva(row.Rva)
             ilMethod = IlMethod()
             ilMethod.setName(row.Name)
-            ilMethod.setAddr(methodOffset)
-
-            headerSize = 1
-            codeSize = body.code_size
+            ilMethod.setOffset(methodOffset)
+            ilMethod.setRva(row.Rva)
+            ilMethod.setCodeSize(body.code_size)
 
             logging.debug(f"\nMethod: {row.Name}")
             logging.debug("  RVA: _{:X}_  Offset: {:X}".format(row.Rva, methodOffset))
-            logging.debug("   HeaderSize: {} codeSize: {}".format(headerSize, codeSize))
+            logging.debug("   codeSize: {}".format(ilMethod.getCodeSize))
 
-            ilMethod.setHeaderSize(headerSize)
-            ilMethod.setCodeSize(codeSize)
-
+            flag = False
             for insn in body.instructions:
                 offset = pe.get_rva_from_offset(insn.offset) - row.Rva
+
+                # headerSize is offset of first instruction
+                if flag is False:
+                    headerSize = offset
+                    ilMethod.setHeaderSize(headerSize)
+                    flag = True
 
                 il = "{:04X}".format(offset)
                 il += "    "
@@ -203,13 +220,13 @@ class DncilParser():
                 
         # convert
         for method in self.methods:
-            if method.addr is None or method.codeSize is None or method.headerSize is None:
+            if method.getOffset() is None or method.getCodeSize is None or method.getHeaderSize is None:
                 #logging.error("Error in parsing: " + str(method))
                 pass
             else:
                 methodIt = Interval(
-                    method.addr, 
-                    method.addr+method.getSize(), 
+                    method.getOffset(), 
+                    method.getOffset()+method.getSize(), 
                     method)
                 self.methodsIt.add(methodIt)
 

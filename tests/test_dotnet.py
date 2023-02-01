@@ -8,25 +8,32 @@ from plugins.file_pe import FilePe
 
 
 class DotnetDisasmTest(unittest.TestCase):
-        def test_dncil(self):
+        def test_dncilparser(self):
             filePe = FilePe()
             filePe.loadFromFile("tests/data/dotnet-test.dll")
             dncilParser = DncilParser(filePe.filepath)
 
-            addr = 0x029c # file offset
-            ilMethods = dncilParser.query(addr, addr+16)
+            offset = 0x029c # file offset
+            headerSize = 1
+            codeSize = 24
+            rva = 0x209c
+
+            ilMethods = dncilParser.query(offset, offset+16)
             self.assertEqual(len(ilMethods), 1)
             ilMethod = ilMethods[0]
 
             self.assertIsNotNone(ilMethod)
             self.assertTrue('g__MyMethod' in ilMethod.getName())
-            self.assertEqual(ilMethod.getSize(), 25)
-            self.assertEqual(ilMethod.getAddr(), addr)
+            self.assertEqual(ilMethod.getOffset(), offset)
+            self.assertEqual(ilMethod.getRva(), rva)
+            self.assertEqual(ilMethod.getSize(), headerSize + codeSize)
+            self.assertEqual(ilMethod.getCodeSize(), codeSize)
+            self.assertEqual(ilMethod.getHeaderSize(), headerSize)
             self.assertEqual(ilMethod.instructions[0], "Function: <<Main>$>g__MyMethod|0_0")
             self.assertEqual(ilMethod.instructions[1], "0001    ldarg.1        ")
 
 
-        def test_ilspydisasm_offset(self):
+        def test_augmentFileDotnet(self):
             filePe = FilePe()
             filePe.loadFromFile("tests/data/dotnet-test.dll")
 
