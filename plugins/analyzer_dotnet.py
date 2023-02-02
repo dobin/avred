@@ -37,7 +37,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
-        match.setInfo(info)
+        match.setSectionInfo(info)
         match.setDetail(detail)
 
 

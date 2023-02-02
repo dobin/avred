@@ -33,7 +33,7 @@ class Match():
         
         self.data: bytes = None
         self.dataHexdump: str = None
-        self.info: str = None
+        self.sectionInfo: str = None
         self.detail: List[DisasmLine] = []
 
     def start(self):
@@ -48,21 +48,24 @@ class Match():
     def setDataHexdump(self, dataHexdump):
         self.dataHexdump = dataHexdump
 
-    def setInfo(self, info):
-        self.info = info
+    def setSectionInfo(self, info):
+        self.sectionInfo = info
+
+    def getSectionInfo(self):
+        return self.sectionInfo
 
     def setDetail(self, detail):
         self.detail = detail
 
     def __str__(self):
         s = ""
-        s += "id:{}  offset:{}  len:{}\n".format(self.idx, self.fileOffset, self.size)
-        if self.info is not None:
-            s += "  {}\n".format(self.info)
+        s += "id:{}  offset:{:X}  len:{}\n".format(self.idx, self.fileOffset, self.size)
+        if self.sectionInfo is not None:
+            s += "  Section: {}\n".format(self.sectionInfo)
         if self.detail is not None:
-            s += "  {}\n".format(self.detail)
+            s += "  Detail: {}\n".format(self.detail)
         if self.dataHexdump is not None:
-            s += "  {}\n".format(self.dataHexdump)
+            s += "  Hexdump: {}\n".format(self.dataHexdump)
         return s
 
 

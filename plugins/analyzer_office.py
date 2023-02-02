@@ -57,7 +57,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
 
         m.setData(data)
         m.setDataHexdump(dataHexdump)
-        m.setInfo(sectionName)
+        m.setSectionInfo(sectionName)
         m.setDetail(details)
 
     fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())

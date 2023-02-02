@@ -1,6 +1,6 @@
 <h2>Info</h2>
 
-<table>
+<table class="table">
     <tr>
         <td>Filename: </td>
         <td>{{filename}}</td>
@@ -19,7 +19,7 @@
 
 <h2>Matches</h2>
 
-<table>
+<table class="table">
     <tr>
         <th>#</th>
         <th>Offset</th>
@@ -32,7 +32,7 @@
         <td>{{match.idx}}</td>
         <td>{{match.fileOffset}}</td>
         <td>{{match.size}}</td>
-        <td>{{match.info}}</td>
+        <td>{{match.sectionInfo}}</td>
     </tr>
     {% endfor %}
 </table>

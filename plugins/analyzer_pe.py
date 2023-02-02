@@ -72,7 +72,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
-        match.setInfo(section.name)
+        match.setSectionInfo(section.name)
         match.setDetail(detail)
 
 
