@@ -16,8 +16,8 @@
     {% for verificationRun in verifications %}
     <tr>
         <td>{{verificationRun.index}}</td>
-        <td>{{verificationRun.info}}</td>
-        <td>{{verificationRun.type}}</td>
+        <td>{{verificationRun.info.name}}</td>
+        <td>{{verificationRun.type.name}}</td>
 
         {% for testEntry in verificationRun.testEntries %}
             {% if testEntry %}
@@ -25,7 +25,7 @@
             {% else %}
             <td style="background-color:green">
             {% endif %}
-                {{testEntry}}
+                &nbsp;
             </td>
         {% endfor %}
     
@@ -36,7 +36,7 @@
 
 <h2>ModifyOrder:</h2>
 <p>
-    Result of detection. True means detected, false means not detected. 
+    Result of detection. Red means detected, Green means not detected. 
 </p>
 
 <p>
