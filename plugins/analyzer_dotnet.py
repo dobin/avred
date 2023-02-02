@@ -60,6 +60,8 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
     addrWideStart = addrTightStart - 16
     addrWideEnd = addrTightEnd + 16
 
+    methodNames = set()
+
     # check each disassembled function if it contains instructions for our offset
     for ilMethod in sorted(ilMethods):
         # find all instructions of method which are part of the match
@@ -71,9 +73,8 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
                 isPart = False
                 if addrOff > addrTightStart and addrOff < addrTightEnd:
                     isPart = True
-                #line = "0x{:X}: {}".format(ilMethod.addr + instrOff - addrOffset, d)
+                
                 line = d
-
                 disasmLine = DisasmLine(
                     addrOff, 
                     addrOff,
@@ -83,8 +84,9 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
                 )
                 detail.append(disasmLine)
 
-    # we take the last method name atm
-    info = " {} (@RVA 0x{:X})".format(ilMethod.getName(), ilMethod.getOffset())
+                methodNames.add(ilMethod.getName())
+
+    info = str(methodNames)
     return detail, info
 
 
