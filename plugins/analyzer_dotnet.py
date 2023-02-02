@@ -26,7 +26,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
 
         if dotnetSections is not None:
             # set info: .NET sections/streams name next if found
-            sections = list(filter(lambda x: match.start() >= x.addr and match.start() < x.addr + x.size, dotnetSections))
+            sections = list(filter(lambda x: match.start() >= x.addr and match.start() <= x.addr + x.size, dotnetSections))
             if len(sections) > 0:
                 info += ' '.join(s.name for s in sections)
 
@@ -71,7 +71,7 @@ def getDotNetDisassembly(addrBase, size, dncilParser):
                 d = ilMethod.instructions[instrOff]
 
                 isPart = False
-                if addrOff > addrTightStart and addrOff < addrTightEnd:
+                if addrOff >= addrTightStart and addrOff <= addrTightEnd:
                     isPart = True
                 
                 line = d
