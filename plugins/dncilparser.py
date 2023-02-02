@@ -174,13 +174,11 @@ class DncilParser():
             if not row.ImplFlags.miIL or any((row.Flags.mdAbstract, row.Flags.mdPinvokeImpl)):
                 # skip methods that do not have a method body
                 continue
-
             try:
                 body: CilMethodBody = read_method_body(pe, row)
             except MethodBodyFormatError as e:
                 logging.error(e)
                 continue
-
             if not body.instructions:
                 continue
 
@@ -208,11 +206,9 @@ class DncilParser():
 
                 il = "{:04X}".format(offset)
                 il += "    "
-                il + f"{' '.join('{:02x}'.format(b) for b in insn.get_bytes()) : <20}"
+                il += f"{' '.join('{:02x}'.format(b) for b in insn.get_bytes()) : <20}"
                 il += f"{str(insn.opcode) : <15}"
                 il += format_operand(pe, insn.operand)
-
-                logging.debug(il)
 
                 ilMethod.addInstruction(offset, il)
             
