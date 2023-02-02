@@ -17,10 +17,10 @@ class Scanner:
 
 
 class DisasmLine():
-    def __init__(self, fileOffset, rva, part, text, textHtml):
+    def __init__(self, fileOffset, rva, isPart, text, textHtml):
         self.offset = str(hex(fileOffset))  # offset in file (as identified by avred)
         self.rva = rva  # relative offset (usually created by external disasm tool)
-        self.part = part  # is this part of the data, or supplemental?
+        self.isPart = isPart  # is this part of the data, or supplemental?
         self.text = text  # the actual disassembled data
         self.textHtml = textHtml  # the actual disassembled data, colored
 
