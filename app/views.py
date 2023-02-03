@@ -45,6 +45,9 @@ def view_file(filename):
 
 @app.route("/files")
 def files():
+    if not app.config['LISTFILES'] == 'True':
+        return render_template('index.html')
+
     examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     res = []
     for example in examples:

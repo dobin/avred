@@ -11,4 +11,6 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 
+app.config.from_prefixed_env()
+
 from app import views
