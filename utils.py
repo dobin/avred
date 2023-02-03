@@ -4,6 +4,8 @@ import random
 import os
 from enum import Enum
 import base64
+import magic
+from enum import Enum
 
 def saveMatchesToFile(filename, matches):
     # convert first
@@ -46,6 +48,35 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
     data = bytes(d)
 
     return data
+
+
+class FileType(Enum):
+    UNKNOWN = 0
+    EXE = 1
+    DOTNET = 2
+    OFFICE = 3
+    TEXT = 4
+    
+
+def GetFileType(filepath):
+    text = magic.from_file(filepath)
+    mime = magic.from_file(filepath, mime=True)
+
+    print("Text: " + text)
+    print("Mime: " + mime)
+
+    if mime == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return FileType.OFFICE
+
+    if mime == 'application/x-dosexec':
+        if 'Mono/.Net assembly' in text: 
+            return FileType.EXE
+            #return FileType.DOTNET
+
+        if 'PE32+' in text:
+            return FileType.EXE
+        
+    return FileType.UNKNOWN
 
 
 def printMatches(data, matches):

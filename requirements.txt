@@ -7,3 +7,8 @@ r2pipe
 pefile
 ansi2html
 flask
+dncil
+dnfile
+olefile
+oletools
+python-magic
