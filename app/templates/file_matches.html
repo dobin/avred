@@ -34,14 +34,13 @@
                 <h2> Match #{{match.idx}}</h2>
                 Offset: {{match.fileOffset}} <br>
                 Size: {{match.size}} <br>
-                Info: {{match.info}} <br>
-
+                Section: {{match.info}} <br>
                 <br>
 
                 <h3> Disassembly </h3>
 
                 <div class="mycode">
-                    {% for disasmLine in match.detail %}
+                    {% for disasmLine in match.getDisasmLines() %}
                         {% if disasmLine.isPart %}
                             <div class="mycodeline"><b>-> {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</b></div>
                         {% else %}

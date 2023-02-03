@@ -3,7 +3,7 @@ import olefile
 from typing import List
 from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo, Scanner, DisasmLine
+from model.model import Match, FileInfo, Scanner, UiDisasmLine
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
@@ -32,6 +32,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
     oleFile = olefile.OleFileIO(fileOffice.data)
     disasmList = convertDisasmAddr(oleFile, disasmList)
     ac = OleStructurizer(oleFile)
+    uiDisasmLines = []
 
     # correlate the matches with the dumped code
     m: Match
@@ -41,32 +42,29 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
         sectionName = ac.getSectionsForAddr(m.start(), m.size)
 
         disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)
-        details = []
-        for item in iter(disasmMatches):
-            text =  "line #{} (0x{:X}-0x{:X}): ".format(
-                item.data.lineNr, item.data.begin, item.data.end)
+        for item in sorted(iter(disasmMatches)):
+            text =  "line #{} (size {}): ".format(
+                item.data.lineNr, item.data.end - item.data.begin)
             text += "\n" + item.data.text
-            disasmLine = DisasmLine(
+            disasmLine = UiDisasmLine(
                 item.data.begin, 
                 item.data.begin,
                 False,
                 text,
                 text,
             )
-            details.append(disasmLine)
+            uiDisasmLines.append(disasmLine)
 
         m.setData(data)
         m.setDataHexdump(dataHexdump)
         m.setSectionInfo(sectionName)
-        m.setDetail(details)
+        m.setDisasmLines(uiDisasmLines)
 
     fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())
     return fileInfo
 
 
 def convertDisasmAddr(ole: olefile.olefile.OleFileIO, results: List[DisasmEntry]) -> IntervalTree:
-    # the output of pcodedmp is wrong. Convert results to real physical addresses.
-    # use the extracted vbaProject.bin from fileOffice.data
     ac = VbaAddressConverter(ole)
     it = IntervalTree()
 
