@@ -11,6 +11,7 @@ import logging
 from config import Config
 from verifier import verify
 from model.model import *
+from utils import FileType, GetFileType
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -27,8 +28,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="File to scan", required=True)
     parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")")
-
-    # --logonly (no saving files)
     parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
 
     # debug
@@ -64,7 +63,7 @@ def main():
 
     if args.server not in config.get("server"):
         logging.error(f"Could not find server with name '{args.server}' in config.json")
-        sys.exit(1)
+        exit(1)
     url = config.get("server")[args.server]
     scanner = ScannerRest(url, args.server)
 
@@ -87,19 +86,33 @@ def scanFile(args, scanner):
     filenameMatches = args.file + ".matches"
     filenameOutcome = args.file + ".outcome"
 
+    # file ident
+    filetype = FileType.UNKNOWN
     if args.file.endswith('.ps1'):
+        filettype = FileType.TEXT
+    elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
+        filetype = FileType.OFFICE
+    elif args.file.endswith('.exe'):
+        filetype = FileType.DOTNET
+    elif args.file.endswith('.ps1'):
+        filetype = FileType.TEXT
+    else: 
+        filetype = GetFileType(args.file)
+
+    logging.info("Using parser for {}".format(filetype.name))
+    if filetype is FileType.TEXT:
         file = FilePlain()
         file.loadFromFile(args.file)
         analyzer = analyzeFilePlain
         augmenter = None
 
-    elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
+    elif filetype is FileType.OFFICE:  # dotm, xlsm, xltm
         file = FileOffice()
         file.loadFromFile(args.file)
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
 
-    elif args.file.endswith('.exe'):
+    elif filetype is FileType.EXE:
         file = FilePe()
         file.loadFromFile(args.file)
 
@@ -116,7 +129,7 @@ def scanFile(args, scanner):
 
     else:
         logging.error("File ending not supported")
-        os.exit(1)
+        exit(1)
 
     # matches
     if os.path.exists(filenameMatches):
@@ -129,7 +142,7 @@ def scanFile(args, scanner):
         detected = scanner.scan(file.data, file.filename)
         if not detected:
             logging.error(f"{file.filename} is not detected by {scanner.scanner_name}")
-            sys.exit(1)
+            exit(1)
 
         # analyze file on avred server to get matches
         matchesIt = analyzer(file, scanner, analyzerOptions)
