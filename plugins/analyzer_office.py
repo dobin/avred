@@ -32,11 +32,12 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
     oleFile = olefile.OleFileIO(fileOffice.data)
     disasmList = convertDisasmAddr(oleFile, disasmList)
     ac = OleStructurizer(oleFile)
-    uiDisasmLines = []
 
     # correlate the matches with the dumped code
     m: Match
     for m in matches:
+        uiDisasmLines = []
+
         data = fileOffice.data[m.start():m.end()]
         dataHexdump = hexdmp(data, offset=m.start())
         sectionName = ac.getSectionsForAddr(m.start(), m.size)
