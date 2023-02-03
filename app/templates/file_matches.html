@@ -24,7 +24,7 @@
             <div class="tab-pane fade show active " id="match-all" role="tabpanel" aria-labelledby="match-tab-all">
                 {% for match in matches %}
                     <h2>Match: {{match.fileOffset}} ({{match.fileOffset}}) size: {{match.size}}</h2>
-                    {{match.info}}:
+                    {{match.sectionInfo}}:
                     <pre>{{match.dataHexdump}}</pre>
                 {% endfor %}
             </div>
@@ -34,7 +34,7 @@
                 <h2> Match #{{match.idx}}</h2>
                 Offset: {{match.fileOffset}} <br>
                 Size: {{match.size}} <br>
-                Section: {{match.info}} <br>
+                Section: {{match.sectionInfo}} <br>
                 <br>
 
                 <h3> Disassembly </h3>
