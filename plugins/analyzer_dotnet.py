@@ -1,7 +1,7 @@
 from intervaltree import Interval, IntervalTree
 import logging
-from typing import List
-from model.model import Match, FileInfo, Scanner, DisasmLine
+from typing import List, Tuple
+from model.model import Match, FileInfo, Scanner, UiDisasmLine
 from plugins.file_pe import FilePe, Section
 from utils import *
 from dotnetfile import DotNetPE
@@ -16,7 +16,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
     dncilParser = DncilParser(filePe.filepath)
     
     for match in matches:
-        detail = []
+        uiDisasmLines = []
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdmp(data, offset=match.start())
         sectionName = filePe.findSectionNameFor(match.fileOffset)
@@ -32,62 +32,89 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
 
         if sectionName == ".text":  # only disassemble in .text
             # set info: precise disassembly info (e.g. function name)
-            detail, info2 = getDotNetDisassembly(match.start(), match.size, dncilParser)
+            uiDisasmLines, info2 = getDotNetDisassembly(match.start(), match.size, dncilParser)
             info += " " + info2
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
         match.setSectionInfo(info)
-        match.setDetail(detail)
+        match.setDisasmLines(uiDisasmLines)
 
 
-def getDotNetDisassembly(addrBase, size, dncilParser):
-    """Get section-info & disassembly in dncilParser for addrBase"""
-    detail = []
+def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine], str]:
+    """Get section-info & disassembly with dncilParser for range offset/+size"""
+    uiDisasmLines = []  # all diasassmbled IL 
+    methodNames = set()  # a set with unique function names
 
-    ilMethods = dncilParser.query(addrBase, addrBase+size)
+    ilMethods = dncilParser.query(offset, offset+size)
     if ilMethods is None or len(ilMethods) == 0:
-        logging.debug("No disassembly found for {:X}", addrBase)
-        return detail, ''
+        logging.debug("No disassembly found for {:X}", offset)
+        return uiDisasmLines, ''
     logging.info("Match physical {}/0x{:X}, method disassemblies found: {}".format(
-        addrBase, addrBase, len(ilMethods)))
+        offset, offset, len(ilMethods)))
 
     # all relevant instructions
-    addrTightStart = addrBase
-    addrTightEnd = addrBase + size
+    addrTightStart = offset
+    addrTightEnd = offset + size
 
-    # provide some context
+    # provide some more context
     addrWideStart = addrTightStart - 16
     addrWideEnd = addrTightEnd + 16
 
-    methodNames = set()
-
+    intervalMatch = Interval(offset, offset+size)
     # check each disassembled function if it contains instructions for our offset
     for ilMethod in sorted(ilMethods):
-        # find all instructions of method which are part of the match
-        for instrOff in sorted(ilMethod.instructions.keys()):
-            addrOff = ilMethod.getOffset() + instrOff
-            if addrOff > addrWideStart and addrOff < addrWideEnd:
-                d = ilMethod.instructions[instrOff]
+        intervalMethod = Interval(ilMethod.getOffset(), ilMethod.getOffset() + ilMethod.getSize())
+        # check if this method contains part of the data
+        if not intervalMatch.overlaps(intervalMethod):
+            continue
 
+        # the method contains some of the data. 
+        # * add method metadata
+        # * add the relevant instructions
+        isPart = False
+        if ilMethod.getOffset() >= addrTightStart and ilMethod.getOffset() <= addrTightEnd:
+            isPart = True
+        uiDisasmLine = UiDisasmLine(
+            ilMethod.getOffset(), 
+            ilMethod.getRva(),
+            isPart, 
+            "Function: {}".format(ilMethod.getName()),
+            "Function: {}".format(ilMethod.getName())
+        )
+        uiDisasmLines.append(uiDisasmLine)
+
+        uiDisasmLine = UiDisasmLine(
+            ilMethod.getOffset(), 
+            ilMethod.getRva(),
+            isPart, 
+            "Header size: {}".format(ilMethod.getHeaderSize()),
+            "Header size: {}".format(ilMethod.getHeaderSize())
+        )
+        uiDisasmLines.append(uiDisasmLine)
+
+        # find all instructions of method which are part of the match
+        for ilInstruction in ilMethod.instructions:
+            addrOff = ilInstruction.fileOffset
+
+            if addrOff > addrWideStart and addrOff < addrWideEnd:
                 isPart = False
                 if addrOff >= addrTightStart and addrOff <= addrTightEnd:
                     isPart = True
                 
-                line = d
-                disasmLine = DisasmLine(
-                    addrOff, 
-                    addrOff,
+                uiDisasmLine = UiDisasmLine(
+                    ilInstruction.fileOffset, 
+                    ilInstruction.rva,
                     isPart, 
-                    line, 
-                    line
+                    ilInstruction.text,
+                    ilInstruction.text
                 )
-                detail.append(disasmLine)
+                uiDisasmLines.append(uiDisasmLine)
 
                 methodNames.add(ilMethod.getName())
 
     info = str(methodNames)
-    return detail, info
+    return uiDisasmLines, info
 
 
 def getDotNetSections(filePe):

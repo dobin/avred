@@ -29,8 +29,7 @@ class DotnetDisasmTest(unittest.TestCase):
             self.assertEqual(ilMethod.getSize(), headerSize + codeSize)
             self.assertEqual(ilMethod.getCodeSize(), codeSize)
             self.assertEqual(ilMethod.getHeaderSize(), headerSize)
-            self.assertEqual(ilMethod.instructions[0], "Function: <<Main>$>g__MyMethod|0_0")
-            self.assertEqual(ilMethod.instructions[1], "0001    ldarg.1        ")
+            self.assertEqual(ilMethod.instructions[0].text, "0001    03                  ldarg.1        ")
 
 
         def test_augmentFileDotnet(self):
@@ -82,8 +81,6 @@ class DotnetDisasmTest(unittest.TestCase):
             Offset in decompile:  0x209c
             Difference:           0x1E00
             """
-            headerSize = 1
-
             matches = []
             match = Match(0, 669, 16) # 0x29D
             matches.append(match)
@@ -91,9 +88,13 @@ class DotnetDisasmTest(unittest.TestCase):
             augmentFileDotnet(filePe, matches)
             self.assertEqual(len(matches), 1)
             match = matches[0]
-            self.assertNotEqual(0, len(match.detail))
-            self.assertTrue('ldarg.1' in match.detail[0+headerSize].text)
-            self.assertTrue('ldstr          "A"' in match.detail[5+headerSize].text)
+            self.assertNotEqual(0, len(match.getDisasmLines()))
+            disasmLines = match.getDisasmLines()
+
+            self.assertTrue('Function: ::<<Main>$>g__MyMethod' in disasmLines[0].text)
+            self.assertTrue('Header size: 1' in disasmLines[1].text)
+            self.assertTrue('ldarg.1' in disasmLines[2].text)
+            self.assertTrue('ldc.i4.s       0xa' in disasmLines[3].text)
 
 
         def test_dotnetsections(self):

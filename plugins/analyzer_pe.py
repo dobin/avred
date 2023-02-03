@@ -6,7 +6,7 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
-from model.model import Match, FileInfo, Scanner, DisasmLine
+from model.model import Match, FileInfo, Scanner, UiDisasmLine
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
 from typing import List
@@ -61,7 +61,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
                 text = a['text']
                 textHtml = conv.convert(text, full=False)
             
-                disasmLine = DisasmLine(
+                disasmLine = UiDisasmLine(
                     relOffset + section.addr, 
                     a['offset'],
                     isPart,
@@ -73,7 +73,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
         match.setData(data)
         match.setDataHexdump(dataHexdump)
         match.setSectionInfo(section.name)
-        match.setDetail(detail)
+        match.setDisasmLines(detail)
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):

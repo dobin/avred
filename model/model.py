@@ -16,14 +16,23 @@ class Scanner:
         pass
 
 
-class DisasmLine():
+class UiDisasmLine():
     def __init__(self, fileOffset, rva, isPart, text, textHtml):
-        self.offset = str(hex(fileOffset))  # offset in file (as identified by avred)
+        self.offset = str(hex(fileOffset))  # offset in file
         self.rva = rva  # relative offset (usually created by external disasm tool)
         self.isPart = isPart  # is this part of the data, or supplemental?
         self.text = text  # the actual disassembled data
         self.textHtml = textHtml  # the actual disassembled data, colored
 
+    def __str__(self):
+        s = "Offset: {}  RVA: {}  isPart: {}  Text: {}".format(
+            self.offset,
+            self.rva,
+            self.isPart,
+            self.text
+        )
+        return s
+    
 
 class Match():
     def __init__(self, idx: int, fileOffset:int , size: int):
@@ -34,7 +43,7 @@ class Match():
         self.data: bytes = None
         self.dataHexdump: str = None
         self.sectionInfo: str = None
-        self.detail: List[DisasmLine] = []
+        self.disasmLines: List[UiDisasmLine] = []
 
     def start(self):
         return self.fileOffset
@@ -54,16 +63,19 @@ class Match():
     def getSectionInfo(self):
         return self.sectionInfo
 
-    def setDetail(self, detail):
-        self.detail = detail
+    def setDisasmLines(self, disasmLines):
+        self.disasmLines = disasmLines
+
+    def getDisasmLines(self):
+        return self.disasmLines
 
     def __str__(self):
         s = ""
         s += "id:{}  offset:{:X}  len:{}\n".format(self.idx, self.fileOffset, self.size)
         if self.sectionInfo is not None:
             s += "  Section: {}\n".format(self.sectionInfo)
-        if self.detail is not None:
-            s += "  Detail: {}\n".format(self.detail)
+        if self.disasmLines is not None:
+            s += "  DisasmLines: {}\n".format(self.disasmLines)
         if self.dataHexdump is not None:
             s += "  Hexdump: {}\n".format(self.dataHexdump)
         return s
