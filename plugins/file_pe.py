@@ -39,7 +39,7 @@ class FilePe(PluginFileFormat):
             name = section.Name.decode("ascii").rstrip("\x00") # its always padded to 8 bytes with \x00
             addr = section.PointerToRawData
             size = section.SizeOfRawData
-            virtaddr = section.VirtualAddress_adj
+            virtaddr = section.VirtualAddress
 
             if addr != 0 and size != 0:
                 self.sections += [
