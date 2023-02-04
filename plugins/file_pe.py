@@ -36,7 +36,12 @@ class FilePe(PluginFileFormat):
 
         # Normal sections
         for section in pepe.sections:
-            name = section.Name.decode("ascii").rstrip("\x00") # its always padded to 8 bytes with \x00
+            name = ''
+            try:
+                name = section.Name.decode("UTF-8").rstrip("\x00") # its always padded to 8 bytes with \x00
+            except:
+                # some binaries have invalid UTF8 in section name
+                name = ''.join('0x{:02x} '.format(x) for x in (section.Name))
             addr = section.PointerToRawData
             size = section.SizeOfRawData
             virtaddr = section.VirtualAddress
