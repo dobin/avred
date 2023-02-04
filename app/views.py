@@ -57,9 +57,28 @@ def files():
         filenames=res)
 
 
-@app.route("/file/<filename>")
-def file(filename):
-    filename: str = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+@app.route("/files_results")
+def files_resulsts():
+    if not app.config['LISTFILES'] == 'True':
+        return render_template('index.html')
+
+    examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
+    outcomes = []
+    for example in examples:
+        name = example[:-len(EXT_INFO)]
+
+        outcome, fileInfo, errStr = getFileData(name)
+        if errStr is not None:
+            print("Err: {} {}".format(example, errStr))
+            continue
+
+        outcomes.append(outcome)
+    
+    return render_template('list_files_results.html',
+    outcomes=outcomes)
+
+
+def getFileData(filename):
     verifyDataFile = filename + EXT_INFO
     logFilename = filename + EXT_LOG
 
@@ -68,8 +87,8 @@ def file(filename):
 
     # Main file (exe, docx etc.)
     if not os.path.isfile(filename):
-        print("File does not exist")
-        return 'File not found: ' + filename, 500
+        print("File does not exist: " + filename)
+        return None, None, 'File not found: ' + filename
 
     # log file
     logData = ""
@@ -78,11 +97,22 @@ def file(filename):
             logData = f.read()
 
     # Outcome
-    verifyDataFile = filename + EXT_INFO
     outcome: Outcome = None
     if os.path.isfile(verifyDataFile):
         with open(verifyDataFile, "rb") as input_file:
             outcome = pickle.load(input_file)
+
+    return outcome, logData, None
+    
+
+
+@app.route("/file/<filename>")
+def file(filename):
+    filename: str = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    outcome, logData, errStr = getFileData(filename)
+    if errStr is not None: 
+        return "Error: " + errStr
 
     return render_template('file.html', 
         filename=filename, 

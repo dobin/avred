@@ -55,6 +55,7 @@ class FileType(Enum):
     EXE = 1
     OFFICE = 3
     TEXT = 4
+    DOTNET = 5
     
 
 def GetFileType(filepath):

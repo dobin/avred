@@ -23,7 +23,7 @@ def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Inte
     return matchesIntervalTree
 
 
-def augmentFilePe(filePe: FilePe, matches: List[Match]):
+def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
 
@@ -74,6 +74,8 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]):
         match.setDataHexdump(dataHexdump)
         match.setSectionInfo(section.name)
         match.setDisasmLines(detail)
+
+    return ""
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):

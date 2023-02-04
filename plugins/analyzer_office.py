@@ -20,7 +20,7 @@ def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}
     return matchesIntervalTree
 
 
-def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
+def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:
     # Augment the matches with VBA decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
 
@@ -61,8 +61,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> FileInfo:
         m.setSectionInfo(sectionName)
         m.setDisasmLines(uiDisasmLines)
 
-    fileInfo = FileInfo(fileOffice.filename, 0, ac.getStructure())
-    return fileInfo
+    return ac.getStructure()
 
 
 def convertDisasmAddr(ole: olefile.olefile.OleFileIO, results: List[DisasmEntry]) -> IntervalTree:

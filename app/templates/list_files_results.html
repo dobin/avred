@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% include 'includes/header.html' %}
+</head>
+<body>
+    {% include 'includes/navigation.html' %}
+
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Type</th>
+            <th>#Matches</th>
+        </tr>
+        {% for outcome in outcomes %}
+        <tr>
+            <td>{{outcome.fileInfo.name}}</td>
+            <td>{{outcome.fileInfo.size}}</td>
+            <td>{{outcome.fileInfo.type}}</td>
+            <td>{{outcome.matches|length}}</td>
+
+            {% for testEntry in outcome.verifications[1].testEntries %}
+                {% if testEntry %}
+                    <td style="background-color:red"></td>
+                {% else %}
+                    <td style="background-color:green"></td>
+                {% endif %}
+            {% endfor %}    
+
+        </tr>
+        {% endfor %}
+    </table>
+
+    <ul>
+        {% for filename in filenames %}
+            <li>AA<a href="/file/{{filename}}">{{filename}}</a></li>
+        {% endfor %}
+    </ul>
+    
+</body>
+</html>

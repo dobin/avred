@@ -89,7 +89,7 @@ def scanFile(args, scanner):
     # file ident
     filetype = FileType.UNKNOWN
     if args.file.endswith('.ps1'):
-        filettype = FileType.TEXT
+        filetype = FileType.TEXT
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
         filetype = FileType.OFFICE
     elif args.file.endswith('.exe'):
@@ -112,7 +112,7 @@ def scanFile(args, scanner):
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
 
-    elif filetype is FileType.EXE:
+    elif filetype is FileType.EXE or filetype is FileType.DOTNET:
         file = FilePe()
         file.loadFromFile(args.file)
 
@@ -171,9 +171,10 @@ def scanFile(args, scanner):
         printVerifyData(verifications)
 
     # augment information
-    fileInfo = None
+    fileInfo = FileInfo(file.filename, 0, None)
     if augmenter is not None:
-        fileInfo = augmenter(file, matches)
+        fileStructure = augmenter(file, matches)
+        fileInfo.fileStructure = fileStructure
     
     # save
     allData = Outcome(fileInfo, matches, verifications, matchesIt)

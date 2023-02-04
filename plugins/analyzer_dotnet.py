@@ -8,7 +8,7 @@ from dotnetfile import DotNetPE
 from plugins.dncilparser import DncilParser
 
 
-def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
+def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     """Correlates file offsets in matches with the disassembles filePe methods"""
     dotnetSections = getDotNetSections(filePe)
     if dotnetSections is None:
@@ -39,6 +39,8 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> FileInfo:
         match.setDataHexdump(dataHexdump)
         match.setSectionInfo(info)
         match.setDisasmLines(uiDisasmLines)
+
+    return ""
 
 
 def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine], str]:
