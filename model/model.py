@@ -81,34 +81,36 @@ class Match():
         return s
 
 
-class TestModifyOrder(Enum):
-    INCREMENTAL = 1
-    INDEPENDANT = 2
+class TestMatchOrder(Enum):
+    ISOLATED = 1
+    INCREMENTAL = 2
+    DECREMENTAL = 3
+    
 
-
-class TestModifyPosition(Enum):
+class TestMatchModify(Enum):
     FULL = 1
-    MIDDLE = 2
+    MIDDLE8 = 2
+    MIDDLE_32 = 3
+    BEGIN = 4
+    END = 5
 
-
-# TEMP
-class TestType(Enum):
-    FULL = 1
-    MIDDLE = 2
 
 class Verification():
-    def __init__(self, index, type, info):
+    def __init__(self, index, matchOrder, matchModify, fillType=FillType.lowentropy):
         self.index: int = index
-        self.type: TestModifyPosition = type
-        self.info: TestModifyOrder = info
+        self.info: TestMatchOrder = matchOrder
+        self.type: TestMatchModify = matchModify
+        self.fillType = fillType
+
         self.testEntries: List[bool] = []
 
     def __str__(self):
         s = ""
-        s += "{} {} {}\n".format(self.index, self.type, self.info)
-        for entry in self.testEntries:
-            s += "  {}".format(entry)
-        s += "\n"
+        s += "{} {} {}".format(self.index, self.type.name, self.info.name)
+
+        if self.testEntries is not None:
+            for entry in self.testEntries:
+                s += "  {}".format(entry)
         return s
     
 

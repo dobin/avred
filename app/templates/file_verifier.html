@@ -3,8 +3,8 @@
     <thead>
         <tr>
             <td>Test #</td>
-            <td>ModifyOrder</td>
-            <td>ModifyPosition</td>
+            <td>MatchOrder</td>
+            <td>MatchModify</td>
 
             {% for testEntry in verifications[0].testEntries %}
             <td>Match {{loop.index0}}</td>
@@ -34,25 +34,13 @@
 
 </table>
 
-<h2>ModifyOrder:</h2>
-<p>
-    Result of detection. Red means detected, Green means not detected. 
-</p>
+<h2> Explanation </h2>
 
-<p>
-    INCREMENTAL: Each match will be modified, starting from the first. 
-
-</p>
-
-<p>
-    INDEPENDANT: Each match is modified by itself, without touching others. 
-</p>
-
-<h2>ModifyPosition</h2>
-<p>
-    FULL: Complete match will be modified
-</p>
-
-<p>
-    MIDDLE: Only a few bytes in the middle will be modified
-</p>
+<ul>
+    <li> Colors: Red = detected, Green = not detected.  </li>
+    <li>ModifyOrder Isolated: Test each match individually</li>
+    <li>ModifyOrder Incremental: Modify each match after another, additive</li>
+    <li>ModifyOrder Decremental: Modify each match after another, additive, downwards (last first)</li>
+    <li>ModifyPosition FULL: Overwrite complete match</li>
+    <li>ModifyPosition MIDDLE8: Overwrite 8 bytes in the middle of the match (partial)</li>
+</ul>
