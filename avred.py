@@ -10,7 +10,7 @@ import logging
 
 from config import Config
 from verifier import verify
-from model.model import *
+from model.model import convertMatchesIt, FileInfo, Outcome
 from utils import FileType, GetFileType
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
@@ -20,6 +20,7 @@ from plugins.analyzer_plain import analyzeFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
+from verifyconclusion import verificationAnalyzer
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -151,12 +152,7 @@ def scanFile(args, scanner):
 
     # convert IntervalTree Matches
     logging.info("Found {} matches".format(len(matchesIt)))
-    matches = []
-    idx = 0
-    for m in matchesIt:
-        match = Match(idx, m.begin, m.end-m.begin)
-        matches.append(match)
-        idx += 1
+    matches = convertMatchesIt(matchesIt)
 
     verifications = None
     if args.loadVerify and os.path.exists(filenameOutcome):
@@ -170,6 +166,9 @@ def scanFile(args, scanner):
         verifications = verify(file, matches, scanner)
         printVerifyData(verifications)
 
+    # analyse verification to get VerifyResults
+    verifyConclusion = verificationAnalyzer(verifications)
+
     # augment information
     fileInfo = FileInfo(file.filename, 0, None)
     if augmenter is not None:
@@ -177,7 +176,7 @@ def scanFile(args, scanner):
         fileInfo.fileStructure = fileStructure
     
     # save
-    allData = Outcome(fileInfo, matches, verifications, matchesIt)
+    allData = Outcome(fileInfo, matches, verifications, matchesIt, verifyConclusion)
     with open(filenameOutcome, 'wb') as handle:
         pickle.dump(allData, handle)
         logging.info(f"Wrote results to {filenameOutcome}")

@@ -101,7 +101,6 @@ class Verification():
         self.info: TestMatchOrder = matchOrder
         self.type: TestMatchModify = matchModify
         self.fillType = fillType
-
         self.testEntries: List[bool] = []
 
     def __str__(self):
@@ -121,35 +120,6 @@ class FileInfo():
         self.fileStructure = fileStructure
         self.type = ''
         self.date = ''
-
-
-class Outcome():
-    def __init__(self, fileInfo, matches, verifications, matchesIt=None):
-        self.fileInfo: FileInfo = fileInfo
-        self.matches: List[Match] = matches
-        self.verifications: List[Verification] = verifications
-        self.matchesIt: IntervalTree = matchesIt
-
-
-    def __str__(self):
-        s = ''
-
-        if self.fileInfo is not None:
-            if self.fileInfo.fileStructure is not None:
-                s += 'FileInfo: \n'
-                s += self.fileInfo.fileStructure
-
-        s += "Matches: \n"
-        for match in self.matches:
-            s += str(match)
-
-        s += "\nVerification: \n"
-        for v in self.verifications:
-            s += str(v)    
-
-        s += "\n"    
-
-        return s
 
 
 class PluginFileFormat():
@@ -184,3 +154,50 @@ class PluginFileFormat():
 
     def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
         self.data = patchData(self.data, base, size, fillType)
+
+
+class VerifyStatus(Enum): 
+    UNKNOWN = 0
+    GOOD = 1
+    OK = 2
+    BAD = 3
+
+
+class VerifyConclusion():
+    def __init__(self, verifyStatus: List[VerifyStatus]):
+        self.verifyStatus = verifyStatus
+
+
+def convertMatchesIt(matchesIt):
+    matches = []
+    idx = 0
+    for m in matchesIt:
+        match = Match(idx, m.begin, m.end-m.begin)
+        matches.append(match)
+        idx += 1
+    return matches
+
+
+class Outcome():
+    def __init__(self, fileInfo, matches, verifications, matchesIt=None, verifyConclusion=None):
+        self.fileInfo: FileInfo = fileInfo
+        self.matches: List[Match] = matches
+        self.verifications: List[Verification] = verifications
+        self.matchesIt: IntervalTree = matchesIt
+        self.verifyConclusion: VerifyConclusion = verifyConclusion
+
+
+    def __str__(self):
+        s = ''
+        if self.fileInfo is not None:
+            if self.fileInfo.fileStructure is not None:
+                s += 'FileInfo: \n'
+                s += self.fileInfo.fileStructure
+        s += "Matches: \n"
+        for match in self.matches:
+            s += str(match)
+        s += "\nVerification: \n"
+        for v in self.verifications:
+            s += str(v)    
+        s += "\n"    
+        return s

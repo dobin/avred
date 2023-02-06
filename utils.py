@@ -7,6 +7,7 @@ import base64
 import magic
 from enum import Enum
 
+
 def saveMatchesToFile(filename, matches):
     # convert first
     results = []

@@ -3,10 +3,9 @@
 import unittest
 from webbrowser import get
 from plugins.analyzer_pe import analyzeFileExe
-from model.model import Scanner
 from tests.helpers import TestDetection
-from pprint import pprint
 from plugins.file_pe import FilePe
+from tests.scanners import *
 
 
 class PeTest(unittest.TestCase):
@@ -91,36 +90,3 @@ class PeTest(unittest.TestCase):
         matches = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
         self.assertTrue(len(matches) == 4)
-
-
-class ScannerTest(Scanner):
-    def __init__(self, detections):
-        self.detections = detections
-        pprint(detections, indent=4)
-
-    def scan(self, data, filename):
-        for detection in self.detections:
-            dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if dataSnippet != detection.refData:
-                return False
-
-        return True    
-
-
-class ScannerTestWeighted(Scanner):
-    def __init__(self, detections):
-        self.detections = detections
-        pprint(detections, indent=4)
-
-    def scan(self, data, filename):
-        n = 0
-        for detection in self.detections:
-            dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
-            if dataSnippet == detection.refData:
-                n += 1
-
-        if n > int(len(self.detections) // 2):
-            return True
-        else:
-            return False
-
