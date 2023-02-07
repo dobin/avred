@@ -167,6 +167,11 @@ class VerifyConclusion():
     def __init__(self, verifyStatus: List[VerifyStatus]):
         self.verifyStatus = verifyStatus
 
+    def __str__(self):
+        s = ''
+        for entry in self.verifyStatus:
+            s += entry
+
 
 def convertMatchesIt(matchesIt):
     matches = []
@@ -198,6 +203,8 @@ class Outcome():
             s += str(match)
         s += "\nVerification: \n"
         for v in self.verifications:
-            s += str(v)    
+            s += str(v)
+        s += "\VerifyConclusion: \n"
+        print(str(self.verifyConclusion))
         s += "\n"    
         return s

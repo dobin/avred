@@ -113,13 +113,14 @@ def file(filename):
     outcome, logData, errStr = getFileData(filename)
     if errStr is not None: 
         return "Error: " + errStr
-
+    
     return render_template('file.html', 
         filename=filename, 
         matches=outcome.matches, 
         verifications=outcome.verifications,
         fileInfo=outcome.fileInfo,
-        logData=logData)
+        logData=logData,
+        verifyConclusion=outcome.verifyConclusion)
 
 
 def allowed_file(filename):
