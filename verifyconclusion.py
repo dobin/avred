@@ -19,6 +19,9 @@ def verificationAnalyzer(verifications: List[Verification]) -> VerifyConclusion:
         elif not verifications[1].testEntries[idx]:
             res = VerifyStatus.OK
 
+        elif (not verifications[2].testEntries[idx]) or (not verifications[3].testEntries[idx]):
+            res = VerifyStatus.OK
+
         else:
             res = VerifyStatus.BAD
         

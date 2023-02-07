@@ -6,14 +6,14 @@
             <td>MatchOrder</td>
             <td>MatchModify</td>
 
-            {% for testEntry in verifications[0].testEntries %}
+            {% for testEntry in outcome.verifications[0].testEntries %}
             <td>Match {{loop.index0}}</td>
             {% endfor %}
 
         </tr>
     </thead>
 
-    {% for verificationRun in verifications %}
+    {% for verificationRun in outcome.verifications %}
     <tr>
         <td>{{verificationRun.index}}</td>
         <td>{{verificationRun.info.name}}</td>
@@ -32,6 +32,12 @@
     </tr>
     {% endfor %}
 
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        {% include 'includes/verifystatus.html' %}
+    </tr>
 </table>
 
 <h2> Explanation </h2>

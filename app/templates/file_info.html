@@ -27,7 +27,7 @@
         <th>Section</th>
     </tr>
 
-    {% for match in matches %}
+    {% for match in outcome.matches %}
     <tr>
         <td>{{match.idx}}</td>
         <td>{{match.fileOffset}}</td>
@@ -45,4 +45,4 @@ Assessment:
 
 <h2>File Structure</h2>
 
-<pre>{{fileInfo.fileStructure}}</pre>
+<pre>{{outcome.fileInfo.fileStructure}}</pre>

@@ -8,7 +8,7 @@
                 </button>
             </li>
 
-            {% for match in matches %}
+            {% for match in outcome.matches %}
                 <li class="nav-item" role="presentation">
                 <button class="nav-link " id="match-tab-{{match.idx}}" data-bs-toggle="tab" data-bs-target="#match-{{match.idx}}" 
                         type="button" role="tab" aria-controls="match-tab-{{match.idx}}" aria-selected="true">
@@ -22,14 +22,14 @@
     <div class="col-md-10">
         <div class="tab-content" id="matchTabContent">
             <div class="tab-pane fade show active " id="match-all" role="tabpanel" aria-labelledby="match-tab-all">
-                {% for match in matches %}
+                {% for match in outcome.matches %}
                     <h2>Match: {{match.fileOffset}} ({{match.fileOffset}}) size: {{match.size}}</h2>
                     {{match.sectionInfo}}:
                     <pre>{{match.dataHexdump}}</pre>
                 {% endfor %}
             </div>
 
-            {% for match in matches %}
+            {% for match in outcome.matches %}
             <div class="tab-pane fade  " id="match-{{match.idx}}" role="tabpanel" aria-labelledby="match-tab-{{match.idx}}">
                 <h2> Match #{{match.idx}}</h2>
                 Offset: {{match.fileOffset}} <br>

@@ -1,0 +1,16 @@
+
+    {% for verifyStatus in outcome.verifyConclusion.verifyStatus %}
+        {% if verifyStatus|string == "VerifyStatus.BAD" %}
+        <td style="background-color:red">
+        {% elif verifyStatus|string == "VerifyStatus.OK" %}
+        <td style="background-color:orange"></td>
+        {% elif verifyStatus|string == "VerifyStatus.GOOD" %}
+        <td style="background-color:green">
+        {% else %}
+        <td style="background-color:black"></td>
+        {% endif %}
+        &nbsp;
+        </td>
+    {% endfor %}
+
+

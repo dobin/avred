@@ -75,7 +75,7 @@ def files_resulsts():
         outcomes.append(outcome)
     
     return render_template('list_files_results.html',
-    outcomes=outcomes)
+        outcomes=outcomes)
 
 
 def getFileData(filename):
@@ -116,11 +116,8 @@ def file(filename):
     
     return render_template('file.html', 
         filename=filename, 
-        matches=outcome.matches, 
-        verifications=outcome.verifications,
-        fileInfo=outcome.fileInfo,
-        logData=logData,
-        verifyConclusion=outcome.verifyConclusion)
+        outcome=outcome,
+        logData=logData)
 
 
 def allowed_file(filename):
