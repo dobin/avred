@@ -25,13 +25,17 @@ class VerifierTest(unittest.TestCase):
         self.assertTrue(len(matches) == 2)
 
         verifications = verify(filePe, matches, scanner)
-        verifyConclusion = verificationAnalyzer(verifications)
 
-        # 0 MIDDLE8 ISOLATED  False  False
-        # 1 FULL ISOLATED  False  False
-        # 2 MIDDLE8 INCREMENTAL  False  False
-        # 3 FULL INCREMENTAL  False  False
-        # 4 FULL DECREMENTAL  False  False
+        self.assertTrue(verifications[0].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(verifications[0].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+
+        self.assertTrue(verifications[2].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(verifications[2].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+
+        self.assertTrue(verifications[3].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(verifications[3].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+
+        verifyConclusion = verificationAnalyzer(verifications)
         self.assertEqual(verifyConclusion.verifyStatus[0], VerifyStatus.GOOD)
         self.assertEqual(verifyConclusion.verifyStatus[1], VerifyStatus.GOOD)
 
@@ -55,17 +59,17 @@ class VerifierTest(unittest.TestCase):
             print(str(match))
 
         verifications = verify(filePe, matches, scanner)
-        for ver in verifications:
-            print(str(ver))
+
+        self.assertTrue(verifications[0].testEntries[0].scanResult == ScanResult.DETECTED)
+        self.assertTrue(verifications[0].testEntries[1].scanResult == ScanResult.DETECTED)
+
+        self.assertTrue(verifications[2].testEntries[0].scanResult == ScanResult.DETECTED)
+        self.assertTrue(verifications[2].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+
+        self.assertTrue(verifications[4].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(verifications[4].testEntries[1].scanResult == ScanResult.DETECTED)
+
 
         verifyConclusion = verificationAnalyzer(verifications)
-        for verRes in verifyConclusion.verifyStatus:
-            print(str(verRes))
-
-        # 0 MIDDLE8 ISOLATED    True  True
-        # 1 FULL ISOLATED       True  True
-        # 2 MIDDLE8 INCREMENTAL True  False
-        # 3 FULL INCREMENTAL    True  False
-        # 4 FULL DECREMENTAL    False  True
-        self.assertEqual(verifyConclusion.verifyStatus[0], VerifyStatus.BAD)
-        self.assertEqual(verifyConclusion.verifyStatus[1], VerifyStatus.BAD)
+        self.assertEqual(verifyConclusion.verifyStatus[0], VerifyStatus.OK)
+        self.assertEqual(verifyConclusion.verifyStatus[1], VerifyStatus.OK)

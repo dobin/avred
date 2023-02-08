@@ -94,7 +94,7 @@ def scanFile(args, scanner):
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
         filetype = FileType.OFFICE
     elif args.file.endswith('.exe'):
-        filetype = FileType.DOTNET
+        filetype = FileType.EXE
     elif args.file.endswith('.bin'):
         filetype = FileType.PLAIN
     else: 
@@ -195,9 +195,10 @@ def checkFile(filepath, scanner):
 
 
 def printVerifyData(verifications):
-    print("Verification results: ")
-    for verification in verifications:
-        print(str(verification))
+    #print("Verification results: ")
+    #for verification in verifications:
+    #    print(str(verification))
+    pass
 
 
 def printMatches(matches):

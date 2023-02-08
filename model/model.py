@@ -85,6 +85,8 @@ class TestMatchOrder(Enum):
     ISOLATED = 1
     INCREMENTAL = 2
     DECREMENTAL = 3
+    LAST_TWO = 4
+    FIRST_TWO = 5
     
 
 class TestMatchModify(Enum):
@@ -95,13 +97,30 @@ class TestMatchModify(Enum):
     END = 5
 
 
+class ScanResult(Enum):
+    NOT_SCANNED = 0
+    DETECTED = 1
+    NOT_DETECTED = 2
+    
+
+class TestEntry():
+    def __init__(self, scanIndex, scanResult):
+        self.scanIndex = scanIndex
+        self.scanResult = scanResult
+
+    def __str__(self):
+        s = ''
+        s += "Idx: {}  result: {}".format(self.scanIndex, self.scanResult)
+        return s
+
+
 class Verification():
     def __init__(self, index, matchOrder, matchModify, fillType=FillType.lowentropy):
         self.index: int = index
         self.info: TestMatchOrder = matchOrder
         self.type: TestMatchModify = matchModify
         self.fillType = fillType
-        self.testEntries: List[bool] = []
+        self.testEntries: List[TestEntry] = []
 
     def __str__(self):
         s = ""

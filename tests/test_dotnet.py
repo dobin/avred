@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import unittest
 from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections
 from plugins.dncilparser import IlMethod

@@ -10,20 +10,29 @@ def verificationAnalyzer(verifications: List[Verification]) -> VerifyConclusion:
     # 4 FULL DECREMENTAL
 
     verifyResults = []
-    res = VerifyStatus.UNKNOWN
+    res = VerifyStatus.BAD
 
     for idx, val in enumerate(verifications[0].testEntries):
-        if not verifications[0].testEntries[idx]:
+        # best: Partial modification of an isolated match
+        if verifications[0].testEntries[idx].scanResult is ScanResult.NOT_DETECTED:
             res = VerifyStatus.GOOD
 
-        elif not verifications[1].testEntries[idx]:
+        # ok: Full modification of an isolated match
+        elif verifications[1].testEntries[idx].scanResult is ScanResult.NOT_DETECTED:
             res = VerifyStatus.OK
 
-        elif (not verifications[2].testEntries[idx]) or (not verifications[3].testEntries[idx]):
-            res = VerifyStatus.OK
-
+        # ok: 
         else:
-            res = VerifyStatus.BAD
+            if len(verifications) >= 5:
+                if idx == 0 or idx == 1:
+                    # check FIRST_TWO (first two entries have same result)
+                    if verifications[5].testEntries[idx].scanResult is ScanResult.NOT_DETECTED:
+                        res = VerifyStatus.OK
+
+                if idx == len(verifications) or idx == len(verifications) - 1:
+                    # check LAST_TWO (last two entries have same result)
+                    if verifications[5].testEntries[idx].scanResult is ScanResult.NOT_DETECTED:
+                        res = VerifyStatus.OK
         
         verifyResults.append(res)
 

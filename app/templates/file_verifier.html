@@ -20,12 +20,14 @@
         <td>{{verificationRun.type.name}}</td>
 
         {% for testEntry in verificationRun.testEntries %}
-            {% if testEntry %}
+            {% if testEntry.scanResult|string == 'ScanResult.DETECTED' %}
             <td style="background-color:red">
-            {% else %}
+            {% elif testEntry.scanResult|string == 'ScanResult.NOT_DETECTED' %}
             <td style="background-color:green">
+            {% else %}
+            <td></td>
             {% endif %}
-                &nbsp;
+                {{testEntry.scanIndex}} 
             </td>
         {% endfor %}
     
