@@ -90,18 +90,18 @@ def scanFile(args, scanner):
     # file ident
     filetype = FileType.UNKNOWN
     if args.file.endswith('.ps1'):
-        filetype = FileType.TEXT
+        filetype = FileType.PLAIN
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
         filetype = FileType.OFFICE
     elif args.file.endswith('.exe'):
         filetype = FileType.DOTNET
-    elif args.file.endswith('.ps1'):
-        filetype = FileType.TEXT
+    elif args.file.endswith('.bin'):
+        filetype = FileType.PLAIN
     else: 
         filetype = GetFileType(args.file)
 
     logging.info("Using parser for {}".format(filetype.name))
-    if filetype is FileType.TEXT:
+    if filetype is FileType.PLAIN:
         file = FilePlain()
         file.loadFromFile(args.file)
         analyzer = analyzeFilePlain

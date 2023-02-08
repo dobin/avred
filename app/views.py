@@ -11,7 +11,7 @@ import pickle
 from app  import app
 from model.model import *
 
-ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm'}
+ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm', '.bin' }
 EXT_INFO = ".outcome"
 EXT_LOG = ".log"
 
