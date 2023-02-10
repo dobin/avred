@@ -16,7 +16,7 @@ from utils import FileType, GetFileType, convertMatchesIt, getFileInfo
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
 from plugins.analyzer_dotnet import augmentFileDotnet
-from plugins.analyzer_plain import analyzeFilePlain
+from plugins.analyzer_plain import analyzeFilePlain, augmentFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
@@ -99,8 +99,13 @@ def scanFile(args, scanner):
         filetype = FileType.EXE
         uiFileType = "Executable"
     elif args.file.endswith('.bin'):
-        filetype = FileType.PLAIN
-        uiFileType = "Binary"
+        # try to detect it first
+        filetype = GetFileType(args.file)
+        uiFileType = filetype
+
+        if filetype is FileType.UNKNOWN:
+            filetype = FileType.PLAIN
+            uiFileType = 'Binary'
     else: 
         filetype = GetFileType(args.file)
 
@@ -109,7 +114,7 @@ def scanFile(args, scanner):
         file = FilePlain()
         file.loadFromFile(args.file)
         analyzer = analyzeFilePlain
-        augmenter = None
+        augmenter = augmentFilePlain
 
     elif filetype is FileType.OFFICE:  # dotm, xlsm, xltm
         file = FileOffice()
