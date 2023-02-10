@@ -1,40 +1,44 @@
 # avred
 
+Antivirus reducer. 
+
 Avred is being used to identify which parts of a file are identified
 by a Antivirus, and tries to show as much possible information and context about each match. 
 
-It is mainly used to make it easier for RedTeamers to obfuscate their
-tools. 
+This includes: 
+* Section names of matches
+* Decompilation if match contains code
+* Verification of matches
+
+It is mainly used to make it easier for RedTeamers to obfuscate their tools. 
 
 
 ## Background
 
 Most antivirus engines rely on strings or other bytes sequences to recognize malware.
-This project helps to automatically recover these signatures.
+This project helps to automatically recover these signatures (matches).
 
 The difference to similar projects is: 
 * Knowledge of internal file structures. 
   * Can extract vbaProject.bin and modify it 
   * Knows about PE sections and scan each one individually
+  * Knows .NET streams
 * Supports any Antivirus (thanks to AMSI server via HTTP)
-* Shows detailed information about each match
-* Verifies the results
+* Shows detailed information about each match (disassembly etc.)
+* Verifies the matches
 
 
-## Inspiration
+## Supported files:
 
-* Similar to matterpreter/DefenderCheck and rasta-mouse/ThreatCheck
-* Based on: https://github.com/scrt/avdebugger
+* PE (EXE) files, r2 disassembly
+* PE .NET files, dncil disassembly
+* Word files, pcodedmp disassembly
 
 
-## Supports
+## Example
 
-* PE (EXE) files
-* PE .NET files 
-* Word files
 
-This includes: 
-* Code decompilation (assembly, .NET IL, and makros)
+## Screenshots
 
 
 ## Install 
@@ -62,13 +66,36 @@ Second, once you have this, you can setup avred.
 * Configure your servers in `config.json` (eg `1.1.1.1:9001`)
 * Scan file with: `./avred.py --file mimikatz.exe --server defender`
 
-Use `--saveMatches` to write all identified matches into file "filename + `.matches.json`". 
 
-Use `--verify` to patch one match after another at the end, until the AV stop detecting it. Used to 
-verify if this thing works as intended. 
+## How to use
+
+
+
+## File and Directory structure
+
+I am team NO-DB. Only files.
+
+File nomenclature: 
+* `file.exe`: The file you want to scan
+* `file.exe.matches`: JSON dump of all matches
+* `file.exe.outcome`: Pickled Outcome data structure with all further information
+
+For the webapp, files are uploaded to `app/uploads`. 
+
+
+## References
+
+Similar to: 
+* https://github.com/matterpreter/DefenderCheck
+* https://github.com/rasta-mouse/ThreatCheck
+
+Based on: 
+* https://github.com/scrt/avdebugger
 
 
 ## Issues when scanning and options
+
+### EXE PE
 
 *If all sections get detected*, use `--isolate`. Instead of nulling a section and see if
 the AV stops identifying it, the option will do the opposite: null other sections, and see
@@ -78,27 +105,22 @@ if the AV still detects it.
 The findings in the other sections are usually good enough. 
 
 
-## Tested with: 
+## Web server
 
-* pe/
-  * DripLoader.exe
-  * lazagne.exe
-  * mimikatz.exe
-  * PetitPotam.exe
-* ps/
-  * 
-* sharp/
-  * Rubeus.exe
-  * Seatbelt.exe
-  * SharpHound.exe
-  * SharpSploit.dll
+Option to show list of files (for public website): 
+```
+export FLASK_LISTFILES="True"
+```
 
-
-# Web server
-
-Development:
+For Development:
 ```
 $ export FLASK_DEBUG=1
+
+```
+
+Run: 
+
+```
 $ flask run --host=0.0.0.0
 ```
 
