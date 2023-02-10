@@ -57,7 +57,7 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclu
     # verifyResults is filled. check for corner cases
 
     # with FIRST_TWO, LAST_TWO
-    if len(verifications) >= 5:
+    if len(verifications) > 5:
         if verifyResults[0] is VerifyStatus.BAD and verifyResults[1] is VerifyStatus.BAD:
             ft = getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)            
             if ft[0].scanResult is ScanResult.NOT_DETECTED and ft[1].scanResult is ScanResult.NOT_DETECTED:

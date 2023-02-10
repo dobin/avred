@@ -11,7 +11,7 @@ import logging
 from config import Config
 from verifier import verify
 from model.model import FileInfo, Outcome
-from utils import FileType, GetFileType, convertMatchesIt
+from utils import FileType, GetFileType, convertMatchesIt, getFileInfo
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -88,14 +88,19 @@ def scanFile(args, scanner):
 
     # file ident
     filetype = FileType.UNKNOWN
+    uiFileType = 'unknown'
     if args.file.endswith('.ps1'):
         filetype = FileType.PLAIN
+        uiFileType = "Powershell"
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
         filetype = FileType.OFFICE
+        uiFileType = "Word"
     elif args.file.endswith('.exe'):
         filetype = FileType.EXE
+        uiFileType = "Executable"
     elif args.file.endswith('.bin'):
         filetype = FileType.PLAIN
+        uiFileType = "Binary"
     else: 
         filetype = GetFileType(args.file)
 
@@ -120,8 +125,10 @@ def scanFile(args, scanner):
 
         if file.isDotNet:
             augmenter = augmentFileDotnet
+            uiFileType = 'Executable DotNet'
         else:
             augmenter = augmentFilePe
+            uiFileType = 'Executable Pe'
 
         analyzerOptions["isolate"] = args.isolate
         analyzerOptions["remove"] = args.remove
@@ -165,7 +172,7 @@ def scanFile(args, scanner):
         verification = verify(file, matches, scanner)
 
     # augment information
-    fileInfo = FileInfo(file.filename, 0, None)
+    fileInfo = getFileInfo(file, uiFileType, '')
     if augmenter is not None:
         fileStructure = augmenter(file, matches)
         fileInfo.fileStructure = fileStructure

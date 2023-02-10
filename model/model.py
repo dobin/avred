@@ -8,7 +8,6 @@ import os
 from model.testverify import *
 
 
-
 class UiDisasmLine():
     def __init__(self, fileOffset, rva, isPart, text, textHtml):
         self.offset = str(hex(fileOffset))  # offset in file
@@ -25,6 +24,14 @@ class UiDisasmLine():
             self.text
         )
         return s
+
+
+
+class FileType(Enum):
+    UNKNOWN = 0
+    EXE = 1
+    OFFICE = 3
+    PLAIN = 4
     
 
 class Match():
@@ -75,12 +82,13 @@ class Match():
 
 
 class FileInfo():
-    def __init__(self, name, size, fileStructure):
+    def __init__(self, name, size, hash, fileType, time, fileStructure):
         self.name = name
         self.size = size
+        self.hash = hash
+        self.fileType = fileType
         self.fileStructure = fileStructure
-        self.type = ''
-        self.date = ''
+        self.date = time
 
 
 class Outcome():

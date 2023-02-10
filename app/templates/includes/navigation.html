@@ -8,6 +8,7 @@
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/upload' else '' }}" href="/upload">Upload</a></li>
                 {% if 'localhost' in request.host_url %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files' else '' }}" href="/files">Files</a></li>
+                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files_results' else '' }}" href="/files_results">FilesResults</a></li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path.startswith('/file') else ''}}" href="/file/F156AC6CB5D5655B.test1.exe">File</a></li>
             </ul>
