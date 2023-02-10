@@ -1,18 +1,21 @@
-<h2>Info</h2>
+<h2>File Info</h2>
 
 <table class="table">
     <tr>
-        <td>Filename: </td>
+        <td>Name: </td>
         <td>{{filename}}</td>
     </tr><tr>
-        <td>File Size: </td>
-        <td></td>
+        <td>Size: </td>
+        <td>{{outcome.fileInfo.size}}</td>
     </tr><tr>
-        <td>File Type: </td>
-        <td></td>
+        <td>Type: </td>
+        <td>{{outcome.fileInfo.fileType}}</td>
     </tr><tr>
-        <td>File Hash: </td>
-        <td></td>
+        <td>Hash: </td>
+        <td>{{outcome.fileInfo.hash}}</td>
+    </tr><tr>
+        <td>date: </td>
+        <td>{{outcome.fileInfo.date}}</td>
     </tr>
 </table>
 
@@ -25,6 +28,7 @@
         <th>Offset</th>
         <th>Size</th>
         <th>Section</th>
+        <th>Conclusion</th>
     </tr>
 
     {% for match in outcome.matches %}
@@ -33,15 +37,20 @@
         <td>{{match.fileOffset}}</td>
         <td>{{match.size}}</td>
         <td>{{match.sectionInfo}}</td>
+
+        {% if outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.BAD" %}
+        <td style="background-color:red">
+        {% elif outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.OK" %}
+        <td style="background-color:orange"></td>
+        {% elif outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.GOOD" %}
+        <td style="background-color:green">
+        {% else %}
+        <td></td>
+        {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>
-
-
-<h2>Verification</h2>
-
-Assessment: 
-
 
 <h2>File Structure</h2>
 

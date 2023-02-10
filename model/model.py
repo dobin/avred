@@ -102,15 +102,11 @@ class Outcome():
     def __str__(self):
         s = ''
         if self.fileInfo is not None:
-            if self.fileInfo.fileStructure is not None:
-                s += 'FileInfo: \n'
-                s += self.fileInfo.fileStructure
+            s += str(self.fileInfo)
         s += "Matches: \n"
         for match in self.matches:
             s += str(match)
         s += "\nVerification: \n"
-        for v in self.verification:
-            s += str(v)
-
+        s += str(self.verification)
         s += "\n"    
         return s

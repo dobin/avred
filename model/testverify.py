@@ -63,7 +63,8 @@ class VerifyConclusion():
     def __str__(self):
         s = ''
         for entry in self.verifyStatus:
-            s += entry
+            s += entry.name
+        return s
 
 
 class VerificationEntry():
@@ -86,6 +87,13 @@ class VerificationEntry():
     
 
 class Verification():
-    def __init__(self, verifications: List[VerificationEntry], matchConclusions: List[VerifyStatus]):
+    def __init__(self, verifications: List[VerificationEntry], matchConclusions: VerifyConclusion):
         self.verifications = verifications
         self.matchConclusions = matchConclusions
+
+    def __str__(self):
+        s = ''
+        for verification in self.verifications:
+            s += str(verification)
+        s += str(self.matchConclusions)
+        return s
