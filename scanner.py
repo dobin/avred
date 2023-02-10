@@ -1,7 +1,7 @@
 import logging
 import requests as req
 from pprint import pprint
-from model.model import Scanner
+from model.extensions import Scanner
 
 
 class ScannerRest(Scanner):

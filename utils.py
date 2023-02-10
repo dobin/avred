@@ -7,6 +7,9 @@ import base64
 import magic
 from enum import Enum
 
+from model.model import Match
+from model.testverify import FillType
+
 
 def saveMatchesToFile(filename, matches):
     # convert first
@@ -20,13 +23,6 @@ def saveMatchesToFile(filename, matches):
 
     with open(filename, 'w') as outfile:
         json.dump(results, outfile)
-
-
-class FillType(Enum):
-    null = 1
-    space = 2
-    highentropy = 3
-    lowentropy = 4
 
 
 def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
@@ -85,6 +81,16 @@ def printMatches(data, matches):
         print(hexdmp(dataDump, offset=i.begin))
 
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
+
+
+def convertMatchesIt(matchesIt):
+    matches = []
+    idx = 0
+    for m in matchesIt:
+        match = Match(idx, m.begin, m.end-m.begin)
+        matches.append(match)
+        idx += 1
+    return matches
 
 
 def hexdmp(src, offset=0, length=16):

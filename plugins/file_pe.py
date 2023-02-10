@@ -3,7 +3,7 @@ import os
 import pefile
 
 from dataclasses import dataclass
-from model.model import PluginFileFormat
+from model.extensions import PluginFileFormat
 
 
 @dataclass

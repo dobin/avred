@@ -4,16 +4,9 @@ from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 from intervaltree import Interval, IntervalTree
 import os
-from utils import patchData, FillType
 
+from model.testverify import *
 
-@dataclass
-class Scanner:
-    scanner_path: str = ""
-    scanner_name: str = ""
-
-    def scan(self, data, filename):
-        pass
 
 
 class UiDisasmLine():
@@ -81,57 +74,6 @@ class Match():
         return s
 
 
-class TestMatchOrder(Enum):
-    ISOLATED = 1
-    INCREMENTAL = 2
-    DECREMENTAL = 3
-    LAST_TWO = 4
-    FIRST_TWO = 5
-    
-
-class TestMatchModify(Enum):
-    FULL = 1
-    MIDDLE8 = 2
-    MIDDLE_32 = 3
-    BEGIN = 4
-    END = 5
-
-
-class ScanResult(Enum):
-    NOT_SCANNED = 0
-    DETECTED = 1
-    NOT_DETECTED = 2
-    
-
-class TestEntry():
-    def __init__(self, scanIndex, scanResult):
-        self.scanIndex = scanIndex
-        self.scanResult = scanResult
-
-    def __str__(self):
-        s = ''
-        s += "Idx: {}  result: {}".format(self.scanIndex, self.scanResult)
-        return s
-
-
-class Verification():
-    def __init__(self, index, matchOrder, matchModify, fillType=FillType.lowentropy):
-        self.index: int = index
-        self.info: TestMatchOrder = matchOrder
-        self.type: TestMatchModify = matchModify
-        self.fillType = fillType
-        self.testEntries: List[TestEntry] = []
-
-    def __str__(self):
-        s = ""
-        s += "{} {} {}".format(self.index, self.type.name, self.info.name)
-
-        if self.testEntries is not None:
-            for entry in self.testEntries:
-                s += "  {}".format(entry)
-        return s
-    
-
 class FileInfo():
     def __init__(self, name, size, fileStructure):
         self.name = name
@@ -139,67 +81,6 @@ class FileInfo():
         self.fileStructure = fileStructure
         self.type = ''
         self.date = ''
-
-
-class PluginFileFormat():
-    def __init__(self):
-        self.filepath = None
-        self.filename = None
-        self.fileData = b""  # The content of the file
-        self.data = b""      # The data we work on
-        
-
-    def parseFile(self) -> bool:
-        self.data = self.fileData  # Default: File is Data
-
-
-    def getData(self):
-        return self.data
-
-
-    def getFileWithNewData(self, data):
-        return data  # Default: Data is the File. No need to modify.
-
-
-    def loadFromFile(self, filepath: str) -> bool:
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
-
-        with open(self.filepath, "rb") as f:
-            self.fileData = f.read()
-
-        return self.parseFile()
-
-
-    def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
-        self.data = patchData(self.data, base, size, fillType)
-
-
-class VerifyStatus(Enum): 
-    UNKNOWN = 0
-    GOOD = 1
-    OK = 2
-    BAD = 3
-
-
-class VerifyConclusion():
-    def __init__(self, verifyStatus: List[VerifyStatus]):
-        self.verifyStatus = verifyStatus
-
-    def __str__(self):
-        s = ''
-        for entry in self.verifyStatus:
-            s += entry
-
-
-def convertMatchesIt(matchesIt):
-    matches = []
-    idx = 0
-    for m in matchesIt:
-        match = Match(idx, m.begin, m.end-m.begin)
-        matches.append(match)
-        idx += 1
-    return matches
 
 
 class Outcome():

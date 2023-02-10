@@ -2,7 +2,7 @@
 
 import unittest
 from plugins.analyzer_office import analyzeFileWord
-from model.model import Scanner
+from model.extensions import Scanner
 from tests.helpers import TestDetection
 from pprint import pprint
 from plugins.file_office import FileOffice

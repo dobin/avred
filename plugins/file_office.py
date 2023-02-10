@@ -1,6 +1,6 @@
 import zipfile
 import io
-from model.model import PluginFileFormat
+from model.extensions import PluginFileFormat
 import olefile
 from math import floor
 from typing import List

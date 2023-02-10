@@ -1,11 +1,12 @@
 import unittest
-from model.model import *
+from model.testverify import *
 from plugins.file_pe import FilePe
 from tests.scanners import *
 from tests.helpers import TestDetection
 from plugins.analyzer_pe import analyzeFileExe
 from verifier import verify
 from verifyconclusion import verificationAnalyzer
+from utils import convertMatchesIt
 
 
 class VerifierTest(unittest.TestCase):

@@ -3,7 +3,8 @@ import olefile
 from typing import List
 from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo, Scanner, UiDisasmLine
+from model.model import Match, FileInfo, UiDisasmLine
+from model.extensions import Scanner
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry

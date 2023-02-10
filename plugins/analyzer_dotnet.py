@@ -1,7 +1,8 @@
 from intervaltree import Interval, IntervalTree
 import logging
 from typing import List, Tuple
-from model.model import Match, FileInfo, Scanner, UiDisasmLine
+from model.model import Match, FileInfo, UiDisasmLine
+from model.extensions import Scanner
 from plugins.file_pe import FilePe, Section
 from utils import *
 from dotnetfile import DotNetPE

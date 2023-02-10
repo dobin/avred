@@ -6,7 +6,8 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
-from model.model import Match, FileInfo, Scanner, UiDisasmLine
+from model.model import Match, FileInfo, UiDisasmLine
+from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
 from typing import List
