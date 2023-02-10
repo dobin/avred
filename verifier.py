@@ -35,11 +35,14 @@ def verify(file, matches: List[Match], scanner) -> Verification:
 def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclusion:
     """Do some analysis on the verifications, and return the result"""
     verifyResults = []
-    res = VerifyStatus.BAD
 
     matchCount = len(verifications[0].matchTests)
+
+    # first phase, simple
     idx = 0
-    while idx < len(verifications[0].matchTests):
+    while idx < matchCount:
+        res = VerifyStatus.BAD
+
         # best: Partial modification of an isolated match
         if getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult is ScanResult.NOT_DETECTED:
             res = VerifyStatus.GOOD
@@ -47,22 +50,26 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclu
         # ok: Full modification of an isolated match
         elif getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
             res = VerifyStatus.OK
-
-        # ok: 
-        else:
-            if len(verifications) >= 5:
-                if idx == 0 or idx == 1:
-                    # check FIRST_TWO (first two entries have same result)
-                    if getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
-                        res = VerifyStatus.OK
-
-                if idx == matchCount-1 or idx == matchCount-2:
-                    # check LAST_TWO (last two entries have same result)
-                    if getMatchTestsFor(verifications, TestMatchOrder.LAST_TWO, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
-                        res = VerifyStatus.OK
         
         verifyResults.append(res)
         idx += 1
+
+    # verifyResults is filled. check for corner cases
+
+    # with FIRST_TWO, LAST_TWO
+    if len(verifications) >= 5:
+        if verifyResults[0] is VerifyStatus.BAD and verifyResults[1] is VerifyStatus.BAD:
+            ft = getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)            
+            if ft[0].scanResult is ScanResult.NOT_DETECTED and ft[1].scanResult is ScanResult.NOT_DETECTED:
+                verifyResults[0] = VerifyStatus.OK
+                verifyResults[1] = VerifyStatus.OK
+
+        if verifyResults[-1] is VerifyStatus.BAD and verifyResults[-2] is VerifyStatus.BAD:
+            ft = getMatchTestsFor(verifications, TestMatchOrder.LAST_TWO, TestMatchModify.FULL)    
+        
+            if ft[-1].scanResult is ScanResult.NOT_DETECTED and ft[-2].scanResult is ScanResult.NOT_DETECTED:
+                verifyResults[-1] = VerifyStatus.OK
+                verifyResults[-2] = VerifyStatus.OK
 
     verifyConclusion = VerifyConclusion(verifyResults)
     return verifyConclusion
