@@ -25,6 +25,7 @@ def getMatchTestsFor(verifications: List[VerificationEntry], matchOrder: TestMat
 
 
 def verify(file, matches: List[Match], scanner) -> Verification:
+    """Verify matches in file with scanner, and return the result"""
     verifications = runVerifications(file, matches, scanner)
     matchConclusions = verificationAnalyzer(verifications)
     verify = Verification(verifications, matchConclusions)
@@ -32,10 +33,13 @@ def verify(file, matches: List[Match], scanner) -> Verification:
 
 
 def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclusion:
+    """Do some analysis on the verifications, and return the result"""
     verifyResults = []
     res = VerifyStatus.BAD
 
-    for idx, val in enumerate(verifications[0].matchTests):
+    matchCount = len(verifications[0].matchTests)
+    idx = 0
+    while idx < len(verifications[0].matchTests):
         # best: Partial modification of an isolated match
         if getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult is ScanResult.NOT_DETECTED:
             res = VerifyStatus.GOOD
@@ -52,19 +56,21 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclu
                     if getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
                         res = VerifyStatus.OK
 
-                if idx == len(verifications) or idx == len(verifications) - 1:
+                if idx == matchCount-1 or idx == matchCount-2:
                     # check LAST_TWO (last two entries have same result)
-                    if getMatchTestsFor(verifications, TestMatchOrder.LAST_TWO, TestMatchModify.FULL).matchTests[idx].scanResult is ScanResult.NOT_DETECTED:
+                    if getMatchTestsFor(verifications, TestMatchOrder.LAST_TWO, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
                         res = VerifyStatus.OK
         
         verifyResults.append(res)
+        idx += 1
 
     verifyConclusion = VerifyConclusion(verifyResults)
     return verifyConclusion
 
 
-def runVerifications(file, matches: List[Match], scanner):
-    verificationRuns = []
+def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEntry]: 
+    """Perform modifications on file from matches, scan with scanner and return those results"""
+    verificationRuns: List[VerificationEntry] = []
     logging.info(f"Verify {len(matches)} matches")
 
     # Independant, Middle
