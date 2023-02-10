@@ -55,7 +55,7 @@ class MatchTest():
         return s
 
 
-class VerifyConclusion():
+class MatchConclusion():
     """Object to hold all information about the verification conclusion"""
     def __init__(self, verifyStatus: List[VerifyStatus]):
         self.verifyStatus = verifyStatus
@@ -87,7 +87,7 @@ class VerificationEntry():
     
 
 class Verification():
-    def __init__(self, verifications: List[VerificationEntry], matchConclusions: VerifyConclusion):
+    def __init__(self, verifications: List[VerificationEntry], matchConclusions: MatchConclusion):
         self.verifications = verifications
         self.matchConclusions = matchConclusions
 

@@ -32,7 +32,7 @@ def verify(file, matches: List[Match], scanner) -> Verification:
     return verify
 
 
-def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclusion:
+def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclusion:
     """Do some analysis on the verifications, and return the result"""
     verifyResults = []
 
@@ -71,8 +71,8 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> VerifyConclu
                 verifyResults[-1] = VerifyStatus.OK
                 verifyResults[-2] = VerifyStatus.OK
 
-    verifyConclusion = VerifyConclusion(verifyResults)
-    return verifyConclusion
+    matchConclusions = MatchConclusion(verifyResults)
+    return matchConclusions
 
 
 def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEntry]: 
