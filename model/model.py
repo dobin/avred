@@ -84,12 +84,11 @@ class FileInfo():
 
 
 class Outcome():
-    def __init__(self, fileInfo, matches, verifications, matchesIt=None, verifyConclusion=None):
+    def __init__(self, fileInfo, matches, verification, matchesIt=None):
         self.fileInfo: FileInfo = fileInfo
         self.matches: List[Match] = matches
-        self.verifications: List[Verification] = verifications
+        self.verification: Verification = verification
         self.matchesIt: IntervalTree = matchesIt
-        self.verifyConclusion: VerifyConclusion = verifyConclusion
 
 
     def __str__(self):
@@ -102,9 +101,8 @@ class Outcome():
         for match in self.matches:
             s += str(match)
         s += "\nVerification: \n"
-        for v in self.verifications:
+        for v in self.verification:
             s += str(v)
-        s += "\VerifyConclusion: \n"
-        print(str(self.verifyConclusion))
+
         s += "\n"    
         return s

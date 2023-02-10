@@ -6,20 +6,20 @@
             <td>MatchOrder</td>
             <td>MatchModify</td>
 
-            {% for testEntry in outcome.verifications[0].testEntries %}
+            {% for testEntry in outcome.verification.verifications[0].matchTests %}
             <td>Match {{loop.index0}}</td>
             {% endfor %}
 
         </tr>
     </thead>
 
-    {% for verificationRun in outcome.verifications %}
+    {% for verificationRun in outcome.verification.verifications %}
     <tr>
         <td>{{verificationRun.index}}</td>
         <td>{{verificationRun.info.name}}</td>
         <td>{{verificationRun.type.name}}</td>
 
-        {% for testEntry in verificationRun.testEntries %}
+        {% for testEntry in verificationRun.matchTests %}
             {% if testEntry.scanResult|string == 'ScanResult.DETECTED' %}
             <td style="background-color:red">
             {% elif testEntry.scanResult|string == 'ScanResult.NOT_DETECTED' %}

@@ -1,9 +1,10 @@
 import zipfile
 import io
-from model.extensions import PluginFileFormat
 import olefile
 from math import floor
 from typing import List
+
+from model.extensions import PluginFileFormat
 
 MAKRO_PATH = 'word/vbaProject.bin'
 

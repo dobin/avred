@@ -10,8 +10,8 @@ import logging
 
 from config import Config
 from verifier import verify
-from model.model import convertMatchesIt, FileInfo, Outcome
-from utils import FileType, GetFileType
+from model.model import FileInfo, Outcome
+from utils import FileType, GetFileType, convertMatchesIt
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -20,7 +20,6 @@ from plugins.analyzer_plain import analyzeFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
-from verifyconclusion import verificationAnalyzer
 
 log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
@@ -154,20 +153,16 @@ def scanFile(args, scanner):
     logging.info("Found {} matches".format(len(matchesIt)))
     matches = convertMatchesIt(matchesIt)
 
-    verifications = None
+    verification = None
     if args.loadVerify and os.path.exists(filenameOutcome):
         # For testing purposes.
         # Basically an offline version if .matches and .augment with verify data exists
         with open(filenameOutcome, 'rb') as handle:
             outcome = pickle.load(handle)
-            verifications = outcome.verifications
+            verification = outcome.verification
     else:
         # verify our analysis
-        verifications = verify(file, matches, scanner)
-        printVerifyData(verifications)
-
-    # analyse verification to get VerifyResults
-    verifyConclusion = verificationAnalyzer(verifications)
+        verification = verify(file, matches, scanner)
 
     # augment information
     fileInfo = FileInfo(file.filename, 0, None)
@@ -176,9 +171,9 @@ def scanFile(args, scanner):
         fileInfo.fileStructure = fileStructure
     
     # save
-    allData = Outcome(fileInfo, matches, verifications, matchesIt, verifyConclusion)
+    outcome = Outcome(fileInfo, matches, verification, matchesIt)
     with open(filenameOutcome, 'wb') as handle:
-        pickle.dump(allData, handle)
+        pickle.dump(outcome, handle)
         logging.info(f"Wrote results to {filenameOutcome}")
 
 
@@ -192,13 +187,6 @@ def checkFile(filepath, scanner):
         print(f"File is detected")
     else:
         print(f"File is not detected")
-
-
-def printVerifyData(verifications):
-    #print("Verification results: ")
-    #for verification in verifications:
-    #    print(str(verification))
-    pass
 
 
 def printMatches(matches):

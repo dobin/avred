@@ -43,7 +43,7 @@ class ScanResult(Enum):
     NOT_DETECTED = 2
     
 
-class TestEntry():
+class MatchTest():
     """Data about a performed Test for Verification"""
     def __init__(self, scanIndex: int, scanResult: ScanResult):
         self.scanIndex = scanIndex
@@ -66,21 +66,26 @@ class VerifyConclusion():
             s += entry
 
 
-class Verification():
+class VerificationEntry():
     """Object to hold all data of a verification run"""
     def __init__(self, index, matchOrder, matchModify, fillType=FillType.lowentropy):
         self.index: int = index
         self.info: TestMatchOrder = matchOrder
         self.type: TestMatchModify = matchModify
         self.fillType = fillType
-        self.testEntries: List[TestEntry] = []
+        self.matchTests: List[MatchTest] = []  # same order as Matches
 
     def __str__(self):
         s = ""
         s += "{} {} {}".format(self.index, self.type.name, self.info.name)
 
-        if self.testEntries is not None:
-            for entry in self.testEntries:
+        if self.matchTests is not None:
+            for entry in self.matchTests:
                 s += "  {}".format(entry)
         return s
     
+
+class Verification():
+    def __init__(self, verifications: List[VerificationEntry], matchConclusions: List[VerifyStatus]):
+        self.verifications = verifications
+        self.matchConclusions = matchConclusions

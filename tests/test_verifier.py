@@ -4,8 +4,7 @@ from plugins.file_pe import FilePe
 from tests.scanners import *
 from tests.helpers import TestDetection
 from plugins.analyzer_pe import analyzeFileExe
-from verifier import verify
-from verifyconclusion import verificationAnalyzer
+from verifier import verify, verificationAnalyzer, getMatchTestsFor
 from utils import convertMatchesIt
 
 
@@ -25,20 +24,22 @@ class VerifierTest(unittest.TestCase):
         matches = convertMatchesIt(matchesIt)
         self.assertTrue(len(matches) == 2)
 
-        verifications = verify(filePe, matches, scanner)
+        verification = verify(filePe, matches, scanner)
 
-        self.assertTrue(verifications[0].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(verifications[0].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
 
-        self.assertTrue(verifications[2].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(verifications[2].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.MIDDLE8)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
 
-        self.assertTrue(verifications[3].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(verifications[3].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.FULL)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
 
-        verifyConclusion = verificationAnalyzer(verifications)
-        self.assertEqual(verifyConclusion.verifyStatus[0], VerifyStatus.GOOD)
-        self.assertEqual(verifyConclusion.verifyStatus[1], VerifyStatus.GOOD)
+        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.GOOD)
+        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.GOOD)
 
 
     def test_verifyresults_or(self):
@@ -59,18 +60,19 @@ class VerifierTest(unittest.TestCase):
         for match in matches: 
             print(str(match))
 
-        verifications = verify(filePe, matches, scanner)
+        verification = verify(filePe, matches, scanner)
 
-        self.assertTrue(verifications[0].testEntries[0].scanResult == ScanResult.DETECTED)
-        self.assertTrue(verifications[0].testEntries[1].scanResult == ScanResult.DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)
 
-        self.assertTrue(verifications[2].testEntries[0].scanResult == ScanResult.DETECTED)
-        self.assertTrue(verifications[2].testEntries[1].scanResult == ScanResult.NOT_DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.MIDDLE8)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
 
-        self.assertTrue(verifications[4].testEntries[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(verifications[4].testEntries[1].scanResult == ScanResult.DETECTED)
+        matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.DECREMENTAL, TestMatchModify.FULL)
+        self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
+        self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)
 
-
-        verifyConclusion = verificationAnalyzer(verifications)
-        self.assertEqual(verifyConclusion.verifyStatus[0], VerifyStatus.OK)
-        self.assertEqual(verifyConclusion.verifyStatus[1], VerifyStatus.OK)
+        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.OK)
+        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.OK)

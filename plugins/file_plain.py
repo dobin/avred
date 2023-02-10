@@ -1,6 +1,6 @@
 import logging
 import os
-from model.model import PluginFileFormat
+from model.extensions import PluginFileFormat
 
 
 class FilePlain(PluginFileFormat):

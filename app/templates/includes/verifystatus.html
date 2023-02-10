@@ -1,5 +1,5 @@
 
-    {% for verifyStatus in outcome.verifyConclusion.verifyStatus %}
+    {% for verifyStatus in outcome.verification.matchConclusions.verifyStatus %}
         {% if verifyStatus|string == "VerifyStatus.BAD" %}
         <td style="background-color:red">
         {% elif verifyStatus|string == "VerifyStatus.OK" %}
