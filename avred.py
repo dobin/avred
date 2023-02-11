@@ -32,12 +32,12 @@ def main():
 
     # debug
     parser.add_argument("--checkOnly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
-    parser.add_argument("--loadVerify", help="Debug: Load matches from .augmented, and perform augmentation again", default=False, action='store_true')
+    parser.add_argument("--loadVerify", help="Debug: Offline. Only do augmentation, if verifications exist.", default=False, action='store_true')
 
     # analyzer options
-    parser.add_argument("--isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
-    parser.add_argument("--remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
-    parser.add_argument("--ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
+    parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
+    parser.add_argument("--pe_remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
+    parser.add_argument("--pe_ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -135,9 +135,9 @@ def scanFile(args, scanner):
             augmenter = augmentFilePe
             uiFileType = 'ExePe'
 
-        analyzerOptions["isolate"] = args.isolate
-        analyzerOptions["remove"] = args.remove
-        analyzerOptions["ignoreText"] = args.ignoreText
+        analyzerOptions["isolate"] = args.pe_isolate
+        analyzerOptions["remove"] = args.pe_remove
+        analyzerOptions["ignoreText"] = args.pe_ignoreText
 
     else:
         logging.error("File ending not supported")
