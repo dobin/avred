@@ -1,5 +1,10 @@
 # Source Code Overview 
 
+Main objectes: 
+* Make it as easy as possible to identify parts of a binary which can be modified to bypass signature detection
+* Add useful information to the matches to make it easy to spot how and what part should be modified
+* Support often used file formats in malware attacks
+
 
 ## Phases 
 
@@ -8,8 +13,7 @@ The whole process is separated into three distinct phases:
 2) *Verify* the matches.
 3) *Augment* the matches with file information.
 
-Phase 1) and 2) require avred-server connection. 
-The augmentation can run offline, but needs some additional tools to decompile. 
+Phase 1) and 2) require avred-server connection. The augmentation can run offline.
 
 1) *Scan* will produce a `.matches` file, which contains a an array of `Interval` with the matches, pickled.
 2) *Verify* will create a `.outcome` file, which contains the matches, and its verification. Its of type `Outcome`.
@@ -44,9 +48,10 @@ Outcome:
 class Outcome: 
   - fileInfo: Some additional information of the file which has been scanned
   - matches: List of `Matches`
-  - verifications: List of `Verification`
+  - verification: List of `Verifications` and supplemental conclusion
   - matchesIt: List of matches as `Interval`, basically copy of the `.matches`. Duplicate of `matches`, and not really used
 ```
+
 
 ## Definition
 
