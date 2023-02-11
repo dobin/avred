@@ -130,10 +130,10 @@ def scanFile(args, scanner):
 
         if file.isDotNet:
             augmenter = augmentFileDotnet
-            uiFileType = 'Executable DotNet'
+            uiFileType = 'ExeDotNet'
         else:
             augmenter = augmentFilePe
-            uiFileType = 'Executable Pe'
+            uiFileType = 'ExePe'
 
         analyzerOptions["isolate"] = args.isolate
         analyzerOptions["remove"] = args.remove
