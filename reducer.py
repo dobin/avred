@@ -1,14 +1,20 @@
 import logging
+import time
 from intervaltree import Interval, IntervalTree
+
 from utils import *
 
 SIG_SIZE = 128
+PRINT_DELAY_SECONDS = 1
 
 
 class Reducer():
     def __init__(self, file, scanner):
         self.file = file
         self.scanner = scanner
+
+        self.lastPrintTime = 0
+        self.chunks_tested = 0
 
 
     def scan(self, offsetStart, offsetEnd):
@@ -24,10 +30,20 @@ class Reducer():
         return self.scanner.scan(newFile, self.file.filename)
 
 
+    def printStatus(self):
+        self.chunks_tested += 1
+
+        currentTime = time.time()
+        if currentTime > self.lastPrintTime + PRINT_DELAY_SECONDS:
+            self.lastPrintTime = currentTime
+            logging.info("Reducing: {} chunks done".format(self.chunks_tested))
+
+
     # recursive
     def _scanSection(self, data, sectionStart, sectionEnd, it):
         size = sectionEnd - sectionStart
         chunkSize = int(size // 2)
+        self.printStatus()
         
         logging.debug(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
         #logging.debug(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
