@@ -4,13 +4,35 @@
     {% include 'includes/header.html' %}
   </head>
   <body>
-      {% include 'includes/navigation.html' %}
+  {% include 'includes/navigation.html' %}
 
-  <h1>Upload new File</h1>
+  <h2>Upload</h2>
+
+  Servers:
+  <ul>
+    {% for serverName, serverUrl in servers.items() %}
+      <li>{{serverName}}: {{serverUrl}}</li>
+    {% endfor %}
+  </ul>
+
+  Allowed extensions: 
+  <ul>
+    {% for ext in extensions %}
+    <li>.{{ext}}</li>
+    {% endfor %}
+  </ul>
+  
+  <br>
+
   <form method=post enctype=multipart/form-data action=/upload>
-    <input type=file name=file>
-    <input type=submit value=Upload>
+    <div class="mb-3">
+      <input class="form-control" type=file name=file>
+    </div>
+    <div class="mb-3">
+      <button class="btn btn-primary" type=submit value=Upload>Upload</button>
+    </div>
   </form>
+
 
 </body>
 </html>

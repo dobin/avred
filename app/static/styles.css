@@ -4,3 +4,8 @@ table.table thead {
   border-left: 1px solid grey;
   border-right: 1px solid grey;
 }
+
+.container {
+  margin-left: 1em;
+  margin-right: 1em;
+}

@@ -1,36 +1,38 @@
 #!/usr/bin/python3
 
 import os
-from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
+from flask import Blueprint, current_app, Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import random
 import subprocess
 #from waitress import serve
 import glob
 import pickle
-from app  import app
+#from app import app
 from model.model import *
+import requests 
 
-ALLOWED_EXTENSIONS = {'exe', 'ps1', 'docm', '.bin' }
 EXT_INFO = ".outcome"
 EXT_LOG = ".log"
 
+views = Blueprint('views', __name__)
 
-@app.route("/")
+
+@views.route("/")
 def index():
     examples = os.listdir("app/examples/")
     return render_template('index.html', examples=examples)
 
 
-@app.route('/examples/<path>')
+@views.route('/examples/<path>')
 def example(path):
     return send_from_directory('examples', path)
 
 
-@app.route("/view_file/<filename>")
+@views.route("/view_file/<filename>")
 def view_file(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_INFO)
-    filepathLog = os.path.join(app.config['UPLOAD_FOLDER'], filename + EXT_LOG)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename + EXT_INFO)
+    filepathLog = os.path.join(current_app.config['UPLOAD_FOLDER'], filename + EXT_LOG)
     logData = ""
     if os.path.isfile(filepathLog):
         with open(filepathLog) as f:
@@ -43,12 +45,14 @@ def view_file(filename):
             logdata=logData)
 
 
-@app.route("/files")
+@views.route("/files")
 def files():
-    if not app.config['LISTFILES'] == 'True':
+    if not current_app.config['LISTFILES'] == 'True':
         return render_template('index.html')
-
-    examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
+    
+    print("AB: " + str(current_app.config['AVRED_SERVERS']))
+    
+    examples = glob.glob(os.path.join(current_app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     res = []
     for example in examples:
         name = os.path.basename(example[:-len(EXT_INFO)])
@@ -57,12 +61,12 @@ def files():
         filenames=res)
 
 
-@app.route("/files_results")
+@views.route("/files_results")
 def files_resulsts():
-    if not app.config['LISTFILES'] == 'True':
+    if not current_app.config['LISTFILES'] == 'True':
         return render_template('index.html')
 
-    examples = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
+    examples = glob.glob(os.path.join(current_app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     outcomes = []
     for example in examples:
         name = example[:-len(EXT_INFO)]
@@ -106,9 +110,9 @@ def getFileData(filename):
     
 
 
-@app.route("/file/<filename>")
+@views.route("/file/<filename>")
 def file(filename):
-    filename: str = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    filename: str = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
     outcome, logData, errStr = getFileData(filename)
     if errStr is not None: 
@@ -122,10 +126,10 @@ def file(filename):
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
            
 
-@app.route('/upload', methods=['GET', 'POST'])
+@views.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -145,12 +149,23 @@ def upload_file():
 
             rand = ''.join(random.choice('0123456789ABCDEF') for i in range(16))
             filename = rand + "." + filename
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, 
-                "--logtofile" ])
+            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, "--logtofile" ])
 
-            return redirect(url_for('view_file', filename=filename))
+            return redirect(url_for('views.view_file', filename=filename))
 
-    return render_template('upload.html')
+    # show upload HTML
+    servers = {}
+
+    for serverName, serverUrl in current_app.config['AVRED_SERVERS'].items():
+        response = requests.get(serverUrl)
+        status = "Offline"
+        if response.ok:
+            status = "Online"
+        servers[serverName] = status
+
+    return render_template('upload.html',
+        servers=servers,
+        extensions=current_app.config['ALLOWED_EXTENSIONS'])
