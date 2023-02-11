@@ -1,11 +1,30 @@
-table.table tbody tr td,
-table.table thead tr th,
-table.table thead {
-  border-left: 1px solid grey;
-  border-right: 1px solid grey;
+.tablevert td {
+  border-left: 1px solid rgb(209, 208, 208);
+  border-right: 1px solid rgb(209, 208, 208);
+  text-align: center;
 }
 
 .container {
   margin-left: 1em;
   margin-right: 1em;
 }
+
+
+.mycode {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.mycodeline {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow: auto;
+  font-family: var(--bs-font-monospace);
+  font-size: 1em;
+  direction: ltr;
+  unicode-bidi: bidi-override;
+  font-family: monospace;
+  white-space: pre;
+}
+

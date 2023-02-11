@@ -14,10 +14,7 @@
     <p>This will split the provided file until Windows Defender does not 
         detect it anymore. It will show which parts of the file is being detected. 
     </p>
-    <p>
-        <b>Note that it is usually enough to change ONE byte in ONE
-          part to make the AV fail to identify the file.</b>
-      </p>
+    
     <p>Supported formats: 
       <ul>
         <li>.exe (PE or .NET)</li>
@@ -34,15 +31,5 @@
         Defender sample submission is disabled.
         Use at your own risk. Do not misuse this service. 
     </p>
-
-
-    <h2>Examples</h2>
-    <p>  
-      <ul>
-          {% for entry in examples %}
-              <li><a href="/examples/{{entry}}">{{entry}}</a></li>
-          {% endfor %}
-      </ul>
-  </p>
   </body>
 </html>
