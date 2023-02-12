@@ -8,4 +8,5 @@ bak/
 testing/
 stuff/
 app/upload/*.*
+app/examples/*.*
 doc/todo.txt

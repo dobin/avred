@@ -16,9 +16,15 @@
         {% for outcome in outcomes %}
         <tr>
             <td>
+                {% if examples %}
+                <a href="/example/{{outcome.fileInfo.name}}">
+                    {{outcome.fileInfo.name}}
+                </a>
+                {% else %}
                 <a href="/file/{{outcome.fileInfo.name}}">
                     {{outcome.fileInfo.name}}
                 </a>
+                {% endif %}
             </td>
             <td>{{outcome.fileInfo.size}}</td>
             <td>{{outcome.fileInfo.fileType}}</td>

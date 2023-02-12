@@ -4,9 +4,6 @@ from flask import Flask
 from config import Config
 from app.views import views
 
-UPLOAD_FOLDER = './app/upload'
-
-
 if __name__ == "__main__":
 	port = int(os.environ.get("PORT", 5000))
 	debug = os.environ.get("DEBUG", True)
@@ -18,7 +15,9 @@ if __name__ == "__main__":
 		static_folder='./app/static',
 		template_folder='./app/templates')
 
-	app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+	app.config['UPLOAD_FOLDER'] = './app/upload'
+	app.config['EXAMPLE_FOLDER'] = './app/examples'
+
 	app.config["TEMPLATES_AUTO_RELOAD"] = True
 	app.config['SECRET_KEY'] = os.urandom(24)
 	app.config['SESSION_TYPE'] = 'filesystem'

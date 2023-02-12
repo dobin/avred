@@ -24,11 +24,6 @@ def index():
     return render_template('index.html', examples=examples)
 
 
-@views.route('/examples/<path>')
-def example(path):
-    return send_from_directory('examples', path)
-
-
 @views.route("/view_file/<filename>")
 def view_file(filename):
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename + EXT_INFO)
@@ -49,8 +44,6 @@ def view_file(filename):
 def files():
     if not current_app.config['LISTFILES'] == 'True':
         return render_template('index.html')
-    
-    print("AB: " + str(current_app.config['AVRED_SERVERS']))
     
     examples = glob.glob(os.path.join(current_app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
     res = []
@@ -169,3 +162,40 @@ def upload_file():
     return render_template('upload.html',
         servers=servers,
         extensions=current_app.config['ALLOWED_EXTENSIONS'])
+
+
+### Examples related
+
+
+@views.route("/example/<filename>")
+def example(filename):
+    filename: str = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
+
+    outcome, logData, errStr = getFileData(filename)
+    if errStr is not None: 
+        return "Error: " + errStr
+    
+    return render_template('file.html', 
+        filename=filename, 
+        outcome=outcome,
+        logData=logData)
+
+
+@views.route("/examples")
+def examples_list():
+    examples = glob.glob(os.path.join(current_app.config['EXAMPLE_FOLDER'], "*" + EXT_INFO))
+    outcomes = []
+    for example in examples:
+        name = example[:-len(EXT_INFO)]
+
+        outcome, fileInfo, errStr = getFileData(name)
+        if errStr is not None:
+            print("Err: {} {}".format(example, errStr))
+            continue
+
+        outcomes.append(outcome)
+    
+    return render_template('list_files_results.html',
+        outcomes=outcomes,
+        examples=True)
+
