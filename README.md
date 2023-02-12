@@ -110,7 +110,7 @@ The findings in the other sections are usually good enough.
 
 Option to show list of files (for public website): 
 ```
-export FLASK_LISTFILES="True"
+export FLASK_LIST_FILES="True"
 ```
 
 For Development:

@@ -23,6 +23,7 @@ if __name__ == "__main__":
 	app.config['SESSION_TYPE'] = 'filesystem'
 	app.config['AVRED_SERVERS'] = config.get('server')
 	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'ps1', 'docm', 'bin' }
+	app.config['LIST_FILES'] = "True"
 
 	app.config.from_prefixed_env()
 
