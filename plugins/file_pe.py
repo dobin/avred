@@ -35,6 +35,7 @@ class FilePe(PluginFileFormat):
         self.baseAddr = pepe.OPTIONAL_HEADER.ImageBase
 
         # Normal sections
+        min = len(self.data)
         for section in pepe.sections:
             name = ''
             try:
@@ -51,28 +52,39 @@ class FilePe(PluginFileFormat):
                     Section(name, addr, size, virtaddr)
                 ]
 
-        # (not necessary?) version information
-        if hasattr(pepe, "VS_VERSIONINFO"):
-            vi = pepe.VS_VERSIONINFO
-            if len(vi) != 0:
-                vim = vi[0] # TODO what if more?
-                base = vim.get_file_offset()
-                size = vim.Length
-                self.sections.append(
-                    Section("VersionInfo", base, size, virtaddr)
-                )
+                if addr < self.min:
+                    self.min = addr
+            else: 
+                logging.warn("Section invalid: {} {} {}".format(name, addr, size))
 
-        # (not necessary?) resources
-        d = None
-        for directory in pepe.OPTIONAL_HEADER.DATA_DIRECTORY:
-            if (directory.name == "IMAGE_DIRECTORY_ENTRY_RESOURCE"):
-                d = directory
-        if d is not None:
-            base = d.VirtualAddress
-            size = d.Size
-            self.sections.append(
-                Section("Ressources", base, size, virtaddr)
-            )
+        self.section += [
+            Section('Header', 0, min, 0)
+        ]
+        
+
+        if False:
+            # (not necessary?) version information
+            if hasattr(pepe, "VS_VERSIONINFO"):
+                vi = pepe.VS_VERSIONINFO
+                if len(vi) != 0:
+                    vim = vi[0] # TODO what if more?
+                    base = vim.get_file_offset()
+                    size = vim.Length
+                    self.sections.append(
+                        Section("VersionInfo", base, size, virtaddr)
+                    )
+
+            # (not necessary?) resources
+            d = None
+            for directory in pepe.OPTIONAL_HEADER.DATA_DIRECTORY:
+                if (directory.name == "IMAGE_DIRECTORY_ENTRY_RESOURCE"):
+                    d = directory
+            if d is not None:
+                base = d.VirtualAddress
+                size = d.Size
+                self.sections.append(
+                    Section("Ressources", base, size, virtaddr)
+                )
 
 
     def hideSection(self, sectionName: str):
