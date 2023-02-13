@@ -2,7 +2,7 @@ import logging
 import time
 from intervaltree import Interval, IntervalTree
 from typing import List
-from model.model import Scanner, PluginFileFormat
+from model.extensions import Scanner, PluginFileFormat
 
 from utils import *
 
