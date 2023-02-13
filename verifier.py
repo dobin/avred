@@ -35,6 +35,9 @@ def verify(file, matches: List[Match], scanner) -> Verification:
 def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclusion:
     """Do some analysis on the verifications, and return the result"""
     verifyResults = []
+    if len(verifications) == 0:
+        matchConclusions = MatchConclusion(verifyResults)
+        return matchConclusions
 
     matchCount = len(verifications[0].matchTests)
 
@@ -110,6 +113,9 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
+
+    if len(matches) == 1:
+        return verificationRuns
 
     # Incremental, Middle
     verificationRun = VerificationEntry(

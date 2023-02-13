@@ -166,7 +166,7 @@ def scanFile(args, scanner):
     # convert IntervalTree Matches
     logging.info("Found {} matches".format(len(matchesIt)))
     if len(matchesIt) == 0:
-        logging.warn("No matches found. Try some other options?")
+        logging.warning("No matches found. Try some other options?")
     matches = convertMatchesIt(matchesIt)
 
     verification = None
