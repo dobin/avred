@@ -93,36 +93,27 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
     else:
         logging.info("Section Detection: Zero section (leave all others intact)")
         detected_sections = findDetectedSections(filePe, scanner)
-
-    if len(detected_sections) == 0:
-        print("No matches?!")
-        return []
-
-    print(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
-
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
-        print(f"  section: {section.name}")
         logging.info(f"  section: {section.name}")
 
-    if len(detected_sections) > 3:
-        print("More than 3 sections detected. Weird. Maybe try --isolate for better results")
-        logging.info("More than 3 sections detected. Weird. Maybe try --isolate for better results")
-        return []
-
-    # analyze each detected section
     reducer = Reducer(filePe, scanner)
     matches = []
-    for section in detected_sections:
-        # reducing .text may not work well
-        if ignoreText and section.name == '.text':
-            continue
-
-        logging.info(f"Launching bytes analysis on section {section.name}")
-
-        # new algo
-        match = reducer.scan(section.addr, section.addr+section.size)
+    if len(detected_sections) == 0 or len(detected_sections) > 3:
+        logging.info("Section analysis failed. Fall back to non-section-aware reducer")
+        match = reducer.scan(0, len(filePe.data))
         matches += match
+    else:
+        # analyze each detected section
+        for section in detected_sections:
+            # reducing .text may not work well
+            if ignoreText and section.name == '.text':
+                continue
+
+            logging.info(f"Launching bytes analysis on section {section.name}")
+
+            match = reducer.scan(section.addr, section.addr+section.size)
+            matches += match
 
     return sorted(matches)
 
