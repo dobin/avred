@@ -6,7 +6,7 @@ from model.extensions import Scanner, PluginFileFormat
 
 from utils import *
 
-SIG_SIZE = 128
+SIG_SIZE = 1024
 PRINT_DELAY_SECONDS = 1
 
 
@@ -22,10 +22,27 @@ class Reducer():
     def scan(self, offsetStart, offsetEnd) -> List[Interval]:
         it = IntervalTree()
         data = self.file.getData()
-        self._scanSection(data, offsetStart, offsetEnd, it)
-        it.merge_overlaps(strict=False)
-        return sorted(it)
 
+        # pre check: defeat hash of binary (or scan would take very long for nothing)
+        if self.scanIsHash():
+            return [Interval(0, len(data))]
+        else:
+            self._scanSection(data, offsetStart, offsetEnd, it)
+            it.merge_overlaps(strict=False)
+            return sorted(it)
+
+
+    def scanIsHash(self):
+        """check if the detection is hash based (complete file)"""
+        firstByte = makeWithPatch(b' ', 0, 1)
+        firstRes = self._scanData(firstByte)
+
+        lastByte = makeWithPatch(b' ', len(self.file.getData())-1, 1)
+        lastRes = self._scanData(lastByte)
+
+        if not firstRes and not lastRes: 
+            return True
+        
 
     def _scanData(self, data):
         newFile = self.file.getFileWithNewData(data)
