@@ -95,8 +95,12 @@ def convertMatchesIt(matchesIt):
         idx += 1
     return matches
 
+MAX_HEXDUMP_SIZE = 2048
 
 def hexdmp(src, offset=0, length=16):
+    if len(src) > 2048:
+        return "Match too large ({} > {} max, do not show".format(len(src), MAX_HEXDUMP_SIZE)
+
     result = []
     digits = 4 if isinstance(src, str) else 2
     for i in range(0, len(src), length):

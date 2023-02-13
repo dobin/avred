@@ -6,7 +6,7 @@ from model.extensions import Scanner, PluginFileFormat
 
 from utils import *
 
-SIG_SIZE = 1024
+SIG_SIZE = 128
 PRINT_DELAY_SECONDS = 1
 
 
@@ -25,6 +25,7 @@ class Reducer():
 
         # pre check: defeat hash of binary (or scan would take very long for nothing)
         if self.scanIsHash():
+            logging.info("Signature is hash based")
             return [Interval(0, len(data))]
         else:
             self._scanSection(data, offsetStart, offsetEnd, it)
@@ -34,14 +35,24 @@ class Reducer():
 
     def scanIsHash(self):
         """check if the detection is hash based (complete file)"""
-        firstByte = makeWithPatch(b' ', 0, 1)
+        size = len(self.file.getData())
+        data = self.file.getData()
+
+        firstOff = int(size//3)
+        firstByte = makeWithPatch(data, firstOff, 1)
         firstRes = self._scanData(firstByte)
 
-        lastByte = makeWithPatch(b' ', len(self.file.getData())-1, 1)
+        lastOff = int((size//3) * 2)
+        lastByte = makeWithPatch(data, lastOff, 1)
         lastRes = self._scanData(lastByte)
 
-        if not firstRes and not lastRes: 
+        logging.info("Change: {} {} {}".format(firstOff, lastOff, size))
+        logging.info("  Result: {} {}".format(firstRes, lastRes))
+
+        if not firstRes and not lastRes:
             return True
+        else:
+            return False
         
 
     def _scanData(self, data):

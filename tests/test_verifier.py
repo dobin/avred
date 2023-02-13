@@ -22,7 +22,7 @@ class VerifierTest(unittest.TestCase):
         
         matchesIt = analyzeFileExe(filePe, scanner)
         matches = convertMatchesIt(matchesIt)
-        self.assertTrue(len(matches) == 2)
+        self.assertEqual(len(matches), 2)
 
         verification = verify(filePe, matches, scanner)
 
