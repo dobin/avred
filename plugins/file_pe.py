@@ -57,7 +57,7 @@ class FilePe(PluginFileFormat):
             else: 
                 logging.warn("Section invalid: {} {} {}".format(name, addr, size))
 
-        self.section += [
+        self.sections += [
             Section('Header', 0, min, 0)
         ]
         
