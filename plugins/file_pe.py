@@ -52,7 +52,7 @@ class FilePe(PluginFileFormat):
                     Section(name, addr, size, virtaddr)
                 ]
 
-                if addr < self.min:
+                if addr < min:
                     min = addr
             else: 
                 logging.warn("Section invalid: {} {} {}".format(name, addr, size))
