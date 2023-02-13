@@ -40,13 +40,13 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     for match in matches:
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdmp(data, offset=match.start())
+        detail = []
+
         section = filePe.findSectionFor(match.fileOffset)
         if section is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
             filePe.printSections()
-
-        detail = []
-        if section.name == ".text":
+        elif section.name == ".text":
             # offset from .text segment (in file)
             offset = match.start() - section.addr
             # base=0x400000 + .text=0x1000 + offset=0x123
