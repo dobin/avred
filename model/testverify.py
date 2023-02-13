@@ -69,10 +69,10 @@ class MatchConclusion():
 
 class VerificationEntry():
     """Object to hold all data of a verification run"""
-    def __init__(self, index, matchOrder, matchModify, fillType=FillType.lowentropy):
-        self.index: int = index
-        self.info: TestMatchOrder = matchOrder
-        self.type: TestMatchModify = matchModify
+    def __init__(self, index: int, matchOrder: TestMatchOrder, matchModify: TestMatchModify, fillType=FillType.lowentropy):
+        self.index = index
+        self.info = matchOrder
+        self.type = matchModify
         self.fillType = fillType
         self.matchTests: List[MatchTest] = []  # same order as Matches
 

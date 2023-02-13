@@ -115,5 +115,4 @@ class FilePe(PluginFileFormat):
 
     def printSections(self):
         for section in self.sections:
-            print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
-            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ") 
+            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")

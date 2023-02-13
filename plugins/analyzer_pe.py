@@ -41,6 +41,9 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         data = filePe.data[match.start():match.end()]
         dataHexdump = hexdmp(data, offset=match.start())
         section = filePe.findSectionFor(match.fileOffset)
+        if section is None: 
+            logging.error("No section found for offset {}".format(match.fileOffset))
+            filePe.printSections()
 
         # offset from .text segment (in file)
         offset = match.start() - section.addr
@@ -79,7 +82,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     return ""
 
 
-def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False):
+def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) -> List[Match]:
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
         filePe.hideSection("Ressources")

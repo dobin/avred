@@ -40,9 +40,9 @@ class Match():
         self.fileOffset: int = fileOffset
         self.size: int = size
         
-        self.data: bytes = None
-        self.dataHexdump: str = None
-        self.sectionInfo: str = None
+        self.data: bytes = b''
+        self.dataHexdump: str = ''
+        self.sectionInfo: str = ''
         self.disasmLines: List[UiDisasmLine] = []
 
     def start(self):
@@ -92,11 +92,11 @@ class FileInfo():
 
 
 class Outcome():
-    def __init__(self, fileInfo, matches, verification, matchesIt=None):
-        self.fileInfo: FileInfo = fileInfo
-        self.matches: List[Match] = matches
-        self.verification: Verification = verification
-        self.matchesIt: IntervalTree = matchesIt
+    def __init__(self, fileInfo: FileInfo, matches: List[Match], verification: Verification, matchesIt: IntervalTree=None):
+        self.fileInfo= fileInfo
+        self.matches = matches
+        self.verification = verification
+        self.matchesIt = matchesIt
 
 
     def __str__(self):

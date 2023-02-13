@@ -1,6 +1,8 @@
 import logging
 import time
 from intervaltree import Interval, IntervalTree
+from typing import List
+from model.model import Scanner, PluginFileFormat
 
 from utils import *
 
@@ -9,7 +11,7 @@ PRINT_DELAY_SECONDS = 1
 
 
 class Reducer():
-    def __init__(self, file, scanner):
+    def __init__(self, file: PluginFileFormat, scanner: Scanner):
         self.file = file
         self.scanner = scanner
 
@@ -17,7 +19,7 @@ class Reducer():
         self.chunks_tested = 0
 
 
-    def scan(self, offsetStart, offsetEnd):
+    def scan(self, offsetStart, offsetEnd) -> List[Interval]:
         it = IntervalTree()
         data = self.file.getData()
         self._scanSection(data, offsetStart, offsetEnd, it)
