@@ -12,15 +12,20 @@
                   type="button" role="tab" aria-controls="info" aria-selected="true">Info</button>
         </li>
 
+        
+{% if outcome.matches|length > 0 %}
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="matches-tab" data-bs-toggle="tab" data-bs-target="#matches" 
                   type="button" role="tab" aria-controls="matches" aria-selected="false">Matches</button>
         </li>
-
+{% endif %}
+        
+{% if outcome.matches|length > 0 %}
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="verifier-tab" data-bs-toggle="tab" data-bs-target="#verifier" 
                   type="button" role="tab" aria-controls="verifier" aria-selected="false">Verifier</button>
         </li>
+{% endif %}
 
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="log-tab" data-bs-toggle="tab" data-bs-target="#log" 

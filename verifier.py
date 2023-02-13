@@ -78,6 +78,9 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
 def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEntry]: 
     """Perform modifications on file from matches, scan with scanner and return those results"""
     verificationRuns: List[VerificationEntry] = []
+    if len(matches) == 0:
+        return verificationRuns
+
     logging.info(f"Verify {len(matches)} matches")
 
     # Independant, Middle

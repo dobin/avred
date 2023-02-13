@@ -152,7 +152,9 @@ def scanFile(args, scanner):
     else:
         # check if its really being detected first
         detected = scanner.scan(file.data, file.filename)
-        if not detected:
+        if detected:
+            logging.info(f"{file.filename} is detected by {scanner.scanner_name}")
+        else:
             logging.error(f"{file.filename} is not detected by {scanner.scanner_name}")
             exit(1)
 
@@ -163,6 +165,8 @@ def scanFile(args, scanner):
 
     # convert IntervalTree Matches
     logging.info("Found {} matches".format(len(matchesIt)))
+    if len(matchesIt) == 0:
+        logging.warn("No matches found. Try some other options?")
     matches = convertMatchesIt(matchesIt)
 
     verification = None

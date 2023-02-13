@@ -20,6 +20,7 @@
 </table>
 
 
+{% if outcome.matches|length > 0 %}
 <h2>Matches</h2>
 
 <table class="table">
@@ -52,6 +53,19 @@
     {% endfor %}
 </table>
 
+{% else %}
+
+<p>
+<b>file is detected by AV. But no matches could be identified. See log.</b>
+</p>
+
+{% endif %}
+
+
+{% if outcome.fileInfo.fileStructure != '' %}
+
 <h2>File Structure</h2>
 
 <pre>{{outcome.fileInfo.fileStructure}}</pre>
+
+{% endif %}
