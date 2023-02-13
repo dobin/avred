@@ -86,6 +86,8 @@ def scanFile(args, scanner):
     filenameMatches = args.file + ".matches"
     filenameOutcome = args.file + ".outcome"
 
+    logging.info("Handle file: " + args.file)
+
     # file ident
     filetype = FileType.UNKNOWN
     uiFileType = 'unknown'
@@ -122,7 +124,7 @@ def scanFile(args, scanner):
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
 
-    elif filetype is FileType.EXE or filetype is FileType.DOTNET:
+    elif filetype is FileType.EXE:
         file = FilePe()
         file.loadFromFile(args.file)
 
