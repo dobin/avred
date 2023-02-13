@@ -43,6 +43,10 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         detail = []
 
         section = filePe.findSectionFor(match.fileOffset)
+        sectionName = '<unknown>'
+        if section is not None:
+            sectionName = section.name
+
         if section is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
             filePe.printSections()
@@ -77,7 +81,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
-        match.setSectionInfo(section.name)
+        match.setSectionInfo(sectionName)
         match.setDisasmLines(detail)
 
     return ""
