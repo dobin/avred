@@ -42,17 +42,18 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         dataHexdump = hexdmp(data, offset=match.start())
         section = filePe.findSectionFor(match.fileOffset)
         if section is None: 
-            logging.error("No section found for offset {}".format(match.fileOffset))
+            logging.warn("No section found for offset {}".format(match.fileOffset))
             filePe.printSections()
-
-        # offset from .text segment (in file)
-        offset = match.start() - section.addr
-        # base=0x400000 + .text=0x1000 + offset=0x123
-        addrDisasm = baseAddr + section.virtaddr + offset - MORE
-        sizeDisasm = match.size + MORE + MORE
 
         detail = []
         if section.name == ".text":
+            # offset from .text segment (in file)
+            offset = match.start() - section.addr
+            # base=0x400000 + .text=0x1000 + offset=0x123
+            addrDisasm = baseAddr + section.virtaddr + offset - MORE
+            sizeDisasm = match.size + MORE + MORE
+
+            
             # r2: Print Dissabled (by bytes)
             asm = r2.cmd("pDJ {} @{}".format(sizeDisasm, addrDisasm))
             asm = json.loads(asm)

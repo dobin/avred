@@ -108,7 +108,7 @@ class FilePe(PluginFileFormat):
         for section in self.sections:
             if address >= section.addr and address <= section.addr + section.size:
                 return section.name
-        return ""
+        return "<unknown>"
 
 
     def findSectionFor(self, address: int) -> Section:
