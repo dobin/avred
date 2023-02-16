@@ -151,12 +151,14 @@ def upload_file():
 
     # show upload HTML
     servers = {}
-
     for serverName, serverUrl in current_app.config['AVRED_SERVERS'].items():
-        response = requests.get(serverUrl)
-        status = "Offline"
-        if response.ok:
-            status = "Online"
+        status = 'Offline'
+        try:
+            response = requests.get(serverUrl, timeout=1)
+            if response.ok:
+                status = "Online"
+        except requests.exceptions.Timeout:
+            status = 'Offline'
         servers[serverName] = status
 
     return render_template('upload.html',
