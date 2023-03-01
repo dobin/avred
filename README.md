@@ -49,6 +49,10 @@ Requires: python 3.8
 pip3 install -r requirements.txt
 ```
 
+If you get the error `ImportError: failed to find libmagic. Check your installation` try: 
+```
+pip3 install python-magic-bin==0.4.14
+```
 
 ## Setup
 
@@ -69,6 +73,11 @@ Second, once you have this, you can setup avred.
 
 ## How to use
 
+For the webapp: 
+
+```
+
+```
 
 
 ## File and Directory structure
@@ -89,6 +98,7 @@ For the webapp, files are uploaded to `app/uploads`.
 Similar to: 
 * https://github.com/matterpreter/DefenderCheck
 * https://github.com/rasta-mouse/ThreatCheck
+* https://github.com/RythmStick/AMSITrigger
 
 Based on: 
 * https://github.com/scrt/avdebugger

@@ -1,13 +1,18 @@
 import os
-#from app import app
+import argparse
 from flask import Flask
+
 from config import Config
 from app.views import views
 
+
 if __name__ == "__main__":
-	port = int(os.environ.get("PORT", 5000))
-	debug = os.environ.get("DEBUG", True)
-	
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--listenip', type=str, help='IP to listen on', default="0.0.0.0")
+	parser.add_argument('--listenport', type=int, help='Port to listen on', default=5000)
+	parser.add_argument('--debug', action='store_true', help='Debug', default=False)
+	args = parser.parse_args()
+
 	config = Config()
 	config.load()
 
@@ -28,4 +33,4 @@ if __name__ == "__main__":
 	app.config.from_prefixed_env()
 
 	app.register_blueprint(views)
-	app.run(host='0.0.0.0', port=port, debug=debug)
+	app.run(host=args.listenip, port=args.listenport, debug=args.debug)
