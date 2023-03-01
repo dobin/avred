@@ -42,7 +42,7 @@ def view_file(filename):
 
 @views.route("/files")
 def files():
-    if not current_app.config['LIST_FILES'] == 'True':
+    if not current_app.config['LIST_FILES']:
         return render_template('index.html')
     
     examples = glob.glob(os.path.join(current_app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))
@@ -56,7 +56,7 @@ def files():
 
 @views.route("/files_results")
 def files_resulsts():
-    if not current_app.config['LIST_FILES'] == 'True':
+    if not current_app.config['LIST_FILES']:
         return render_template('index.html')
 
     examples = glob.glob(os.path.join(current_app.config['UPLOAD_FOLDER'], "*" + EXT_INFO))

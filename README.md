@@ -117,24 +117,3 @@ if the AV still detects it.
 
 *If there are a lot of matches in `.text`*, use `--ignoreText` to skip analyzing this section.
 The findings in the other sections are usually good enough. 
-
-
-## Web server
-
-Option to show list of files (for public website): 
-```
-export FLASK_LIST_FILES="True"
-```
-
-For Development:
-```
-$ export FLASK_DEBUG=1
-
-```
-
-Run: 
-
-```
-$ flask run --host=0.0.0.0
-```
-
