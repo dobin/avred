@@ -74,11 +74,14 @@ Second, once you have this, you can setup avred.
 ## How to use
 
 For the webapp: 
-
+```sh
+$ python3 app.py --listenip 127.0.0.1 --listenport 8080
 ```
 
+Manually: 
+```sh
+$ python3 avred.py --server amsi --file malware/evil.exe
 ```
-
 
 ## File and Directory structure
 
