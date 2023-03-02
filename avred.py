@@ -7,6 +7,8 @@ import pickle
 import os
 import sys
 import logging
+from intervaltree import Interval, IntervalTree
+from typing import List
 
 from config import Config
 from verifier import verify
@@ -145,6 +147,7 @@ def scanFile(args, scanner):
         logging.error("File ending not supported")
         exit(1)
 
+    matchesIt: List[Interval]
     # matches
     if os.path.exists(filenameMatches):
         # load previous matches (offline mode)
@@ -156,19 +159,19 @@ def scanFile(args, scanner):
         detected = scanner.scan(file.data, file.filename)
         if detected:
             logging.info(f"{file.filename} is detected by {scanner.scanner_name}")
+            matchesIt = analyzer(file, scanner, analyzerOptions)
         else:
             logging.error(f"{file.filename} is not detected by {scanner.scanner_name}")
-            exit(1)
+            matchesIt = []
 
         # analyze file on avred server to get matches
-        matchesIt = analyzer(file, scanner, analyzerOptions)
         with open(filenameMatches, 'wb') as handle:
             pickle.dump(matchesIt, handle)
 
     # convert IntervalTree Matches
     logging.info("Found {} matches".format(len(matchesIt)))
-    if len(matchesIt) == 0:
-        logging.warning("No matches found. Try some other options?")
+    #if len(matchesIt) == 0:
+    #    logging.warning("No matches found. Try some other options?")
     matches = convertMatchesIt(matchesIt)
 
     verification = None
