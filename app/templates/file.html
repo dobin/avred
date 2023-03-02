@@ -43,7 +43,7 @@
         </div>
 
         <div class="tab-pane fade" id="verifier" role="tabpanel" aria-labelledby="verifier-tab">
-          {% if verifications != None %}
+          {% if verifications|length > 0 %}
             {% include 'file_verifier.html' %}
           {% endif %}
         </div>

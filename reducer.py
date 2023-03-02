@@ -46,9 +46,6 @@ class Reducer():
         lastByte = makeWithPatch(data, lastOff, 1)
         lastRes = self._scanData(lastByte)
 
-        logging.info("Change: {} {} {}".format(firstOff, lastOff, size))
-        logging.info("  Result: {} {}".format(firstRes, lastRes))
-
         if not firstRes and not lastRes:
             return True
         else:

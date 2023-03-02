@@ -24,6 +24,11 @@ def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Inte
     return matchesIntervalTree
 
 
+# Fix for https://github.com/radareorg/radare2-r2pipe/issues/146
+def cmdcmd(r, cmd):
+    first = r.cmd(cmd)
+    return first if len(first) > 0 else r.cmd("")
+
 def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
@@ -33,7 +38,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     r2.cmd("e scr.color=2") # enable terminal color output
     r2.cmd("aaa")
 
-    baddr = r2.cmd("e bin.baddr")
+    baddr = cmdcmd(r2, "e bin.baddr")
     baseAddr = int(baddr, 16)
 
     MORE = 16
@@ -59,7 +64,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
             
             # r2: Print Dissabled (by bytes)
-            asm = r2.cmd("pDJ {} @{}".format(sizeDisasm, addrDisasm))
+            asm = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
             asm = json.loads(asm)
             for a in asm:
                 relOffset = a['offset'] - baseAddr - section.virtaddr

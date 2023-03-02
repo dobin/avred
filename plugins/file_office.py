@@ -246,6 +246,11 @@ class OleStructurizer():
 
         while offset < endOffset:
             sector, arrIdx = self._getMiniRefFor(offset, ministreamSectStart)
+
+            # Temp Fix: initialized with 'unknown', but ministream needs yet another dict
+            if self.sector[sector] == 'unknown':
+                self.sector[sector] = {}
+
             self.sector[sector][arrIdx] = name
             offset += self.ole.mini_sector_size
 

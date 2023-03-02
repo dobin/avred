@@ -1,6 +1,9 @@
 import logging
 import olefile
 from typing import List
+from intervaltree import Interval, IntervalTree
+import os
+
 from reducer import Reducer
 from utils import *
 from model.model import Match, FileInfo, UiDisasmLine
@@ -8,7 +11,7 @@ from model.extensions import Scanner
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
-from intervaltree import Interval, IntervalTree
+
 
 
 def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> IntervalTree:
@@ -26,7 +29,7 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:
     # Returns a FileInfo object with detailed file information too.
 
     # dump all makros as disassembled code
-    fd = open('/dev/null', 'w')
+    fd = open(os.devnull, 'w')
     disasmList = pcodedmp.processFile(fileOffice.filepath, output_file=fd)
     fd.close()
 

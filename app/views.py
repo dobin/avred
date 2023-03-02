@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 
-import os
 from flask import Blueprint, current_app, Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
+import os
 import random
 import subprocess
-#from waitress import serve
 import glob
 import pickle
-#from app import app
+import requests
+import sys
+
 from model.model import *
-import requests 
+#from waitress import serve
 
 EXT_INFO = ".outcome"
 EXT_LOG = ".log"
@@ -145,7 +146,8 @@ def upload_file():
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, "--logtofile" ], shell=True)
+            # sys.executable is the python used to execute this
+            subprocess.Popen([sys.executable, "./avred.py", "--server", "amsi", "--file", filepath, "--logtofile" ], shell=True)
 
             return redirect(url_for('views.view_file', filename=filename))
 
