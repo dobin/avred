@@ -145,7 +145,7 @@ def upload_file():
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, "--logtofile" ])
+            subprocess.Popen(["./avred.py", "--server", "amsi", "--file", filepath, "--logtofile" ], shell=True)
 
             return redirect(url_for('views.view_file', filename=filename))
 
