@@ -11,4 +11,4 @@ dncil
 dnfile
 olefile
 oletools
-python-magic
+python-magic-bin
