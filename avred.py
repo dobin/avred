@@ -5,14 +5,13 @@ from scanner import ScannerRest
 
 import pickle
 import os
-import sys
 import logging
-from intervaltree import Interval, IntervalTree
+from intervaltree import Interval
 from typing import List
 
 from config import Config
 from verifier import verify
-from model.model import FileInfo, Outcome
+from model.model import Outcome, FileInfo
 from utils import FileType, GetFileType, convertMatchesIt, getFileInfo
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
@@ -102,7 +101,7 @@ def scanFile(args, scanner):
     elif args.file.endswith('.exe'):
         filetype = FileType.EXE
         uiFileType = "Executable"
-    elif args.file.endswith('.bin'):
+    elif args.file.endswith('.bin') or args.file.endswith('.lnk'):
         # try to detect it first
         filetype = GetFileType(args.file)
         uiFileType = filetype
@@ -145,6 +144,15 @@ def scanFile(args, scanner):
 
     else:
         logging.error("File ending not supported")
+        # write null outcome, to signal "scan over" to the webserver
+        file = FilePlain()
+        file.loadFromFile(args.file)
+        fileInfo = getFileInfo(file, uiFileType, '')
+        outcome = Outcome.nullOutcome(fileInfo)
+        print(file.filename)
+        with open(filenameOutcome, 'wb') as handle:
+            pickle.dump(outcome, handle)
+            logging.info(f"Wrote results to {filenameOutcome}")
         exit(1)
 
     matchesIt: List[Interval]
