@@ -1,6 +1,4 @@
-import logging
 import requests as req
-from pprint import pprint
 from model.extensions import Scanner
 
 

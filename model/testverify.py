@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Set, Dict, Tuple, Optional
+from typing import List
 
 
 class FillType(Enum):
