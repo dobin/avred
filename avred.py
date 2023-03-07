@@ -98,7 +98,7 @@ def scanFile(args, scanner):
     elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
         filetype = FileType.OFFICE
         uiFileType = "Word"
-    elif args.file.endswith('.exe'):
+    elif args.file.endswith('.exe') or args.file.endswith('.dll'):
         filetype = FileType.EXE
         uiFileType = "Executable"
     elif args.file.endswith('.bin') or args.file.endswith('.lnk'):
