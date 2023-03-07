@@ -82,7 +82,7 @@ class VerificationEntry():
 
         if self.matchTests is not None:
             for entry in self.matchTests:
-                s += "  {}".format(entry)
+                s += "  {}\n".format(entry)
         return s
     
 
@@ -94,6 +94,6 @@ class Verification():
     def __str__(self):
         s = ''
         for verification in self.verifications:
-            s += str(verification)
+            s += "{}\n".format(verification)
         s += str(self.matchConclusions)
         return s
