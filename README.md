@@ -43,8 +43,9 @@ The difference to similar projects is:
 
 ## Install 
 
-Requires: python 3.8 (and radare2 in PATH for PE / exe files)
+Requires: python 3.8
 
+Install python deps:
 ```
 pip3 install -r requirements.txt
 ```
@@ -54,39 +55,58 @@ If you get the error `ImportError: failed to find libmagic. Check your installat
 pip3 install python-magic-bin==0.4.14
 ```
 
-### radare2 Setup
-- follow [instructions](https://github.com/radareorg/radare2#installation) for Windows, or download exe from [releases](https://github.com/radareorg/radare2/releases) and add to PATH
+Install radare2:
+* follow [instructions](https://github.com/radareorg/radare2#installation) on radare2 github
+* Or download exe from github [releases](https://github.com/radareorg/radare2/releases) and add to your `PATH` (e.g. on windows)
 
-### python-magic Bug
-- on Windows 10 Pro with Python 3.10.4: magic package has bugs (freezes, crashes, TP_NUM_C_BUFS too small: 50), use python-magic-bin
 
 ## Setup
 
-First, we need a windows instance with an antivirus. We use [avred-server](https://github.com/dobin/avred-server) as interface to this antivirus.
+First, we need a windows instance with an antivirus. We use [avred-server](https://github.com/dobin/avred-server) as interface to this antivirus on a Windows host.
 
-On VM `1.1.1.1:9001`:
-* Deploy a avred-server onto a VM with the AV you want to test
-* Configured the `config.json` on the avred-server directory
-* Start server: `./avred-server.py`
-* Test it: http://1.1.1.1:9001/test
+Lets install and configure avred-server on windows VM `1.1.1.1:9001`. 
+Follow install instructions on [avred-server](https://github.com/dobin/avred-server) README. 
 
-Second, once you have this, you can setup avred.
-* checkout avred 
-* Configure your servers in `config.json` (eg `1.1.1.1:9001`)
-* Scan file with: `./avred.py --file mimikatz.exe --server amsi`
+Once you have this and its working properly (`use curl 1.1.1.1:9001/test`), you can setup avred:
+* Configure your server IP in `config.json` (eg `"amsi": "1.1.1.1:9001"`)
+* Test it by scanning a file with: `./avred.py --file test.ps1 --server amsi`
+
+config.json:
+```
+{
+        "server": 
+                {
+                        "amsi": "http://1.1.1.1:8001/"
+                }
+}
+```
+
+```
+$ curl http://192.168.88.127:8001/test
+{"benign detected":false,"malicous detected":true,"msg":"working as intended"}
+
+$ ./avred.py --file test.ps1 --server amsi
+[INFO    ][2023/03/09 18:33][avred.py: 71] main() :: Using file: test.ps1
+[INFO    ][2023/03/09 18:33][avred.py: 90] scanFile() :: Handle file: test.ps1
+[INFO    ][2023/03/09 18:33][avred.py:115] scanFile() :: Using parser for PLAIN
+[ERROR   ][2023/03/09 18:33][avred.py:172] scanFile() :: test.ps1 is not detected by amsi
+[INFO    ][2023/03/09 18:33][avred.py:180] scanFile() :: Found 0 matches
+[INFO    ][2023/03/09 18:33][avred.py:206] scanFile() :: Wrote results to test.ps1.outcome
+```
 
 
 ## How to use
 
-For the webapp: 
+As a web server: 
 ```sh
 $ python3 app.py --listenip 127.0.0.1 --listenport 8080
 ```
 
-Manually: 
+From command line: 
 ```sh
 $ python3 avred.py --server amsi --file malware/evil.exe
 ```
+
 
 ## File and Directory structure
 
