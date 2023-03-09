@@ -43,7 +43,7 @@ The difference to similar projects is:
 
 ## Install 
 
-Requires: python 3.8
+Requires: python 3.8 (and radare2 in PATH for PE / exe files)
 
 ```
 pip3 install -r requirements.txt
@@ -54,10 +54,15 @@ If you get the error `ImportError: failed to find libmagic. Check your installat
 pip3 install python-magic-bin==0.4.14
 ```
 
+### radare2 Setup
+- follow [instructions](https://github.com/radareorg/radare2#installation) for Windows, or download exe from [releases](https://github.com/radareorg/radare2/releases) and add to PATH
+
+### python-magic Bug
+- on Windows 10 Pro with Python 3.10.4: magic package has bugs (freezes, crashes, TP_NUM_C_BUFS too small: 50), use python-magic-bin
+
 ## Setup
 
-First, we need a windows instance with an antivirus. We use avred-server as interface
-to this antivirus.
+First, we need a windows instance with an antivirus. We use [avred-server](https://github.com/dobin/avred-server) as interface to this antivirus.
 
 On VM `1.1.1.1:9001`:
 * Deploy a avred-server onto a VM with the AV you want to test
@@ -68,7 +73,7 @@ On VM `1.1.1.1:9001`:
 Second, once you have this, you can setup avred.
 * checkout avred 
 * Configure your servers in `config.json` (eg `1.1.1.1:9001`)
-* Scan file with: `./avred.py --file mimikatz.exe --server defender`
+* Scan file with: `./avred.py --file mimikatz.exe --server amsi`
 
 
 ## How to use

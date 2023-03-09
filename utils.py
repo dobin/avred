@@ -1,11 +1,8 @@
 import logging
 import json
-import random
 import os
-from enum import Enum
 import base64
 import magic
-from enum import Enum
 import pathlib
 import hashlib
 

@@ -98,6 +98,10 @@ class Outcome():
         self.verification = verification
         self.matchesIt = matchesIt
 
+    @staticmethod
+    def nullOutcome(fileInfo):
+        v = Verification([], None)
+        return Outcome(fileInfo, [], v)
 
     def __str__(self):
         s = ''

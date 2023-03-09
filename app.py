@@ -16,19 +16,23 @@ if __name__ == "__main__":
 
 	config = Config()
 	config.load()
+	root_folder = os.path.dirname(__file__)
+	app_folder = os.path.join(root_folder, 'app')
 
 	app = Flask(__name__, 
-		static_folder='./app/static',
-		template_folder='./app/templates')
+		static_folder=os.path.join(app_folder, 'static'),
+		template_folder=os.path.join(app_folder, 'templates')
+	)
 
-	app.config['UPLOAD_FOLDER'] = './app/upload'
-	app.config['EXAMPLE_FOLDER'] = './app/examples'
+	app.config['UPLOAD_FOLDER'] = os.path.join(app_folder, 'upload')
+	app.config['EXAMPLE_FOLDER'] = os.path.join(app_folder, 'examples')
 
-	app.config["TEMPLATES_AUTO_RELOAD"] = True
+	app.config['TEMPLATES_AUTO_RELOAD'] = True
 	app.config['SECRET_KEY'] = os.urandom(24)
 	app.config['SESSION_TYPE'] = 'filesystem'
 	app.config['AVRED_SERVERS'] = config.get('server')
-	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'ps1', 'docm', 'bin', 'lnk' }
+	app.config['AVRED_SCANNER'] = os.path.join(root_folder, 'avred.py')
+	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'dll', 'ps1', 'docm', 'bin', 'lnk', 'zip' }
 	app.config['LIST_FILES'] = not args.disable_listfiles
 
 	app.config.from_prefixed_env()
