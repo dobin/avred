@@ -71,18 +71,21 @@ Once you have this and its working properly (`use curl 1.1.1.1:9001/test`), you 
 * Configure your server IP in `config.json` (eg `"amsi": "1.1.1.1:9001"`)
 * Test it by scanning a file with: `./avred.py --file test.ps1 --server amsi`
 
-config.json:
+It should look like this:
 ```
+$ r2 -v
+radare2 5.7.2 0 @ linux-x86-64 git.
+commit: 5.7.2 build: 2022-07-02__14:15:22
+
+$ cat config.json
 {
         "server": 
                 {
                         "amsi": "http://1.1.1.1:8001/"
                 }
 }
-```
 
-```
-$ curl http://192.168.88.127:8001/test
+$ curl http://1.1.1.1:8001/test
 {"benign detected":false,"malicous detected":true,"msg":"working as intended"}
 
 $ ./avred.py --file test.ps1 --server amsi
