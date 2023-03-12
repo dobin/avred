@@ -60,7 +60,7 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     # verifyResults is filled. check for corner cases
 
     # with FIRST_TWO, LAST_TWO
-    if len(verifications) > 5:
+    if False and len(verifications) > 5: 
         if verifyResults[0] is VerifyStatus.BAD and verifyResults[1] is VerifyStatus.BAD:
             ft = getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)            
             if ft[0].scanResult is ScanResult.NOT_DETECTED and ft[1].scanResult is ScanResult.NOT_DETECTED:
@@ -88,11 +88,14 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
 
     # Independant, Middle
     verificationRun = VerificationEntry(
-        index=0, 
+        index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.MIDDLE8)
     logging.info("Verification run: {}".format(verificationRun))
     for match in matches:
+        if match.size < (2*8):
+            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
+            continue
         fileCopy = deepcopy(file)
         offset = match.fileOffset + int((match.size) // 2)
         fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
@@ -100,9 +103,28 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
 
+    # Independant, Thirds
+    verificationRun = VerificationEntry(
+        index=len(verificationRuns), 
+        matchOrder=TestMatchOrder.ISOLATED,
+        matchModify=TestMatchModify.THIRDS8)
+    logging.info("Verification run: {}".format(verificationRun))
+    for match in matches:
+        if match.size < (3*8):
+            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
+            continue
+        fileCopy = deepcopy(file)
+        offset1 = match.fileOffset + int( (match.size // 3) * 1)
+        offset2 = match.fileOffset + int( (match.size // 3) * 2)
+        fileCopy.hidePart(offset1, 8, fillType=FillType.lowentropy)
+        fileCopy.hidePart(offset2, 8, fillType=FillType.lowentropy)
+        result = scanner.scan(fileCopy.data, file.filename)
+        verificationRun.matchTests.append(toTestEntry('', result))
+    verificationRuns.append(verificationRun)
+
     # Independant, Full
     verificationRun = VerificationEntry(
-        index=1, 
+        index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.FULL
     )
@@ -119,13 +141,16 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
 
     # Incremental, Middle
     verificationRun = VerificationEntry(
-        index=2, 
+        index=len(verificationRuns), 
         matchOrder=TestMatchOrder.INCREMENTAL,
         matchModify=TestMatchModify.MIDDLE8, 
     )
     logging.info("Verification run: {}".format(verificationRun))
     fileCopy = deepcopy(file)
     for match in matches:
+        if match.size < (2*8):
+            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
+            continue
         offset = match.fileOffset + int((match.size) // 2)
         fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
@@ -134,7 +159,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
 
     # Incremental, Full
     verificationRun = VerificationEntry(
-        index=3, 
+        index=len(verificationRuns), 
         matchOrder=TestMatchOrder.INCREMENTAL,
         matchModify=TestMatchModify.FULL)
     logging.info("Verification run: {}".format(verificationRun))
@@ -147,7 +172,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
 
     # Decremental, Full
     verificationRun = VerificationEntry(
-        index=4, 
+        index=len(verificationRuns), 
         matchOrder=TestMatchOrder.DECREMENTAL,
         matchModify=TestMatchModify.FULL)
     logging.info("Verification run: {}".format(verificationRun))
@@ -160,42 +185,5 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         n += 1
     verificationRun.matchTests = list(reversed(verificationRun.matchTests))
     verificationRuns.append(verificationRun)
-
-    if len(matches) >= 2:
-        # First Two
-        verificationRun = VerificationEntry(
-            index=5, 
-            matchOrder=TestMatchOrder.FIRST_TWO,
-            matchModify=TestMatchModify.FULL)
-        logging.info("Verification run: {}".format(verificationRun))
-        fileCopy = deepcopy(file)
-        fileCopy.hidePart(matches[0].fileOffset, matches[0].size, fillType=FillType.lowentropy)
-        fileCopy.hidePart(matches[1].fileOffset, matches[1].size, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
-        verificationRun.matchTests.append(toTestEntry(0, result))
-        verificationRun.matchTests.append(toTestEntry(0, result))
-        n = 2
-        while n < len(matches):
-            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
-            n += 1
-        verificationRuns.append(verificationRun)
-
-        # Last two
-        verificationRun = VerificationEntry(
-            index=6, 
-            matchOrder=TestMatchOrder.LAST_TWO,
-            matchModify=TestMatchModify.FULL)
-        logging.info("Verification run: {}".format(verificationRun))
-        fileCopy = deepcopy(file)
-        fileCopy.hidePart(matches[-1].fileOffset, matches[-1].size, fillType=FillType.lowentropy)
-        fileCopy.hidePart(matches[-2].fileOffset, matches[-2].size, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
-        n = 0
-        while n < len(matches) - 2:
-            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
-            n += 1
-        verificationRun.matchTests.append(toTestEntry(0, result))
-        verificationRun.matchTests.append(toTestEntry(0, result))
-        verificationRuns.append(verificationRun)
 
     return verificationRuns

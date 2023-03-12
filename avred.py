@@ -32,8 +32,10 @@ def main():
     parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
 
     # debug
-    parser.add_argument("--checkOnly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
-    parser.add_argument("--loadVerify", help="Debug: Offline. Only do augmentation, if verifications exist.", default=False, action='store_true')
+    parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
+    parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
+    parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
+    parser.add_argument("--noreaugment", help="Debug: Dont Re-do the augmentation", default=False, action='store_true')
 
     # analyzer options
     parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
@@ -69,7 +71,7 @@ def main():
     scanner = ScannerRest(url, args.server)
 
     logging.info("Using file: {}".format(args.file))
-    if args.checkOnly:
+    if args.checkonly:
         checkFile(args.file, scanner)
     else:
         scanFile(args, scanner)
@@ -157,53 +159,57 @@ def scanFile(args, scanner):
 
     matchesIt: List[Interval]
     # matches
-    if os.path.exists(filenameMatches):
-        # load previous matches (offline mode)
-        logging.info("Loading matches from file")
+    if os.path.exists(filenameMatches) and not args.rescan:
+        # load previous matches
+        logging.info("Loading matches from file {}".format(filenameMatches))
         with open(filenameMatches, 'rb') as handle:
             matchesIt = pickle.load(handle)
     else:
-        # check if its really being detected first
+        # find matches
+        # check if its really being detected first as a quick check
         detected = scanner.scan(file.data, file.filename)
-        if detected:
-            logging.info(f"{file.filename} is detected by {scanner.scanner_name}")
-            matchesIt = analyzer(file, scanner, analyzerOptions)
-        else:
-            logging.error(f"{file.filename} is not detected by {scanner.scanner_name}")
+        if not detected:
+            logging.error(f"QuickCheck: {file.filename} is not detected by {scanner.scanner_name}")
             matchesIt = []
+        else:
+            logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
+            logging.info("Scanning for matches...")
+            matchesIt = analyzer(file, scanner, analyzerOptions)
 
-        # analyze file on avred server to get matches
+        # write matches to <file>.matches
         with open(filenameMatches, 'wb') as handle:
+            logging.info("Write matches to file: {}".format(filenameMatches))
             pickle.dump(matchesIt, handle)
 
     # convert IntervalTree Matches
-    logging.info("Found {} matches".format(len(matchesIt)))
-    #if len(matchesIt) == 0:
-    #    logging.warning("No matches found. Try some other options?")
+    logging.info("Result: {} matches".format(len(matchesIt)))
     matches = convertMatchesIt(matchesIt)
 
     verification = None
-    if args.loadVerify and os.path.exists(filenameOutcome):
-        # For testing purposes.
-        # Basically an offline version if .matches and .augment with verify data exists
+    if os.path.exists(filenameOutcome) and not args.reverify:
+        # load existing verifications
         with open(filenameOutcome, 'rb') as handle:
-            outcome = pickle.load(handle)
-            verification = outcome.verification
+            outcomeTmp = pickle.load(handle)
+            verification = outcomeTmp.verification
     else:
         # verify our analysis
+        logging.info("Perform verification of matches")
         verification = verify(file, matches, scanner)
 
     # augment information
     fileInfo = getFileInfo(file, uiFileType, '')
-    if augmenter is not None:
+    if augmenter is not None and not args.noreaugment:
         fileStructure = augmenter(file, matches)
         fileInfo.fileStructure = fileStructure
     
-    # save
+    # save all as Outcome: matches, verification, augmentation
+    logging.info("Saving results to: {}".format(filenameOutcome))
     outcome = Outcome(fileInfo, matches, verification, matchesIt)
     with open(filenameOutcome, 'wb') as handle:
         pickle.dump(outcome, handle)
-        logging.info(f"Wrote results to {filenameOutcome}")
+
+    # output all data
+    print(outcome)
 
 
 # Check if file gets detected by the scanner

@@ -74,10 +74,11 @@ class Match():
         s += "id:{}  offset:{:X}  len:{}\n".format(self.idx, self.fileOffset, self.size)
         if self.sectionInfo is not None:
             s += "  Section: {}\n".format(self.sectionInfo)
-        if self.disasmLines is not None:
-            s += "  DisasmLines: {}\n".format(self.disasmLines)
+        #if self.disasmLines is not None:
+        #    s += "  DisasmLines: {}\n".format(self.disasmLines)
         if self.dataHexdump is not None:
             s += "  Hexdump: {}\n".format(self.dataHexdump)
+        s += '\n'
         return s
 
 
@@ -89,6 +90,11 @@ class FileInfo():
         self.fileType = fileType
         self.fileStructure = fileStructure
         self.date = time
+
+    def __str__(self):
+        s = ''
+        s += "{} size: {}".format(self.name, self.size)
+        return s
 
 
 class Outcome():

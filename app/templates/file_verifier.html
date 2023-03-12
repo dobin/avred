@@ -6,8 +6,11 @@
             <td>MatchOrder</td>
             <td>MatchModify</td>
 
-            {% for testEntry in outcome.verification.verifications[0].matchTests %}
-            <td>Match {{loop.index0}}</td>
+            {% for match in outcome.matches %}
+            <td>
+                Match#{{loop.index0}}<br>
+                {{match.size}}B
+            </td>
             {% endfor %}
 
         </tr>

@@ -26,6 +26,7 @@ class TestMatchModify(Enum):
     MIDDLE_32 = 3
     BEGIN = 4
     END = 5
+    THIRDS8 = 6
 
 
 class VerifyStatus(Enum):
@@ -51,7 +52,10 @@ class MatchTest():
 
     def __str__(self):
         s = ''
-        s += "Idx: {}  result: {}".format(self.scanIndex, self.scanResult)
+        if self.scanIndex != '':
+            s += "Idx: {}  result: {}".format(self.scanIndex, self.scanResult)
+        else: 
+            s += "result: {}".format(self.scanResult)
         return s
 
 
@@ -62,8 +66,8 @@ class MatchConclusion():
 
     def __str__(self):
         s = ''
-        for entry in self.verifyStatus:
-            s += entry.name
+        for idx, entry in enumerate(self.verifyStatus):
+            s += "{} {}\n".format(idx, entry.name)
         return s
 
 
@@ -78,7 +82,7 @@ class VerificationEntry():
 
     def __str__(self):
         s = ""
-        s += "{} {} {}".format(self.index, self.type.name, self.info.name)
+        s += "{} {} {}\n".format(self.index, self.type.name, self.info.name)
 
         if self.matchTests is not None:
             for entry in self.matchTests:
@@ -95,5 +99,6 @@ class Verification():
         s = ''
         for verification in self.verifications:
             s += "{}\n".format(verification)
+        s += 'Conclusion:\n'
         s += str(self.matchConclusions)
         return s
