@@ -10,10 +10,12 @@
 
   Servers:
   <ul>
-    {% for serverName, serverUrl in servers.items() %}
-      <li>{{serverName}}: {{serverUrl}}</li>
+    {% for server in servers %}
+      <li>{{server['name']}}: {{server['url']}}: {{server['status']}}</li>
     {% endfor %}
   </ul>
+
+
 
   Allowed extensions: 
   <ul>
@@ -31,15 +33,25 @@
   </p>
   <br>
 
-  <form method=post enctype=multipart/form-data action=/upload>
-    <div class="mb-3">
-      <input class="form-control" type=file name=file>
-    </div>
-    <div class="mb-3">
-      <button class="btn btn-primary" type=submit value=Upload>Upload</button>
-    </div>
-  </form>
+  <form method="POST" enctype="multipart/form-data" action="/upload">
+  <div class="row row-cols-lg-auto g-3">
+      <div class="col">
+        <select class="form-select" name="server">
+          {% for server in servers %}
+              <option value="{{server['name']}}">{{server['name']}}</option>"
+          {% endfor %}
+        </select>
+      </div>
 
+      <div class="col">
+          <input class="form-control" type="file" name="file">
+      </div>
+
+      <div class="col">
+          <button class="btn btn-primary" type="submit" value="Upload">Upload</button>
+      </div>
+  </div>
+  </form>
 
 </body>
 </html>

@@ -9,6 +9,7 @@ import pickle
 import requests
 import sys
 import zipfile
+import logging
 
 from model.model import *
 #from waitress import serve
@@ -117,7 +118,6 @@ def getFileData(filepath):
             outcome = pickle.load(input_file)
 
     return outcome, logData, None
-    
 
 
 @views.route("/file/<filename>")
@@ -164,14 +164,23 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
+            logging.error('No file part')
+            return redirect(request.url)
+        if 'server' not in request.form:
+            logging.error('No server part')
             return redirect(request.url)
 
-        file = request.files['file']
         # If the user does not select a file, the browser submits an empty file without a filename
-        if file.filename == '':
-            flash('No selected file')
+        if not 'file' in request.files or request.files['file'].filename == '':
+            logging.error('No selected file')
             return redirect(request.url)
+        file = request.files['file']
+        
+        # no haxxoring in server name
+        if not request.form['server'].isalnum():
+            logging.error('Invalid server name')
+            return redirect(request.url)
+        avred_server = request.form['server']
 
         if file and allowed_file(file.filename):
             filepath = save_file_obj(file)
@@ -180,7 +189,7 @@ def upload_file():
             # handle zip files (check for secure filenames, extract, correctly saving and scanning)
             if filepath.split(".")[-1] == "zip":
                 if not zipfile.is_zipfile(filepath):
-                    flash('Not a valid zip file')
+                    logging.error('Not a valid zip file')
                 filepaths = [] # do not scan the container itself, only scan contained files
                 with zipfile.ZipFile(filepath) as zip_f:
                     for z_file in zip_f.infolist():
@@ -188,11 +197,10 @@ def upload_file():
                         filepaths.append(extracted_path)
 
             # now scan the (extracted) file(s)
-            avred_server = "amsi" # TODO refactor server selector
             cli_scanner = current_app.config['AVRED_SCANNER']
             for filepath in filepaths:
-                subprocess.Popen([sys.executable, cli_scanner, "--server", avred_server, "--file", filepath, "--logtofile" ], shell=True)
-            filenames = [fp.split("\\")[-1] for fp in filepaths]
+                subprocess.Popen([sys.executable, cli_scanner, "--server", avred_server, "--file", filepath, "--logtofile" ], shell=False)
+            filenames = [os.path.basename(fp) for fp in filepaths]
 
             # show general results page if multiple files scanned
             if len(filenames) > 1:
@@ -203,7 +211,7 @@ def upload_file():
             return redirect(url_for('views.view_file', filename=filenames[0]))
 
     # else show upload HTML
-    servers = {}
+    servers = []
     for serverName, serverUrl in current_app.config['AVRED_SERVERS'].items():
         status = 'Offline'
         try:
@@ -212,7 +220,14 @@ def upload_file():
                 status = "Online"
         except requests.exceptions.Timeout:
             status = 'Offline'
-        servers[serverName] = status
+
+        server = {
+            'name': serverName,
+            'url': serverUrl,
+            'status': status,
+        }
+        servers.append(server)
+
 
     return render_template('upload.html',
         servers=servers,
