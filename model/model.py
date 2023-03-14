@@ -113,6 +113,7 @@ class Outcome():
         s = ''
         if self.fileInfo is not None:
             s += str(self.fileInfo)
+        s += '\n'
         s += "Matches: \n"
         for match in self.matches:
             s += str(match)
