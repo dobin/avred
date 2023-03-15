@@ -10,18 +10,18 @@ from model.model import Match, FileInfo, UiDisasmLine
 from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
-from typing import List
+from typing import List, Tuple
 
 
-def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> IntervalTree:
+def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[IntervalTree, str]:
     # Scans a PE file given with filePe with Scanner scanner. 
     # Returns all matches.
     isolate = analyzerOptions.get("isolate", False)
     remove = analyzerOptions.get("remove", False)
     ignoreText = analyzerOptions.get("ignoreText", False)
 
-    matchesIntervalTree = investigate(filePe, scanner, isolate, remove, ignoreText)
-    return matchesIntervalTree
+    matchesIntervalTree, scannerInfo = investigate(filePe, scanner, isolate, remove, ignoreText)
+    return matchesIntervalTree, scannerInfo
 
 
 # Fix for https://github.com/radareorg/radare2-r2pipe/issues/146
@@ -92,9 +92,11 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     return ""
 
 
-def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) -> List[Match]:
+def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) -> Tuple[IntervalTree, str]:
+    scannerInfos = []
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
+        scannerInfos.append('remove-sections')
         filePe.hideSection("Ressources")
         filePe.hideSection("VersionInfo")
 
@@ -102,9 +104,11 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
     detected_sections = []
     if isolate:
         logging.info("Section Detection: Isolating sections (zero all others)")
+        scannerInfos.append('isolate-sections')
         detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
         logging.info("Section Detection: Zero section (leave all others intact)")
+        scannerInfos.append('zero-sections')
         detected_sections = findDetectedSections(filePe, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
@@ -114,9 +118,11 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
     matches = []
     if len(detected_sections) == 0 or len(detected_sections) > 3:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer")
+        scannerInfos.append('full-scan')
         match = reducer.scan(0, len(filePe.data))
         matches += match
     else:
+        scannerInfos.append('section-scan')
         # analyze each detected section
         for section in detected_sections:
             # reducing .text may not work well
@@ -124,11 +130,10 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
                 continue
 
             logging.info(f"Launching bytes analysis on section {section.name}")
-
             match = reducer.scan(section.addr, section.addr+section.size)
             matches += match
 
-    return sorted(matches)
+    return sorted(matches), ",".join(scannerInfos)
 
 
 def findDetectedSectionsIsolate(filePe, scanner):

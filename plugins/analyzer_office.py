@@ -1,6 +1,6 @@
 import logging
 import olefile
-from typing import List
+from typing import List, Tuple
 from intervaltree import Interval, IntervalTree
 import os
 
@@ -14,14 +14,14 @@ from pcodedmp.disasm import DisasmEntry
 
 
 
-def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> IntervalTree:
+def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[IntervalTree, str]:
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
     makroData = fileOffice.data
 
     reducer = Reducer(fileOffice, scanner)
     matchesIntervalTree = reducer.scan(0, len(makroData))
-    return matchesIntervalTree
+    return matchesIntervalTree, ''
 
 
 def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:

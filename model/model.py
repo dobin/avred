@@ -4,6 +4,8 @@ from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 from intervaltree import Interval, IntervalTree
 import os
+import logging
+import pickle
 
 from model.testverify import *
 
@@ -98,22 +100,39 @@ class FileInfo():
 
 
 class Outcome():
-    def __init__(self, fileInfo: FileInfo, matches: List[Match], verification: Verification, matchesIt: IntervalTree=None):
-        self.fileInfo= fileInfo
-        self.matches = matches
-        self.verification = verification
-        self.matchesIt = matchesIt
+    def __init__(self, fileInfo):
+        self.fileInfo: FileInfo = fileInfo
+        self.matches: List[Match] = []
+        self.verification: Verification = None
+        self.matchesIt: IntervalTree = IntervalTree()
+
+        self.isDetected: bool = False
+        self.isScanned: bool = False
+        self.isVerified: bool = False
+        self.isAugmented: bool = False
+
+        self.scannerInfo: str = ''
+        self.scannerName: str = ''
+
 
     @staticmethod
     def nullOutcome(fileInfo):
-        v = Verification([], None)
-        return Outcome(fileInfo, [], v)
+        return Outcome(fileInfo)
+    
+
+    def saveToFile(self, filepath):
+        filenameOutcome = filepath + '.outcome'
+        logging.info("Saving results to: {}".format(filenameOutcome))
+        with open(filenameOutcome, 'wb') as handle:
+            pickle.dump(self, handle)
+
 
     def __str__(self):
         s = ''
         if self.fileInfo is not None:
             s += str(self.fileInfo)
         s += '\n'
+        s += "ScannerInfo: {}\n".format(self.scannerInfo)
         s += "Matches: \n"
         for match in self.matches:
             s += str(match)
