@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
 import argparse
-from scanner import ScannerRest
-
 import pickle
 import os
 import logging
@@ -12,7 +10,8 @@ from typing import List
 from config import Config
 from verifier import verify
 from model.model import Outcome, FileInfo
-from utils import FileType, GetFileType, convertMatchesIt, getFileInfo
+from utils import FileType, convertMatchesIt, getFileInfo, getFileIdent
+from scanner import ScannerRest
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -83,78 +82,37 @@ def handleFile(args, scanner):
     analyzerOptions = {}
     augmenter = None
     filenameOutcome = args.file + ".outcome"
-
     logging.info("Handle file: " + args.file)
 
-    # file ident
-    filetype = FileType.UNKNOWN
-    uiFileType = 'unknown'
-    if args.file.endswith('.ps1'):
-        filetype = FileType.PLAIN
-        uiFileType = "Powershell"
-    elif args.file.endswith('.docm'):  # dotm, xlsm, xltm
-        filetype = FileType.OFFICE
-        uiFileType = "Word"
-    elif args.file.endswith('.exe') or args.file.endswith('.dll'):
-        filetype = FileType.EXE
-        uiFileType = "Executable"
-    elif args.file.endswith('.bin') or args.file.endswith('.lnk'):
-        # try to detect it first
-        filetype = GetFileType(args.file)
-        uiFileType = filetype
-
-        if filetype is FileType.UNKNOWN:
-            filetype = FileType.PLAIN
-            uiFileType = 'Binary'
-    else: 
-        filetype = GetFileType(args.file)
-
-    logging.info("Using parser for {}".format(filetype.name))
-    if filetype is FileType.PLAIN:
+    fileInfo = getFileInfo(file)
+    fileScannerType = getFileIdent(args.file)
+    logging.info("Using parser for file type {}".format(fileScannerType.name))
+    if fileScannerType is FileType.PLAIN:
         file = FilePlain()
         file.loadFromFile(args.file)
         analyzer = analyzeFilePlain
         augmenter = augmentFilePlain
-
-    elif filetype is FileType.OFFICE:  # dotm, xlsm, xltm
+    elif fileScannerType is FileType.OFFICE:
         file = FileOffice()
         file.loadFromFile(args.file)
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
-
-    elif filetype is FileType.EXE:
+    elif fileScannerType is FileType.EXE:
         file = FilePe()
         file.loadFromFile(args.file)
-
         analyzer = analyzeFileExe
-
         if file.isDotNet:
             augmenter = augmentFileDotnet
-            uiFileType = 'ExeDotNet'
         else:
             augmenter = augmentFilePe
-            uiFileType = 'ExePe'
-
         analyzerOptions["isolate"] = args.pe_isolate
         analyzerOptions["remove"] = args.pe_remove
         analyzerOptions["ignoreText"] = args.pe_ignoreText
-
     else:
-        logging.error("File ending not supported")
-        # write null outcome, to signal "scan over" to the webserver
-        file = FilePlain()
-        file.loadFromFile(args.file)
-        fileInfo = getFileInfo(file, uiFileType, '')
-        outcome = Outcome.nullOutcome(fileInfo)
-        print(file.filename)
-        with open(filenameOutcome, 'wb') as handle:
-            pickle.dump(outcome, handle)
-            logging.info(f"Wrote results to {filenameOutcome}")
+        logging.error("Unknown filetype, aborting")
         exit(1)
 
-    fileInfo = getFileInfo(file, uiFileType, '')
-
-    # load existing
+    # load existing outcome
     if os.path.exists(filenameOutcome):
         with open(filenameOutcome, 'rb') as handle:
             outcome = pickle.load(handle)
@@ -173,9 +131,8 @@ def handleFile(args, scanner):
         outcome = augmentFile(outcome, file, augmenter)
         outcome.saveToFile(file.filepath)
 
-    # output all data
+    # output for cmdline users
     print(outcome)
-
 
 
 def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
@@ -195,7 +152,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
 
     logging.info("Scanning for matches...")
     matchesIt, scannerInfo = analyzer(file, scanner, analyzerOptions)
-    outcome.matchesIt = []
+    outcome.matchesIt = matchesIt
     outcome.scannerInfo = scannerInfo
 
     # convert IntervalTree Matches

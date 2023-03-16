@@ -3,7 +3,6 @@ from re import S
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 from intervaltree import Interval, IntervalTree
-import os
 import logging
 import pickle
 
@@ -28,9 +27,7 @@ class UiDisasmLine():
         return s
 
 
-
 class FileType(Enum):
-    UNKNOWN = 0
     EXE = 1
     OFFICE = 3
     PLAIN = 4
@@ -85,22 +82,21 @@ class Match():
 
 
 class FileInfo():
-    def __init__(self, name, size, hash, fileType, time, fileStructure):
+    def __init__(self, name, size, hash, time, ident):
         self.name = name
         self.size = size
         self.hash = hash
-        self.fileType = fileType
-        self.fileStructure = fileStructure
         self.date = time
+        self.ident = ident
 
     def __str__(self):
         s = ''
-        s += "{} size: {}".format(self.name, self.size)
+        s += "{} size: {}  ident: {}".format(self.name, self.size, self.ident)
         return s
 
 
 class Outcome():
-    def __init__(self, fileInfo):
+    def __init__(self, fileInfo: FileInfo):
         self.fileInfo: FileInfo = fileInfo
         self.matches: List[Match] = []
         self.verification: Verification = None
@@ -116,11 +112,11 @@ class Outcome():
 
 
     @staticmethod
-    def nullOutcome(fileInfo):
+    def nullOutcome(fileInfo: FileInfo):
         return Outcome(fileInfo)
     
 
-    def saveToFile(self, filepath):
+    def saveToFile(self, filepath: str):
         filenameOutcome = filepath + '.outcome'
         logging.info("Saving results to: {}".format(filenameOutcome))
         with open(filenameOutcome, 'wb') as handle:

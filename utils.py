@@ -10,11 +10,13 @@ from model.model import Match, FileInfo, FileType
 from model.testverify import FillType
 
 
-def getFileInfo(file, fileType, fileStructure):
+def getFileInfo(file):
     size = pathlib.Path(file.filepath).stat().st_size
     hash = hashlib.md5(file.fileData).digest()
     time = pathlib.Path(file.filepath).stat().st_ctime
-    fileInfo = FileInfo(file.filename, size, hash, fileType, time, fileStructure)
+    ident = magic.from_file(file.filepath)
+
+    fileInfo = FileInfo(file.filename, size, hash, time, ident)
     return fileInfo
 
 
@@ -54,22 +56,20 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
     return data
 
 
-def GetFileType(filepath):
-    text = magic.from_file(filepath)
-    mime = magic.from_file(filepath, mime=True)
+def getFileIdent(filename):
+    # detection based on file ending (excplicitly tested)
+    if filename.endswith('.ps1'):
+        fileScannerType = FileType.PLAIN
+    elif filename.endswith('.docm'):  # dotm, xlsm, xltm
+        fileScannerType = FileType.OFFICE
+    elif filename.endswith('.exe') or filename.endswith('.dll'):
+        fileScannerType = FileType.EXE
+    elif filename.endswith('.lnk'):
+        fileScannerType = FileType.PLAIN
+    else:
+        fileScannerType = FileType.PLAIN
 
-    if mime == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return FileType.OFFICE
-
-    if mime == 'application/x-dosexec':
-        #if 'Mono/.Net assembly' in text: 
-        #    return FileType.DOTNET
-        #if 'PE32+' in text:
-        #    return FileType.EXE
-        
-        return FileType.EXE
-        
-    return FileType.UNKNOWN
+    return fileScannerType
 
 
 def printMatches(data, matches):

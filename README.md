@@ -118,7 +118,6 @@ I am team NO-DB. Only files.
 File nomenclature: 
 * `file.exe`: The file you want to scan
 * `file.exe.log`: All log output of the scanning (with `--logtofile`)
-* `file.exe.matches`: JSON dump of all matches
 * `file.exe.outcome`: Pickled Outcome data structure with all further information
 
 For the webapp, files are uploaded to `app/uploads`. 
