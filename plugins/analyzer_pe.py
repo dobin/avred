@@ -29,6 +29,7 @@ def cmdcmd(r, cmd):
     first = r.cmd(cmd)
     return first if len(first) > 0 else r.cmd("")
 
+
 def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
@@ -141,6 +142,9 @@ def findDetectedSectionsIsolate(filePe, scanner):
     detected_sections = []
 
     for section in filePe.sections:
+        # skip header
+        if section.name is 'Header':
+            continue
         filePeCopy = deepcopy(filePe)
 
         filePeCopy.hideAllSectionsExcept(section.name)
@@ -159,6 +163,9 @@ def findDetectedSections(filePe, scanner):
     detected_sections = []
 
     for section in filePe.sections:
+        # skip header
+        if section.name is 'Header':
+            continue
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section.name)
 
