@@ -50,16 +50,9 @@ File is not detected by AV.
         <td>{{match.size}}</td>
         <td>{{match.sectionInfo}}</td>
 
-        {% if outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.BAD" %}
-        <td style="background-color:red">No influence, false positive</td>
-        {% elif outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.OK" %}
-        <td style="background-color:orange">Unsure, check the verifier</td>
-        {% elif outcome.verification.matchConclusions.verifyStatus[loop.index0]|string == "VerifyStatus.GOOD" %}
-        <td style="background-color:green">Modify just this to make it undetected</td>
-        {% else %}
-        <td></td>
-        {% endif %}
-        </td>
+        {% with index = loop.index0 %}
+        {% include 'includes/file_conclusion.html' %}
+        {% endwith %}
     </tr>
     {% endfor %}
 </table>
