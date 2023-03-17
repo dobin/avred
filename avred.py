@@ -25,14 +25,13 @@ from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
 
-log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="File to scan", required=True)
-    parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")")
-    parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
+    parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")", default="amsi")
+    #parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
 
     # debug
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
@@ -47,22 +46,18 @@ def main():
 
     args = parser.parse_args()
 
-    logging.getLogger().setLevel(logging.INFO)
-    if args.logtofile:
-        logfile = args.file + ".log"
-        print(f"Logging to file: {logfile}")
-        logging.basicConfig(filename=logfile,
-            filemode='a',
-            format=log_format,
-            datefmt='%Y/%m/%d %H:%M',
-            level=logging.INFO
-        )
-    else:
-        logging.basicConfig(
-            format=log_format,
-            datefmt='%Y/%m/%d %H:%M',
-            level=logging.INFO
-        )
+    # Setup logging
+    # log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
+    log_format = '[%(levelname)-8s][%(asctime)s] %(funcName)s() :: %(message)s'
+    handlers = [
+        logging.StreamHandler(),
+        logging.FileHandler(args.file + ".log")
+    ]
+    logging.basicConfig(
+        level=logging.INFO,
+        format=log_format,
+        handlers=handlers,
+    )
 
     config = Config()
     config.load()
@@ -125,10 +120,12 @@ def handleFile(args, scanner):
         outcome = Outcome.nullOutcome(fileInfo)
 
     if not outcome.isScanned:
+        scanner.checkOnlineOrExit()
         outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
         outcome.saveToFile(file.filepath)
 
     if not outcome.isVerified:
+        scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
         outcome.saveToFile(file.filepath)
 
@@ -204,11 +201,13 @@ def getFileInfo(file: PluginFileFormat):
     time = pathlib.Path(file.filepath).stat().st_ctime
     ident = magic.from_file(file.filepath)
 
-    if 'PE32 executable (console) Intel 80386 Mono/.Net assembly' in ident:
+    if 'Mono/.Net assembly' in ident:
         ident = "PE EXE .NET"
-    elif 'PE32+ executable (console) x86-64' in ident:
+    elif 'PE32+ executable' in ident:
         ident = "PE EXE 64"
-    elif file.filename.endwith('.ps1'):
+    elif 'PE32 executable' in ident:
+        ident = "PE EXE 32"
+    elif file.filename.endswith('.ps1'):
         ident = "Powershell"
 
     fileInfo = FileInfo(file.filename, size, hash, time, ident)

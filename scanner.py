@@ -1,4 +1,6 @@
 import requests as req
+import logging
+
 from model.extensions import Scanner
 
 
@@ -11,7 +13,7 @@ class ScannerRest(Scanner):
     def scan(self, data, filename):
         params = { 'filename': filename }
 
-        res = req.post(f"{self.scanner_path}/scan", params=params, data=data)
+        res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=3)
         jsonRes = res.json()
 
         if res.status_code != 200:
@@ -20,3 +22,13 @@ class ScannerRest(Scanner):
         
         ret_value = jsonRes['detected']
         return ret_value
+
+
+    def checkOnlineOrExit(self):
+        try:
+            res = req.post(f"{self.scanner_path}/test", timeout=1)
+        except:
+            logging.error("Scanner {} is not online at: {}".format(
+                self.scanner_name, self.scanner_path
+            ))
+            exit(1)
