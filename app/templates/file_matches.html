@@ -15,13 +15,18 @@
                 {% for match in outcome.matches %}
                     <h2 id="title{{match.idx}}">Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
 
-                    Section: {{match.sectionInfo}}<br>
+
+                    <div class="card card-body">
                     <table><tr>
                         {% with index = loop.index0 %}
                         {% include 'includes/file_conclusion.html' %}
                         {% endwith %}
                     </tr></table>
-                    <br>
+                    </div>
+
+                    <div class="card card-body">
+                        Section: {{match.sectionInfo}}<br>
+                    </div>
                     
                     <div class="accordion" id="hexdumps">
                         <div class="accordion-item">
