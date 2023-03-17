@@ -9,6 +9,7 @@ from typing import List
 import magic
 import pathlib
 import hashlib
+import datetime
 
 from config import Config
 from verifier import verify
@@ -139,6 +140,9 @@ def handleFile(args, scanner):
 
 def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
     matchesIt: List[Interval]
+
+    outcome.scanTime = datetime.datetime.now()
+
     # find matches
     # check if its really being detected first as a quick check
     detected = scanner.scan(file.data, file.filename)

@@ -265,3 +265,11 @@ def examples_list():
     
     return render_template('list_files_results.html', outcomes=outcomes, examples=True)
 
+
+@views.app_template_filter('hex')
+def hex_filter(s):
+    return s.hex()
+
+@views.app_template_filter('mydate')
+def date_filter(s):
+    return s.strftime('%Y-%m-%d %H:%M:%S')

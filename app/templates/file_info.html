@@ -6,16 +6,16 @@
         <td>{{outcome.fileInfo.name}}</td>
     </tr><tr>
         <td>Size: </td>
-        <td>{{outcome.fileInfo.size}}</td>
+        <td>{{outcome.fileInfo.size}} bytes</td>
     </tr><tr>
         <td>Type: </td>
         <td>{{outcome.fileInfo.ident}}</td>
     </tr><tr>
-        <td>Hash: </td>
-        <td>{{outcome.fileInfo.hash}}</td>
+        <td>MD5: </td>
+        <td>{{outcome.fileInfo.hash|hex}}</td>
     </tr><tr>
         <td>date: </td>
-        <td>{{outcome.fileInfo.date}}</td>
+        <td>{{outcome.scanTime|mydate}}</td>
     </tr>
 </table>
 
