@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
     parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
-    parser.add_argument("--noreaugment", help="Debug: Dont Re-do the augmentation", default=False, action='store_true')
+    parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
 
     # analyzer options
     parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
@@ -140,17 +140,17 @@ def handleFile(filename, args, scanner):
     else:
         outcome = Outcome.nullOutcome(fileInfo)
 
-    if not outcome.isScanned:
+    if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
         outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
         outcome.saveToFile(file.filepath)
 
-    if not outcome.isVerified:
+    if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
         outcome.saveToFile(file.filepath)
 
-    if not outcome.isAugmented:
+    if not outcome.isAugmented or args.reaugment:
         outcome = augmentFile(outcome, file, augmenter)
         outcome.saveToFile(file.filepath)
 

@@ -90,7 +90,12 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         match.setSectionInfo(sectionName)
         match.setDisasmLines(detail)
 
-    return ""
+    # file structure
+    s = ''
+    for section in filePe.sections:
+        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
+            section.name, section.addr, section.virtaddr, section.size)
+    return s
 
 
 def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) -> Tuple[IntervalTree, str]:

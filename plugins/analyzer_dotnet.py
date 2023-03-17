@@ -41,7 +41,14 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         match.setSectionInfo(info)
         match.setDisasmLines(uiDisasmLines)
 
-    return ""
+    s = ''
+    for section in filePe.sections:
+        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
+            section.name, section.addr, section.virtaddr, section.size)
+    for section in dotnetSections:
+        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
+            section.name, section.addr, section.virtaddr, section.size)
+    return s
 
 
 def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine], str]:

@@ -13,7 +13,6 @@ from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
 
 
-
 def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[IntervalTree, str]:
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
