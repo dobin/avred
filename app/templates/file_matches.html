@@ -12,7 +12,7 @@
                 <li class="nav-item" role="presentation">
                 <button class="nav-link " id="match-tab-{{match.idx}}" data-bs-toggle="tab" data-bs-target="#match-{{match.idx}}" 
                         type="button" role="tab" aria-controls="match-tab-{{match.idx}}" aria-selected="true">
-                            {{match.idx}}: {{match.fileOffset}}
+                            {{match.idx}}: {{match.fileOffset|prettynumber}}
                 </button>
                 </li>
             {% endfor %}

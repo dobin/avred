@@ -26,7 +26,7 @@
                 </a>
                 {% endif %}
             </td>
-            <td>{{outcome.fileInfo.size}}</td>
+            <td>{{outcome.fileInfo.size|prettynumber}}</td>
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
             <td>{{outcome.matches|length}}</td>
 
