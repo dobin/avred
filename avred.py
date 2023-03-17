@@ -27,10 +27,10 @@ from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
 
 
-
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", help="File to scan", required=True)
+    parser.add_argument("-f", "--file", help="File to scan")
+    parser.add_argument("-u", "--uploads", help="Scan app/uploads/*", default=False, action='store_true')
     parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")", default="amsi")
     #parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
 
@@ -47,19 +47,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Setup logging
-    # log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
-    log_format = '[%(levelname)-8s][%(asctime)s] %(funcName)s() :: %(message)s'
-    handlers = [
-        logging.StreamHandler(),
-        logging.FileHandler(args.file + ".log")
-    ]
-    logging.basicConfig(
-        level=logging.INFO,
-        format=log_format,
-        handlers=handlers,
-    )
-
     config = Config()
     config.load()
 
@@ -68,37 +55,70 @@ def main():
         exit(1)
     url = config.get("server")[args.server]
     scanner = ScannerRest(url, args.server)
-
-    logging.info("Using file: {}".format(args.file))
-    if args.checkonly:
-        checkFile(args.file, scanner)
+    if args.uploads:
+        scanUploads(args, scanner)
     else:
-        handleFile(args, scanner)
+        setupLogging(args.file)
+        logging.info("Using file: {}".format(args.file))
+        if args.checkonly:
+            checkFile(args.file, scanner)
+        else:
+            handleFile(args.file, args, scanner)
 
 
-def handleFile(args, scanner):
+def setupLogging(filename):
+    # Setup logging
+    # log_format = '[%(levelname)-8s][%(asctime)s][%(filename)s:%(lineno)3d] %(funcName)s() :: %(message)s'
+    logging.root.handlers = []
+
+    log_format = '[%(levelname)-8s][%(asctime)s] %(funcName)s() :: %(message)s'
+    handlers = [
+        logging.StreamHandler(),
+        logging.FileHandler(filename + ".log")
+    ]
+    logging.basicConfig(
+        level=logging.INFO,
+        format=log_format,
+        handlers=handlers,
+    )
+
+
+def scanUploads(args, scanner):
+    root_folder = os.path.dirname(__file__)
+    upload_folder = os.path.join(root_folder, 'app', 'upload')
+    files = os.listdir(upload_folder)
+
+    for filename in files:
+        if not filename.endswith('.outcome') and not filename.endswith('.log') and not filename.endswith('.gitkeep'):
+            #handleFile(filename, args, scanner)
+            filepath = os.path.join(upload_folder, filename)
+            setupLogging(filepath)
+            handleFile(filepath, args, scanner)
+
+
+def handleFile(filename, args, scanner):
     file = None
     analyzer = None
     analyzerOptions = {}
     augmenter = None
-    filenameOutcome = args.file + ".outcome"
-    logging.info("Handle file: " + args.file)
+    filenameOutcome = filename + ".outcome"
+    logging.info("Handle file: " + filename)
 
-    fileScannerType = getFileScannerTypeFor(args.file)
+    fileScannerType = getFileScannerTypeFor(filename)
     logging.info("Using parser for file type {}".format(fileScannerType.name))
     if fileScannerType is FileType.PLAIN:
         file = FilePlain()
-        file.loadFromFile(args.file)
+        file.loadFromFile(filename)
         analyzer = analyzeFilePlain
         augmenter = augmentFilePlain
     elif fileScannerType is FileType.OFFICE:
         file = FileOffice()
-        file.loadFromFile(args.file)
+        file.loadFromFile(filename)
         analyzer = analyzeFileWord
         augmenter = augmentFileWord 
     elif fileScannerType is FileType.EXE:
         file = FilePe()
-        file.loadFromFile(args.file)
+        file.loadFromFile(filename)
         analyzer = analyzeFileExe
         if file.isDotNet:
             augmenter = augmentFileDotnet
@@ -142,6 +162,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
     matchesIt: List[Interval]
 
     outcome.scanTime = datetime.datetime.now()
+    outcome.scannerName = scanner.scanner_name
 
     # find matches
     # check if its really being detected first as a quick check
