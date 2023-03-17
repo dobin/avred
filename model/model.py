@@ -76,7 +76,7 @@ class Match():
         #if self.disasmLines is not None:
         #    s += "  DisasmLines: {}\n".format(self.disasmLines)
         if self.dataHexdump is not None:
-            s += "  Hexdump: {}\n".format(self.dataHexdump)
+            s += "  Hexdump: \n{}\n".format(self.dataHexdump)
         s += '\n'
         return s
 

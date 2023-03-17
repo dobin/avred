@@ -54,8 +54,8 @@ class FilePe(PluginFileFormat):
 
                 if addr < min:
                     min = addr
-            else: 
-                logging.warn("Section invalid: {} {} {}".format(name, addr, size))
+            else:
+                logging.warn("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
 
         self.sections += [
             Section('Header', 0, min, 0)
