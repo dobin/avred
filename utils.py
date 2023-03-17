@@ -2,22 +2,9 @@ import logging
 import json
 import os
 import base64
-import magic
-import pathlib
-import hashlib
 
 from model.model import Match, FileInfo, FileType
 from model.testverify import FillType
-
-
-def getFileInfo(file):
-    size = pathlib.Path(file.filepath).stat().st_size
-    hash = hashlib.md5(file.fileData).digest()
-    time = pathlib.Path(file.filepath).stat().st_ctime
-    ident = magic.from_file(file.filepath)
-
-    fileInfo = FileInfo(file.filename, size, hash, time, ident)
-    return fileInfo
 
 
 def saveMatchesToFile(filename, matches):
@@ -54,22 +41,6 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
     data = bytes(d)
 
     return data
-
-
-def getFileIdent(filename):
-    # detection based on file ending (excplicitly tested)
-    if filename.endswith('.ps1'):
-        fileScannerType = FileType.PLAIN
-    elif filename.endswith('.docm'):  # dotm, xlsm, xltm
-        fileScannerType = FileType.OFFICE
-    elif filename.endswith('.exe') or filename.endswith('.dll'):
-        fileScannerType = FileType.EXE
-    elif filename.endswith('.lnk'):
-        fileScannerType = FileType.PLAIN
-    else:
-        fileScannerType = FileType.PLAIN
-
-    return fileScannerType
 
 
 def printMatches(data, matches):

@@ -6,12 +6,16 @@ import os
 import logging
 from intervaltree import Interval
 from typing import List
+import magic
+import pathlib
+import hashlib
 
 from config import Config
 from verifier import verify
 from model.model import Outcome, FileInfo
-from utils import FileType, convertMatchesIt, getFileInfo, getFileIdent
+from utils import FileType, convertMatchesIt
 from scanner import ScannerRest
+from model.extensions import PluginFileFormat
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -84,8 +88,7 @@ def handleFile(args, scanner):
     filenameOutcome = args.file + ".outcome"
     logging.info("Handle file: " + args.file)
 
-    fileInfo = getFileInfo(file)
-    fileScannerType = getFileIdent(args.file)
+    fileScannerType = getFileScannerTypeFor(args.file)
     logging.info("Using parser for file type {}".format(fileScannerType.name))
     if fileScannerType is FileType.PLAIN:
         file = FilePlain()
@@ -111,6 +114,8 @@ def handleFile(args, scanner):
     else:
         logging.error("Unknown filetype, aborting")
         exit(1)
+
+    fileInfo = getFileInfo(file)
 
     # load existing outcome
     if os.path.exists(filenameOutcome):
@@ -191,6 +196,39 @@ def checkFile(filepath, scanner):
         print(f"File is detected")
     else:
         print(f"File is not detected")
+
+
+def getFileInfo(file: PluginFileFormat):
+    size = pathlib.Path(file.filepath).stat().st_size
+    hash = hashlib.md5(file.fileData).digest()
+    time = pathlib.Path(file.filepath).stat().st_ctime
+    ident = magic.from_file(file.filepath)
+
+    if 'PE32 executable (console) Intel 80386 Mono/.Net assembly' in ident:
+        ident = "PE EXE .NET"
+    elif 'PE32+ executable (console) x86-64' in ident:
+        ident = "PE EXE 64"
+    elif file.filename.endwith('.ps1'):
+        ident = "Powershell"
+
+    fileInfo = FileInfo(file.filename, size, hash, time, ident)
+    return fileInfo
+
+
+def getFileScannerTypeFor(filename):
+    # detection based on file ending (excplicitly tested)
+    if filename.endswith('.ps1'):
+        fileScannerType = FileType.PLAIN
+    elif filename.endswith('.docm'):  # dotm, xlsm, xltm
+        fileScannerType = FileType.OFFICE
+    elif filename.endswith('.exe') or filename.endswith('.dll'):
+        fileScannerType = FileType.EXE
+    elif filename.endswith('.lnk'):
+        fileScannerType = FileType.PLAIN
+    else:
+        fileScannerType = FileType.PLAIN
+
+    return fileScannerType
 
 
 def printMatches(matches):
