@@ -47,11 +47,26 @@
 
 <h2> Explanation </h2>
 
+
+<h3>Colors</h3>
+
 <ul>
-    <li> Colors: Red = detected, Green = not detected.  </li>
-    <li>ModifyOrder Isolated: Test each match individually</li>
-    <li>ModifyOrder Incremental: Modify each match after another, additive</li>
-    <li>ModifyOrder Decremental: Modify each match after another, additive, downwards (last first)</li>
-    <li>ModifyPosition FULL: Overwrite complete match</li>
-    <li>ModifyPosition MIDDLE8: Overwrite 8 bytes in the middle of the match (partial)</li>
+    <li><font color="green">Green: Not detected</font></li>
+    <li><font color="red">Red: Detected by AV</font></li>
+</ul>
+
+<h3>Match Order</h3>
+
+<ul>
+    <li>Isolated: Test each match individually, by themselves. At most one match is modified per scan </li>
+    <li>Incremental: Modify each match after another, additive. At the end, all matches are modified </li>
+    <li>Decremental: Modify each match after another, additive, downwards (last first)</li>
+</ul>
+
+<h3>Position</h3>
+
+<ul>
+    <li>ModifyPosition FULL: Overwrite complete match: MMMMMMMMMMMM</li>
+    <li>ModifyPosition MIDDLE8: Overwrite 8 bytes in the middle of the match (partial): aaaaMMMMMMMMaaaa</li>
+    <li>ModifyPosition THIRD8: Overwrite 8 bytes in the first and second third of the match (partial): aaaaMMMMMMMMaaaaMMMMMMMMaaaa</li>
 </ul>

@@ -1,20 +1,10 @@
 <div class="row">
     <aside class="col-md-2">
         <ul class="nav nav-pills flex-column nav-fill" id="matchTab" role="tablist">
-            <li class="nav-item active" role="presentation">
-                <button class="nav-link " id="match-tab-all" data-bs-toggle="tab" data-bs-target="#match-all" 
-                        type="button" role="tab" aria-controls="match-tab-all" aria-selected="true">
-                            All
-                </button>
-            </li>
-
             {% for match in outcome.matches %}
-                <li class="nav-item" role="presentation">
-                <button class="nav-link " id="match-tab-{{match.idx}}" data-bs-toggle="tab" data-bs-target="#match-{{match.idx}}" 
-                        type="button" role="tab" aria-controls="match-tab-{{match.idx}}" aria-selected="true">
-                            {{match.idx}}: {{match.fileOffset|prettynumber}}
-                </button>
-                </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" href="#title{{match.idx}}">{{match.idx}}: {{match.fileOffset|prettynumber}}</a>
+            </li>
             {% endfor %}
         </ul>
     </aside>
@@ -23,42 +13,54 @@
         <div class="tab-content" id="matchTabContent">
             <div class="tab-pane fade show active " id="match-all" role="tabpanel" aria-labelledby="match-tab-all">
                 {% for match in outcome.matches %}
-                    <h2>Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
+                    <h2 id="title{{match.idx}}">Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
+
+                    Section: {{match.sectionInfo}}
+                    
+                    <div class="accordion" id="hexdumps">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{match.idx}}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hexdump{{match.idx}}" 
+                                    aria-expanded="true" aria-controls="hexdump{{match.idx}}">
+                                Hexdump
+                            </button>
+                            </h2>
+                            <div id="hexdump{{match.idx}}" class="accordion-collapse collapse show" aria-labelledby="heading{{match.idx}}">
+                            <div class="accordion-body">
+                                <pre>{{match.dataHexdump}}</pre>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {% if match.disasmLines|length > 0 %}
-                    Has Disassembly <br>
+                    <div class="accordion" id="disassembly">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{match.idx}}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#disas{{match.idx}}" 
+                                    aria-expanded="false" aria-controls="disas{{match.idx}}">
+                                Disassembly
+                            </button>
+                            </h2>
+                            <div id="disas{{match.idx}}" class="accordion-collapse collapse" aria-labelledby="heading{{match.idx}}">
+                            <div class="accordion-body">
+                                <div class="mycode">
+                                    {% for disasmLine in match.getDisasmLines() %}
+                                        {% if disasmLine.isPart %}
+                                            <div class="mycodeline"><b>-> {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</b></div>
+                                        {% else %}
+                                            <div class="mycodeline">   {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
-                    {{match.sectionInfo}}:
-                    <pre>{{match.dataHexdump}}</pre>
+                <br>
                 {% endfor %}
             </div>
-
-            {% for match in outcome.matches %}
-            <div class="tab-pane fade  " id="match-{{match.idx}}" role="tabpanel" aria-labelledby="match-tab-{{match.idx}}">
-                <h2> Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
-                Section: {{match.sectionInfo}} <br>
-                <br>
-
-                {% if match.disasmLines|length > 0 %}
-
-                <h3> Disassembly </h3>
-
-                <div class="mycode">
-                    {% for disasmLine in match.getDisasmLines() %}
-                        {% if disasmLine.isPart %}
-                            <div class="mycodeline"><b>-> {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</b></div>
-                        {% else %}
-                            <div class="mycodeline">   {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-
-                <h3> Hexdump </h3>
-                <pre>{{match.dataHexdump}}</pre>
-
-            </div>
-            {% endfor %}
         </div>
     </div>
 </div>
