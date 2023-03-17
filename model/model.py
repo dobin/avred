@@ -110,7 +110,8 @@ class Outcome():
         self.scannerInfo: str = ''
         self.scannerName: str = ''
         self.scanTime: str = ''
-        
+        self.fileStructure: str = ''
+
 
     @staticmethod
     def nullOutcome(fileInfo: FileInfo):

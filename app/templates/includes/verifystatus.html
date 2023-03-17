@@ -1,4 +1,5 @@
 
+{% if outcome.verifications != None %}
     {% for verifyStatus in outcome.verification.matchConclusions.verifyStatus %}
         {% if verifyStatus|string == "VerifyStatus.BAD" %}
         <td style="background-color:red">
@@ -12,3 +13,4 @@
         &nbsp;
         </td>
     {% endfor %}
+{% endif %}

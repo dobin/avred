@@ -1,4 +1,4 @@
-<h2>File Info</h2>
+<h2>Info</h2>
 
 <table class="table">
     <tr>
@@ -14,10 +14,21 @@
         <td>MD5: </td>
         <td>{{outcome.fileInfo.hash|hex}}</td>
     </tr><tr>
-        <td>date: </td>
+        <td>Scan date: </td>
         <td>{{outcome.scanTime|mydate}}</td>
+    </tr><tr>
+        <td>Scanner Name: </td>
+        <td>{{outcome.scannerName}}</td>
+    </tr><tr>
+        <td>Scanner Info: </td>
+        <td>{{outcome.scannerInfo}}</td>
     </tr>
+
 </table>
+
+{% if outcome.isScanned and not outcome.isDetected %}
+File is not detected by AV.
+{% endif %}
 
 
 {% if outcome.matches|length > 0 %}
@@ -56,10 +67,10 @@
 {% endif %}
 
 
-{% if outcome.fileInfo.fileStructure != '' %}
+{% if outcome.fileStructure != '' %}
 
 <h2>File Structure</h2>
 
-<pre>{{outcome.fileInfo.fileStructure}}</pre>
+<pre>{{outcome.fileStructure}}</pre>
 
 {% endif %}
