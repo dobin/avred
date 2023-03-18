@@ -252,12 +252,12 @@ def getFileInfo(file: PluginFileFormat):
     time = pathlib.Path(file.filepath).stat().st_ctime
     ident = magic.from_file(file.filepath)
 
-    if 'Mono/.Net assembly' in ident:
-        ident = "PE EXE .NET"
+    if 'PE Mono/.Net assembly' in ident:
+        ident = "EXE PE.NET"
     elif 'PE32+ executable' in ident:
-        ident = "PE EXE 64"
+        ident = "EXE PE64"
     elif 'PE32 executable' in ident:
-        ident = "PE EXE 32"
+        ident = "EXE PE32"
     elif 'PDF document' in ident:
         ident = 'PDF'
     elif 'ASCII text' in ident:
@@ -270,6 +270,8 @@ def getFileInfo(file: PluginFileFormat):
 
 
 def getFileScannerTypeFor(filename):
+    fileScannerType = FileType.PLAIN
+
     # detection based on file ending (excplicitly tested)
     if filename.endswith('.ps1'):
         fileScannerType = FileType.PLAIN
@@ -280,7 +282,12 @@ def getFileScannerTypeFor(filename):
     elif filename.endswith('.lnk'):
         fileScannerType = FileType.PLAIN
     else:
-        fileScannerType = FileType.PLAIN
+        # unknown file extension, try to identify it based on type (mostly for .bin files)
+        ident = magic.from_file(filename)
+        if 'PE32 ' in ident or 'PE32+ ' in ident:
+            fileScannerType = FileType.EXE
+        elif 'Microsoft Word' in ident:
+            fileScannerType = FileType.OFFICE
 
     return fileScannerType
 
