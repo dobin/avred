@@ -218,11 +218,9 @@ def verifyFile(outcome, file, scanner):
 
     if badCount == allCount:
         outcome.appraisal = 'OR Signature'
-
-    if (goodCount + okCount) == 1:
+    elif (goodCount + okCount) == 1:
         outcome.appraisal = 'One match'
-
-    if goodCount > 1:
+    elif (goodCount + okCount) > 1:
         outcome.appraisal = 'AND Signature'
 
     return outcome
@@ -262,7 +260,7 @@ def getFileInfo(file: PluginFileFormat):
         ident = "PE EXE 32"
     elif 'PDF document' in ident:
         ident = 'PDF'
-    elif 'ASCII test' in ident:
+    elif 'ASCII text' in ident:
         ident = 'ASCII'
     elif file.filename.endswith('.ps1'):
         ident = "Powershell"
