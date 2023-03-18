@@ -146,8 +146,8 @@ def handleFile(filename, args, scanner):
         outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
         outcome.saveToFile(file.filepath)
 
-    if not outcome.isDetected:
-        # no need to verify or augment
+    if not outcome.isDetected or outcome.appraisal == 'Hash based':
+        # no need to verify or augment if it is not detected
         return
 
     if not outcome.isVerified or args.reverify:
