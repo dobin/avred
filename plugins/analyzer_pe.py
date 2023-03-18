@@ -124,11 +124,10 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
     matches = []
     if len(detected_sections) == 0 or len(detected_sections) > 3:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer")
-        scannerInfos.append('full-scan')
+        scannerInfos.append('flat-scan')
         match = reducer.scan(0, len(filePe.data))
         matches += match
     else:
-        scannerInfos.append('section-scan')
         # analyze each detected section
         for section in detected_sections:
             # reducing .text may not work well
@@ -138,6 +137,18 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
             logging.info(f"Launching bytes analysis on section {section.name}")
             match = reducer.scan(section.addr, section.addr+section.size)
             matches += match
+
+        if len(matches) > 0:
+            # only append section-scan indicator if it yielded results, see below
+            scannerInfos.append('section-scan')
+
+    # there are instances where the section-based scanning does not yield any result.
+    # do it again without it
+    if len(matches) == 0:
+        logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
+        scannerInfos.append('flat-scan')
+        match = reducer.scan(0, len(filePe.data))
+        matches += match
 
     return sorted(matches), ",".join(scannerInfos)
 
