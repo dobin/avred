@@ -215,7 +215,7 @@ def verifyFile(outcome, file, scanner):
     if badCount == allCount:
         outcome.appraisal = 'OR Signature'
 
-    if goodCount == 1:
+    if goodCount == 1 or okCount == 1:
         outcome.appraisal = 'One match'
 
     if goodCount > 1:
