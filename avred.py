@@ -17,6 +17,7 @@ from model.model import Outcome, FileInfo
 from utils import FileType, convertMatchesIt, patchData
 from scanner import ScannerRest
 from model.extensions import PluginFileFormat
+from model.testverify import VerifyStatus
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
 from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
@@ -205,6 +206,21 @@ def verifyFile(outcome, file, scanner):
     verification = verify(file, outcome.matches, scanner)
     outcome.verification = verification
     outcome.isVerified = True
+
+    allCount = len(verification.matchConclusions.verifyStatus)
+    badCount = verification.matchConclusions.getCount(VerifyStatus.BAD)
+    goodCount = verification.matchConclusions.getCount(VerifyStatus.GOOD)
+    okCount = verification.matchConclusions.getCount(VerifyStatus.OK)
+
+    if badCount == allCount:
+        outcome.appraisal = 'OR Signature'
+
+    if goodCount == 1:
+        outcome.appraisal = 'One match'
+
+    if goodCount > 1:
+        outcome.appraisal = 'AND Signature'
+
     return outcome
 
 

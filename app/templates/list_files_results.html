@@ -11,6 +11,7 @@
             <th>Name</th>
             <th>Size</th>
             <th>Type</th>
+            <th>Appraisal</th>
             <th>#Matches</th>
         </tr>
         {% for outcome in outcomes %}
@@ -28,6 +29,7 @@
             </td>
             <td>{{outcome.fileInfo.size|prettynumber}}</td>
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
+            <td style="white-space:nowrap;">{{outcome.appraisal}}</td>
             <td>{{outcome.matches|length}}</td>
 
             {% include 'includes/verifystatus.html' %}

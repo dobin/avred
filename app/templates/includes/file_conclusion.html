@@ -1,5 +1,5 @@
 {% if outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.BAD" %}
-<td style="background-color:red">No influence, false positive</td>
+<td style="background-color:red">No influence, OR signature or false positive</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.OK" %}
 <td style="background-color:orange">Unsure, check the verifier</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.GOOD" %}

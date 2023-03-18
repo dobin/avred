@@ -64,6 +64,14 @@ class MatchConclusion():
     def __init__(self, verifyStatus: List[VerifyStatus]):
         self.verifyStatus = verifyStatus
 
+
+    def getCount(self, verifyStatus: VerifyStatus) -> int:
+        n = 0
+        for vs in self.verifyStatus:
+            if vs is verifyStatus:
+                n += 1
+        return n
+
     def __str__(self):
         s = ''
         for idx, entry in enumerate(self.verifyStatus):

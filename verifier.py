@@ -40,39 +40,21 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
         return matchConclusions
 
     matchCount = len(verifications[0].matchTests)
-
-    # first phase, simple
     idx = 0
     while idx < matchCount:
-        res = VerifyStatus.BAD
+        middle8 = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult is ScanResult.NOT_DETECTED
+        thirds8 = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.THIRDS8)[idx].scanResult is ScanResult.NOT_DETECTED
+        full = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED
 
-        # best: Partial modification of an isolated match
-        if getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult is ScanResult.NOT_DETECTED:
+        if middle8 or thirds8:
             res = VerifyStatus.GOOD
-
-        # ok: Full modification of an isolated match
-        elif getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED:
+        elif full:
             res = VerifyStatus.OK
-        
+        else:
+            res = VerifyStatus.BAD
+
         verifyResults.append(res)
         idx += 1
-
-    # verifyResults is filled. check for corner cases
-
-    # with FIRST_TWO, LAST_TWO
-    if False and len(verifications) > 5: 
-        if verifyResults[0] is VerifyStatus.BAD and verifyResults[1] is VerifyStatus.BAD:
-            ft = getMatchTestsFor(verifications, TestMatchOrder.FIRST_TWO, TestMatchModify.FULL)            
-            if ft[0].scanResult is ScanResult.NOT_DETECTED and ft[1].scanResult is ScanResult.NOT_DETECTED:
-                verifyResults[0] = VerifyStatus.OK
-                verifyResults[1] = VerifyStatus.OK
-
-        if verifyResults[-1] is VerifyStatus.BAD and verifyResults[-2] is VerifyStatus.BAD:
-            ft = getMatchTestsFor(verifications, TestMatchOrder.LAST_TWO, TestMatchModify.FULL)    
-        
-            if ft[-1].scanResult is ScanResult.NOT_DETECTED and ft[-2].scanResult is ScanResult.NOT_DETECTED:
-                verifyResults[-1] = VerifyStatus.OK
-                verifyResults[-2] = VerifyStatus.OK
 
     matchConclusions = MatchConclusion(verifyResults)
     return matchConclusions
