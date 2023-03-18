@@ -22,11 +22,14 @@ class TestMatchOrder(Enum):
 class TestMatchModify(Enum):
     """How much and where the match was modified for a Verification"""
     FULL = 1
+    
     MIDDLE8 = 2
     MIDDLE_32 = 3
     BEGIN = 4
     END = 5
     THIRDS8 = 6
+
+    FULLB = 7
 
 
 class VerifyStatus(Enum):

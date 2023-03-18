@@ -146,6 +146,10 @@ def handleFile(filename, args, scanner):
         outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
         outcome.saveToFile(file.filepath)
 
+    if not outcome.isDetected:
+        # no need to verify or augment
+        return
+
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
@@ -215,7 +219,7 @@ def verifyFile(outcome, file, scanner):
     if badCount == allCount:
         outcome.appraisal = 'OR Signature'
 
-    if goodCount == 1 or okCount == 1:
+    if (goodCount + okCount) == 1:
         outcome.appraisal = 'One match'
 
     if goodCount > 1:
@@ -256,6 +260,10 @@ def getFileInfo(file: PluginFileFormat):
         ident = "PE EXE 64"
     elif 'PE32 executable' in ident:
         ident = "PE EXE 32"
+    elif 'PDF document' in ident:
+        ident = 'PDF'
+    elif 'ASCII test' in ident:
+        ident = 'ASCII'
     elif file.filename.endswith('.ps1'):
         ident = "Powershell"
 
