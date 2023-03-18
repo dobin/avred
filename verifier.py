@@ -118,6 +118,20 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
 
+    # Independant, Full B
+    verificationRun = VerificationEntry(
+        index=len(verificationRuns), 
+        matchOrder=TestMatchOrder.ISOLATED,
+        matchModify=TestMatchModify.FULLB
+    )
+    logging.info("Verification run: {}".format(verificationRun))
+    for match in matches:
+        fileCopy = deepcopy(file)
+        fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.highentropy)
+        result = scanner.scan(fileCopy.data, file.filename)
+        verificationRun.matchTests.append(toTestEntry('', result))
+    verificationRuns.append(verificationRun)
+
     if len(matches) == 1:
         return verificationRuns
 
