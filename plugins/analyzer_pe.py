@@ -148,7 +148,7 @@ def findDetectedSectionsIsolate(filePe, scanner):
 
     for section in filePe.sections:
         # skip header
-        if section.name is 'Header':
+        if section.name == 'Header':
             continue
         filePeCopy = deepcopy(filePe)
 
@@ -169,7 +169,7 @@ def findDetectedSections(filePe, scanner):
 
     for section in filePe.sections:
         # skip header
-        if section.name is 'Header':
+        if section.name == 'Header':
             continue
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section.name)
