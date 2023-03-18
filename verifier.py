@@ -97,7 +97,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         fileCopy = deepcopy(file)
-        offset = match.fileOffset + int((match.size) // 2)
+        offset = match.fileOffset + int((match.size) // 2) - 4
         fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
@@ -114,8 +114,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         fileCopy = deepcopy(file)
-        offset1 = match.fileOffset + int( (match.size // 3) * 1)
-        offset2 = match.fileOffset + int( (match.size // 3) * 2)
+        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 4
+        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 4
         fileCopy.hidePart(offset1, 8, fillType=FillType.lowentropy)
         fileCopy.hidePart(offset2, 8, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
@@ -151,7 +151,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         if match.size < (2*8):
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
-        offset = match.fileOffset + int((match.size) // 2)
+        offset = match.fileOffset + int((match.size) // 2) - 4
         fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry(match.idx, result))
