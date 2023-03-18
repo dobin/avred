@@ -141,14 +141,13 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
         if len(matches) > 0:
             # only append section-scan indicator if it yielded results, see below
             scannerInfos.append('section-scan')
-
-    # there are instances where the section-based scanning does not yield any result.
-    # do it again without it
-    if len(matches) == 0:
-        logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
-        scannerInfos.append('flat-scan')
-        match = reducer.scan(0, len(filePe.data))
-        matches += match
+        else:
+            # there are instances where the section-based scanning does not yield any result.
+            # do it again without it
+            logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
+            scannerInfos.append('flat-scan')
+            match = reducer.scan(0, len(filePe.data))
+            matches += match
 
     return sorted(matches), ",".join(scannerInfos)
 
