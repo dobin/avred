@@ -22,35 +22,10 @@ class Reducer():
     def scan(self, offsetStart, offsetEnd) -> List[Interval]:
         it = IntervalTree()
         data = self.file.getData()
+        self._scanSection(data, offsetStart, offsetEnd, it)
+        it.merge_overlaps(strict=False)
+        return sorted(it)
 
-        # pre check: defeat hash of binary (or scan would take very long for nothing)
-        if self.scanIsHash():
-            logging.info("Signature is hash based")
-            return [Interval(0, len(data))]
-        else:
-            self._scanSection(data, offsetStart, offsetEnd, it)
-            it.merge_overlaps(strict=False)
-            return sorted(it)
-
-
-    def scanIsHash(self):
-        """check if the detection is hash based (complete file)"""
-        size = len(self.file.getData())
-        data = self.file.getData()
-
-        firstOff = int(size//3)
-        firstByte = makeWithPatch(data, firstOff, 1)
-        firstRes = self._scanData(firstByte)
-
-        lastOff = int((size//3) * 2)
-        lastByte = makeWithPatch(data, lastOff, 1)
-        lastRes = self._scanData(lastByte)
-
-        if not firstRes and not lastRes:
-            return True
-        else:
-            return False
-        
 
     def _scanData(self, data):
         newFile = self.file.getFileWithNewData(data)
@@ -80,8 +55,8 @@ class Reducer():
             logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
             return
 
-        chunkTopNull = makeWithPatch(data, sectionStart, chunkSize)
-        chunkBotNull = makeWithPatch(data, sectionStart+chunkSize, chunkSize)
+        chunkTopNull = patchData(data, sectionStart, chunkSize)
+        chunkBotNull = patchData(data, sectionStart+chunkSize, chunkSize)
 
         detectTopNull = self._scanData(chunkTopNull)
         detectBotNull = self._scanData(chunkBotNull)
@@ -129,9 +104,3 @@ class Reducer():
             self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
 
         return
-
-
-def makeWithPatch(data, offset, size):
-    patch = bytes(chr(0),'ascii') * int(size)
-    goat = data[:offset] + patch + data[offset+size:]
-    return goat

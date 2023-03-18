@@ -112,6 +112,8 @@ class Outcome():
         self.scanTime: str = ''
         self.fileStructure: str = ''
 
+        self.appraisal: str = ''
+
 
     @staticmethod
     def nullOutcome(fileInfo: FileInfo):

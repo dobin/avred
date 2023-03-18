@@ -14,7 +14,7 @@ import datetime
 from config import Config
 from verifier import verify
 from model.model import Outcome, FileInfo
-from utils import FileType, convertMatchesIt
+from utils import FileType, convertMatchesIt, patchData
 from scanner import ScannerRest
 from model.extensions import PluginFileFormat
 
@@ -164,7 +164,6 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
     outcome.scanTime = datetime.datetime.now()
     outcome.scannerName = scanner.scanner_name
 
-    # find matches
     # check if its really being detected first as a quick check
     detected = scanner.scan(file.data, file.filename)
     if not detected:
@@ -172,12 +171,21 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
         outcome.isDetected = False
         outcome.isScanned = True
         outcome.matchesIt = []
+        outcome.appraisal = 'Not detected'
+        return outcome
+    
+    # pre check: defeat hash of binary (or scan would take very long for nothing)
+    if scanIsHash(file, scanner):
+        logging.info("QuickCheck: Signature is hash based")
+        outcome.isDetected = True
+        outcome.isScanned = True
+        outcome.matchesIt = [ ]
+        outcome.appraisal = 'Hash based'
         return outcome
     
     logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
-    outcome.isDetected = True
-
     logging.info("Scanning for matches...")
+    outcome.isDetected = True
     matchesIt, scannerInfo = analyzer(file, scanner, analyzerOptions)
     outcome.matchesIt = matchesIt
     outcome.scannerInfo = scannerInfo
@@ -253,6 +261,27 @@ def getFileScannerTypeFor(filename):
         fileScannerType = FileType.PLAIN
 
     return fileScannerType
+
+
+def scanIsHash(file, scanner) -> bool:
+    """check if the detection is hash based (complete file)"""
+    data = file.getData()
+    size = len(data)
+
+    firstOff = int(size//3)
+    firstData = patchData(data, firstOff, 1)
+    firstFile = file.getFileWithNewData(firstData)
+    firstRes = scanner.scan(firstFile, file.filename)
+
+    lastOff = int((size//3) * 2)
+    lastData = patchData(data, lastOff, 1)
+    lastFile = file.getFileWithNewData(lastData)
+    lastRes = scanner.scan(lastFile, file.filename)
+
+    if not firstRes and not lastRes:
+        return True
+    else:
+        return False
 
 
 def printMatches(matches):

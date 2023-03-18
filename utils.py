@@ -22,6 +22,8 @@ def saveMatchesToFile(filename, matches):
 
 
 def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
+    origLen = len(data)
+
     fill = None # has to be exactly <size> bytes
     if fillType is FillType.null:
         fill = b"\x00" * size
@@ -36,9 +38,13 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
         temp = base64.b64encode(temp)
         fill = temp[:size]
 
-    d = bytearray(data)
-    d[base:base+size] = fill
-    data = bytes(d)
+    #d = bytearray(data)
+    #d[base:base+size] = fill
+    #data = bytes(d)
+    data = data[:base] + fill + data[base+size:]
+
+    if len(data) != origLen:
+        raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(data)))
 
     return data
 
