@@ -37,6 +37,7 @@ def main():
 
     # debug
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
+    parser.add_argument("--reinfo", help="Debug: Re-do the file info", default=False, action='store_true')
     parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
@@ -132,13 +133,18 @@ def handleFile(filename, args, scanner):
         logging.error("Unknown filetype, aborting")
         exit(1)
 
-    fileInfo = getFileInfo(file)
 
     # load existing outcome
     if os.path.exists(filenameOutcome):
         with open(filenameOutcome, 'rb') as handle:
             outcome = pickle.load(handle)
+
+        if args.reinfo:
+            fileInfo = getFileInfo(file)
+            outcome.fileInfo = fileInfo
+            outcome.saveToFile(file.filepath)
     else:
+        fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
 
     if not outcome.isScanned or args.rescan:
@@ -264,6 +270,9 @@ def getFileInfo(file: PluginFileFormat):
         ident = 'ASCII'
     elif file.filename.endswith('.ps1'):
         ident = "Powershell"
+    else:
+        # first two words
+        ident = ' '.join(ident.split()[:2])
 
     fileInfo = FileInfo(file.filename, size, hash, time, ident)
     return fileInfo
