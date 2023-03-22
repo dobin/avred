@@ -12,6 +12,7 @@ This includes:
 
 It is mainly used to make it easier for RedTeamers to obfuscate their tools. 
 
+Check it out: [avred.r00ted.ch](https://avred.r00ted.ch)
 
 ## Background
 
@@ -36,6 +37,31 @@ The difference to similar projects is:
 
 
 ## Example
+
+```
+$ ./avred.py --file app/upload/DripLoader.exe 
+[...]
+DripLoader.exe size: 93184  ident: PE EXE 64
+ScannerInfo: zero-sections,section-scan
+Matches: 
+id:0  offset:12991  len:195
+  Section: .text
+  Hexdump: 
+00012991   48 81 C4 98 13 00 00 C3 CC CC CC CC CC CC CC C3    H...............
+000129A1   4D 8B C2 49 C7 C2 01 00 00 00 4D 33 D2 49 C7 C2    M..I......M3.I..
+000129B1   0A 00 00 00 4C 8B D1 33 C0 4D 2B C2 83 C0 18 4D    ....L..3.M+....M
+000129C1   33 C0 0F 05 C3 48 83 C1 0A 33 C0 4C 8B D1 83 C0    3....H...3.L....
+000129D1   3A 49 83 EA 0A 48 83 E9 0A 0F 05 C3 49 83 C2 1C    :I...H......I...
+000129E1   33 C0 4C 8B D1 49 83 EA 01 83 C0 50 49 83 C2 01    3.L..I.....PI...
+000129F1   0F 05 C3 4C 8B E1 4C 8B EA 4D 8B F0 4D 8B F9 4C    ...L..L..M..M..L
+00012A01   8B D1 48 33 C0 05 C1 00 00 00 0F 05 48 83 F8 00    ..H3........H...
+00012A11   74 8D 49 8B CC 49 8B D5 4D 8B C6 4D 8B CF 4C 8B    t.I..I..M..M..L.
+00012A21   D1 48 33 C0 05 BD 00 00 00 0F 05 48 83 F8 00 0F    .H3........H....
+00012A31   84 6A FF FF FF 49 8B CC 49 8B D5 4D 8B C6 4D 8B    .j...I..I..M..M.
+00012A41   CF 4C 8B D1 48 33 C0 05 BC 00 00 00 0F 05 48 83    .L..H3........H.
+00012A51   F8 00 0F                                           ...
+[...]
+```
 
 
 ## Screenshots
