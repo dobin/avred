@@ -128,7 +128,7 @@ $ ./avred.py --file test.ps1 --server amsi
 
 As a web server: 
 ```sh
-$ python3 app.py --listenip 127.0.0.1 --listenport 8080
+$ python3 avred-web.py --listenip 127.0.0.1 --listenport 8080
 ```
 
 From command line: 
