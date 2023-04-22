@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	app.config['SESSION_TYPE'] = 'filesystem'
 	app.config['AVRED_SERVERS'] = config.get('server')
 	app.config['AVRED_SCANNER'] = os.path.join(root_folder, 'avred.py')
-	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'dll', 'ps1', 'docm', 'bin', 'lnk', 'zip' }
+	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'dll', 'ps1', 'docm', 'bin', 'lnk' }
 	app.config['LIST_FILES'] = not args.disable_listfiles
 
 	app.config.from_prefixed_env()

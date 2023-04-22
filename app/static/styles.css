@@ -32,3 +32,6 @@ table.table th {
   white-space: pre;
 }
 
+.indent {
+  margin-left: 1em; 
+}

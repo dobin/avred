@@ -6,6 +6,8 @@
   <body>
   {% include 'includes/navigation.html' %}
 
+
+  <div class="indent">
   <h2>Upload</h2>
 
   Servers:
@@ -15,11 +17,9 @@
     {% endfor %}
   </ul>
 
-
-
   Allowed extensions: 
   <ul>
-    {% for ext in extensions %}
+    {% for ext in extensions|sort %}
     <li>.{{ext}}</li>
     {% endfor %}
   </ul>
@@ -53,5 +53,6 @@
   </div>
   </form>
 
+  </div>
 </body>
 </html>
