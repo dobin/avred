@@ -6,6 +6,7 @@ from flask import Flask
 
 from config import Config
 from app.views import views
+from app.views_upload import views_upload
 
 
 if __name__ == "__main__":
@@ -44,4 +45,5 @@ if __name__ == "__main__":
 	print("")
 
 	app.register_blueprint(views)
+	app.register_blueprint(views_upload)
 	app.run(host=args.listenip, port=args.listenport, debug=args.debug)

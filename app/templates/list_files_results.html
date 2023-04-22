@@ -38,9 +38,6 @@
         </tr>
         {% endfor %}
     </table>
-    {% if refresh_needed %}
-        <p>Multiple files submited, click to query results: <button onClick="window.location.reload();">Reload</button></p>
-    {% endif %}
 
     {% include 'includes/tablesorter.html' %}
 </body>

@@ -1,3 +1,5 @@
+{% if outcome.verification %}
+
 {% if outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.BAD" %}
 <td style="background-color:red">No influence, OR signature or false positive</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.OK" %}
@@ -6,4 +8,6 @@
 <td style="background-color:green">Modify just this to make it undetected</td>
 {% else %}
 <td></td>
+{% endif %}
+
 {% endif %}

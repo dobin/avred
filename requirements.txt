@@ -12,3 +12,4 @@ dnfile
 olefile
 oletools
 python-magic-bin
+psutil

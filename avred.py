@@ -133,7 +133,6 @@ def handleFile(filename, args, scanner):
         logging.error("Unknown filetype, aborting")
         exit(1)
 
-
     # load existing outcome
     if os.path.exists(filenameOutcome):
         with open(filenameOutcome, 'rb') as handle:
@@ -154,8 +153,10 @@ def handleFile(filename, args, scanner):
 
     if not outcome.isDetected or outcome.appraisal == 'Hash based':
         # no need to verify or augment if it is not detected
+        print("isDetected: {}".format(outcome.isDetected))
+        print("Appraisal: {}".format(outcome.appraisal))
         return
-
+    
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
@@ -166,6 +167,7 @@ def handleFile(filename, args, scanner):
         outcome.saveToFile(file.filepath)
 
     # output for cmdline users
+    print("Result:")
     print(outcome)
 
 
