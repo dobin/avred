@@ -114,7 +114,7 @@ def fileDownloadExample(filename):
     if not current_app.config['DOWNLOAD_FILES']:
         return render_template('index.html')
     filename = secure_filename(filename)
-    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    filepath = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
     return send_file(filepath, as_attachment=True)
 
 
