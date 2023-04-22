@@ -184,7 +184,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
         outcome.isDetected = False
         outcome.isScanned = True
         outcome.matchesIt = []
-        outcome.appraisal = 'Not detected'
+        outcome.appraisal = 'Undetected'
         return outcome
     
     # pre check: defeat hash of binary (or scan would take very long for nothing)
@@ -193,7 +193,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
         outcome.isDetected = True
         outcome.isScanned = True
         outcome.matchesIt = [ ]
-        outcome.appraisal = 'Hash based'
+        outcome.appraisal = 'Hash'
         return outcome
     
     logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
@@ -225,11 +225,11 @@ def verifyFile(outcome, file, scanner):
     okCount = verification.matchConclusions.getCount(VerifyStatus.OK)
 
     if badCount == allCount:
-        outcome.appraisal = 'OR Signature'
+        outcome.appraisal = 'OR Sig'
     elif (goodCount + okCount) == 1:
-        outcome.appraisal = 'One match'
+        outcome.appraisal = 'One'
     elif (goodCount + okCount) > 1:
-        outcome.appraisal = 'AND Signature'
+        outcome.appraisal = 'AND Sig'
 
     return outcome
 
