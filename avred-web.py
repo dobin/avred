@@ -14,7 +14,8 @@ if __name__ == "__main__":
 	parser.add_argument('--listenip', type=str, help='IP to listen on', default="0.0.0.0")
 	parser.add_argument('--listenport', type=int, help='Port to listen on', default=5000)
 	parser.add_argument('--debug', action='store_true', help='Debug', default=False)
-	parser.add_argument('--disable-listfiles', action='store_true', help='List files', default=False)
+	parser.add_argument('--disable-listfiles', action='store_true', help='Disable List Files', default=False)
+	parser.add_argument('--disable-downloadfiles', action='store_true', help='Disable Download Files', default=False)
 	args = parser.parse_args()
 
 	config = Config()
@@ -37,6 +38,7 @@ if __name__ == "__main__":
 	app.config['AVRED_SCANNER'] = os.path.join(root_folder, 'avred.py')
 	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'dll', 'ps1', 'docm', 'bin', 'lnk' }
 	app.config['LIST_FILES'] = not args.disable_listfiles
+	app.config['DOWNLOAD_FILES'] = not args.disable_downloadfiles
 
 	app.config.from_prefixed_env()
 

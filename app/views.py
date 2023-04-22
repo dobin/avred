@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template
+from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template, send_file
 from werkzeug.utils import secure_filename
 import os
 import random
@@ -24,17 +24,6 @@ def index():
     return render_template('index.html', examples=examples)
 
 
-def get_filepaths(folder, ext):
-    filenames = [f for f in os.listdir(folder) if f.endswith(ext)]
-    return [os.path.join(folder, f) for f in filenames]
-
-
-def parse_filenames(folder, filenames):
-    existing = os.listdir(folder)
-    parsed = [f+EXT_INFO for f in filenames if f+EXT_INFO in existing] # re-add .outcome
-    return [os.path.join(folder, f) for f in parsed]
-
-
 @views.route("/files")
 def files():
     if not current_app.config['LIST_FILES']:
@@ -57,46 +46,13 @@ def files_results():
     outcomes = []
     for filepath in filepaths:
         filepath = filepath[:-len(EXT_INFO)]
-
         outcome, _, errStr = getFileData(filepath)
         if errStr is not None:
             logging.error("Err parsing file: {} {}".format(filepath, errStr))
             continue
-
         outcomes.append(outcome)
     
     return render_template('list_files_results.html', outcomes=outcomes)
-
-
-def getFileData(filepath):
-    verifyDataFile = filepath + EXT_INFO
-    logFilename = filepath + EXT_LOG
-
-    outcome: Outcome = None
-    logData: str = None
-
-    # Main file (exe, docx etc.)
-    if not os.path.isfile(filepath):
-        print("File does not exist: " + filepath)
-        return None, None, 'File not found: ' + filepath
-
-    # log file
-    logData = ""
-    if os.path.isfile(logFilename):
-        with open(logFilename) as f:
-            logData = f.read()
-    else:
-        return None, None, 'File not found: ' + logFilename
-
-    # Outcome
-    outcome: Outcome = None
-    if os.path.isfile(verifyDataFile):
-        with open(verifyDataFile, "rb") as input_file:
-            outcome = pickle.load(input_file)
-    else:
-        return None, None, 'File not found: ' + verifyDataFile
-
-    return outcome, logData, None
 
 
 @views.route("/file/<filename>")
@@ -111,6 +67,15 @@ def file(filename):
         return "Error: " + errStr
     
     return render_template('file.html', outcome=outcome, logData=logData)
+
+
+@views.route("/file/<filename>/download")
+def fileDownload(filename):
+    if not current_app.config['DOWNLOAD_FILES']:
+        return render_template('index.html')
+    filename = secure_filename(filename)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    return send_file(filepath, as_attachment=True)
 
 
 ### Examples related
@@ -144,6 +109,15 @@ def examples_list():
     return render_template('list_files_results.html', outcomes=outcomes, examples=True)
 
 
+@views.route("/example/<filename>/download")
+def fileDownloadExample(filename):
+    if not current_app.config['DOWNLOAD_FILES']:
+        return render_template('index.html')
+    filename = secure_filename(filename)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    return send_file(filepath, as_attachment=True)
+
+
 ## Filters
 
 @views.app_template_filter('hex')
@@ -157,3 +131,41 @@ def date_filter(s):
 @views.app_template_filter('prettynumber')
 def date_filter(s):
     return f"{s:,}"
+
+
+## Utils 
+
+def get_filepaths(folder, ext):
+    filenames = [f for f in os.listdir(folder) if f.endswith(ext)]
+    return [os.path.join(folder, f) for f in filenames]
+
+
+def getFileData(filepath):
+    verifyDataFile = filepath + EXT_INFO
+    logFilename = filepath + EXT_LOG
+
+    outcome: Outcome = None
+    logData: str = None
+
+    # Main file (exe, docx etc.)
+    if not os.path.isfile(filepath):
+        print("File does not exist: " + filepath)
+        return None, None, 'File not found: ' + filepath
+
+    # log file
+    logData = ""
+    if os.path.isfile(logFilename):
+        with open(logFilename) as f:
+            logData = f.read()
+    else:
+        return None, None, 'File not found: ' + logFilename
+
+    # Outcome
+    outcome: Outcome = None
+    if os.path.isfile(verifyDataFile):
+        with open(verifyDataFile, "rb") as input_file:
+            outcome = pickle.load(input_file)
+    else:
+        return None, None, 'File not found: ' + verifyDataFile
+
+    return outcome, logData, None
