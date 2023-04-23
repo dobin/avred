@@ -260,11 +260,11 @@ def getFileInfo(file: PluginFileFormat):
     time = pathlib.Path(file.filepath).stat().st_ctime
     ident = magic.from_file(file.filepath)
 
-    if 'PE Mono/.Net assembly' in ident:
+    if 'Mono/.Net assembly' in ident: # 'PE32 executable (console) Intel 80386 Mono/.Net assembly, for MS Windows'
         ident = "EXE PE.NET"
-    elif 'PE32+ executable' in ident:
+    elif 'PE32+ executable' in ident: # 'PE32+ executable (console) x86-64, for MS Windows'
         ident = "EXE PE64"
-    elif 'PE32 executable' in ident:
+    elif 'PE32 executable' in ident: # 'PE32 executable (console) Intel 80386, for MS Windows'
         ident = "EXE PE32"
     elif 'PDF document' in ident:
         ident = 'PDF'
