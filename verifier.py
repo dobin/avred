@@ -73,7 +73,6 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.MIDDLE8)
-    logging.info("Verification run: {}".format(verificationRun))
     for match in matches:
         if match.size < (2*8):
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
@@ -83,6 +82,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
+    logging.info("Verification run: {}".format(verificationRun))
     verificationRuns.append(verificationRun)
 
     # Independant, Thirds
@@ -90,7 +90,6 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.THIRDS8)
-    logging.info("Verification run: {}".format(verificationRun))
     for match in matches:
         if match.size < (3*8):
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
@@ -103,6 +102,7 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     # Independant, Full
     verificationRun = VerificationEntry(
@@ -110,13 +110,13 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.FULL
     )
-    logging.info("Verification run: {}".format(verificationRun))
     for match in matches:
         fileCopy = deepcopy(file)
         fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     # Independant, Full B
     verificationRun = VerificationEntry(
@@ -124,13 +124,13 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.FULLB
     )
-    logging.info("Verification run: {}".format(verificationRun))
     for match in matches:
         fileCopy = deepcopy(file)
         fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.highentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     if len(matches) == 1:
         return verificationRuns
@@ -141,7 +141,6 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         matchOrder=TestMatchOrder.INCREMENTAL,
         matchModify=TestMatchModify.MIDDLE8, 
     )
-    logging.info("Verification run: {}".format(verificationRun))
     fileCopy = deepcopy(file)
     for match in matches:
         if match.size < (2*8):
@@ -152,26 +151,26 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry(match.idx, result))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     # Incremental, Full
     verificationRun = VerificationEntry(
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.INCREMENTAL,
         matchModify=TestMatchModify.FULL)
-    logging.info("Verification run: {}".format(verificationRun))
     fileCopy = deepcopy(file)
     for match in matches:
         fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
         result = scanner.scan(fileCopy.data, file.filename)
         verificationRun.matchTests.append(toTestEntry(match.idx, result))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     # Decremental, Full
     verificationRun = VerificationEntry(
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.DECREMENTAL,
         matchModify=TestMatchModify.FULL)
-    logging.info("Verification run: {}".format(verificationRun))
     fileCopy = deepcopy(file)
     n = 0
     for match in reversed(matches):
@@ -181,5 +180,6 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         n += 1
     verificationRun.matchTests = list(reversed(verificationRun.matchTests))
     verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     return verificationRuns
