@@ -5,7 +5,7 @@
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.OK" %}
 <td style="background-color:orange">Unsure, check the verifier</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.GOOD" %}
-<td style="background-color:green">Modify just this to make it undetected</td>
+<td style="background-color:green">Modify just this match to make it undetected</td>
 {% else %}
 <td></td>
 {% endif %}

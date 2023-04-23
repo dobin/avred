@@ -16,18 +16,28 @@
                     <h2 id="title{{match.idx}}">Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
 
 
-                    <div class="card card-body">
-                    <table><tr>
-                        {% with index = loop.index0 %}
-                        {% include 'includes/file_conclusion.html' %}
-                        {% endwith %}
-                    </tr></table>
+                    <div class="accordion" id="info">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{match.idx}}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#info{{match.idx}}" 
+                                    aria-expanded="true" aria-controls="info{{match.idx}}">
+                                Info
+                            </button>
+                            </h2>
+                            <div id="info{{match.idx}}" class="accordion-collapse collapse show" aria-labelledby="heading{{match.idx}}">
+                            <div class="accordion-body">
+                                <table><tr>
+                                {% with index = loop.index0 %}
+                                {% include 'includes/file_conclusion.html' %}
+                                {% endwith %}
+                                </tr></table>
+                                <br>
+                                Section: {{match.sectionInfo}}<br>
+                            </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card card-body">
-                        Section: {{match.sectionInfo}}<br>
-                    </div>
-                    
                     <div class="accordion" id="hexdumps">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{match.idx}}">
@@ -50,7 +60,7 @@
                             <h2 class="accordion-header" id="heading{{match.idx}}">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#disas{{match.idx}}" 
                                     aria-expanded="false" aria-controls="disas{{match.idx}}">
-                                Disassembly
+                                <b>Disassembly</b>
                             </button>
                             </h2>
                             <div id="disas{{match.idx}}" class="accordion-collapse collapse" aria-labelledby="heading{{match.idx}}">

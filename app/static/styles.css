@@ -35,3 +35,12 @@ table.table th {
 .indent {
   margin-left: 1em; 
 }
+
+/* button to the left 
+   https://stackoverflow.com/questions/69833687/how-to-left-align-default-bootstrap-5-accordion-icon
+*/
+.accordion-button:after {
+  order: -1; 
+  margin-left: 0; 
+  margin-right:0.5em;
+}
