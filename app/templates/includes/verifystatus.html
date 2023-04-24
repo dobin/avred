@@ -15,11 +15,13 @@
         {% if 'EXE PE32' in outcome.fileInfo.ident or 'EXE PE64' in outcome.fileInfo.ident %}
             {% if '.text' in outcome.matches[loop.index0].sectionInfo %}
             c
-            {% endif %}
-
-            {% if '.data' in outcome.matches[loop.index0].sectionInfo %}
+            {% elif '.data' in outcome.matches[loop.index0].sectionInfo %}
             d
+            {% else %}
+            &nbsp;
             {% endif %}
+        {% else %}
+            &nbsp;
         {% endif %}
         </td>
     {% endfor %}
