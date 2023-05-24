@@ -1,5 +1,5 @@
 import unittest
-from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections
+from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, sectionGetOverlaps
 from plugins.dncilparser import IlMethod
 from model.model import Match
 from plugins.file_pe import FilePe
@@ -113,6 +113,15 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(sections[3].name, 'Stream: #~')
         self.assertEqual(sections[3].addr, 720)
         self.assertEqual(sections[3].size, 424)
+
+
+    def test_dotnetsection_overlap(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/HelloWorld.dll")
+        sections = getDotNetSections(filePe)
+        overlap = sectionGetOverlaps(sections, 512, 584)
+        self.assertEqual(overlap[0].name, "Stream: #~")
+        self.assertEqual(overlap[1].name, "methods")
 
 
     def test_dotnetsections_signed(self):

@@ -27,9 +27,9 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
 
         if dotnetSections is not None:
             # set info: .NET sections/streams name next if found
-            sections = list(filter(lambda x: match.start() >= x.addr and match.start() <= x.addr + x.size, dotnetSections))
+            sections = sectionGetOverlaps(dotnetSections, match.start(), match.size)
             if len(sections) > 0:
-                info += ' '.join(s.name for s in sections)
+                info += ','.join(s.name for s in sections)
 
         if sectionName == ".text":  # only disassemble in .text
             # set info: precise disassembly info (e.g. function name)
@@ -127,7 +127,7 @@ def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine],
     return uiDisasmLines, info
 
 
-def getDotNetSections(filePe):
+def getDotNetSections(filePe) -> List[Section]:
     # Get more details about .net executable (e.g. streams)
     # as most of it is just in PE .text
     sections = []
@@ -148,7 +148,8 @@ def getDotNetSections(filePe):
     methods_size = metadata_header_addr - methods_addr
 
     signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
-    signature_addr -= addrOffset
+    if (signature_addr != 0):
+        signature_addr -= addrOffset
     signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value
 
     s = Section('DotNet Header', 
@@ -183,3 +184,15 @@ def getDotNetSections(filePe):
     sections.append(s)
 
     return sections
+
+
+def sectionGetOverlaps(sections: List[Section], addr: int, size: int):
+    intervalTree = IntervalTree()
+    for section in sections:
+        if section.addr != 0 and section.size != 0:
+            interval = Interval(section.addr, section.addr + section.size, section)
+            intervalTree.add(interval)
+    res = intervalTree.overlap(addr, addr+size)
+    res = [r[2] for r in res]
+    return res
+    
