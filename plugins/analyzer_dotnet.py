@@ -147,11 +147,6 @@ def getDotNetSections(filePe) -> List[Section]:
     methods_addr = cli_header_addr + cli_header_size
     methods_size = metadata_header_addr - methods_addr
 
-    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
-    if (signature_addr != 0):
-        signature_addr -= addrOffset
-    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value
-
     s = Section('DotNet Header', 
         cli_header_addr,   
         cli_header_size, 
@@ -170,6 +165,18 @@ def getDotNetSections(filePe) -> List[Section]:
         0)
     sections.append(s)
 
+    # signature
+    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
+    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value    
+    if (signature_addr != 0):
+        signature_addr -= addrOffset
+        s = Section('Signature', 
+            signature_addr,
+            signature_size, 
+            0)
+        sections.append(s)
+
+    # All streams
     for stream in dotnet_file.dotnet_streams:
         s = Section('Stream: ' + stream.string_representation,
             stream.address - addrOffset, 
@@ -177,11 +184,7 @@ def getDotNetSections(filePe) -> List[Section]:
             0)
         sections.append(s)
 
-    s = Section('Signature', 
-        signature_addr,
-        signature_size, 
-        0)
-    sections.append(s)
+    
 
     return sections
 
