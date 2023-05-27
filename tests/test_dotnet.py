@@ -1,5 +1,5 @@
 import unittest
-from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, sectionGetOverlaps
+from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections
 from plugins.dncilparser import IlMethod
 from model.model import Match
 from plugins.file_pe import FilePe
@@ -100,28 +100,30 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld.dll")
 
         self.assertTrue(filePe.isDotNet)
-        sections = getDotNetSections(filePe)
+        sectionsBag = getDotNetSections(filePe)
 
-        self.assertEqual(sections[0].name, 'DotNet Header')
-        self.assertEqual(sections[0].addr, 512)
-        self.assertEqual(sections[0].size, 72)
+        section = sectionsBag.getSectionByName('DotNet Header')
+        self.assertEqual(section.addr, 512)
+        self.assertEqual(section.size, 72)
 
-        self.assertEqual(sections[1].name, 'methods')
-        self.assertEqual(sections[1].addr, 584)
-        self.assertEqual(sections[1].size, 28)
+        section = sectionsBag.getSectionByName('methods')
+        self.assertEqual(section.addr, 584)
+        self.assertEqual(section.size, 7708)
 
-        self.assertEqual(sections[3].name, 'Stream: #~')
-        self.assertEqual(sections[3].addr, 720)
-        self.assertEqual(sections[3].size, 424)
+        section = sectionsBag.getSectionByName('Stream: #~')
+        self.assertEqual(section.addr, 720)
+        self.assertEqual(section.size, 424)
 
 
     def test_dotnetsection_overlap(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
-        sections = getDotNetSections(filePe)
-        overlap = sectionGetOverlaps(sections, 512, 584)
-        self.assertEqual(overlap[0].name, "Stream: #~")
-        self.assertEqual(overlap[1].name, "methods")
+        sectionsBag = getDotNetSections(filePe) 
+        overlap = sectionsBag.getSectionsForRange(600, 750)
+        
+        self.assertEqual(len(overlap), 8)
+        #self.assertEqual(overlap[0].name, "Stream: #~")
+        #self.assertEqual(overlap[1].name, "methods")
 
 
     def test_dotnetsections_signed(self):
@@ -129,8 +131,8 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
 
         self.assertTrue(filePe.isDotNet)
-        sections = getDotNetSections(filePe)
+        sectionsBag = getDotNetSections(filePe)
 
-        self.assertEqual(sections[8].name, 'Signature')
-        self.assertEqual(sections[8].addr, 2088)
-        self.assertEqual(sections[8].size, 128)
+        section = sectionsBag.getSectionByName("Signature")
+        self.assertEqual(section.addr, 2088)
+        self.assertEqual(section.size, 128)

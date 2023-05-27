@@ -4,8 +4,59 @@ from enum import Enum
 from intervaltree import Interval, IntervalTree
 import logging
 import pickle
+from dataclasses import dataclass
 
 from model.testverify import *
+
+
+@dataclass
+class Section:
+    name: str
+    addr: int
+    size: int
+    virtaddr: int
+
+
+class SectionsBag:
+
+    def __init__(self):
+        self.sections = []
+        self.sectionsIntervalTree = IntervalTree()
+
+
+    def addSection(self, section):
+        self.sections.append(section)
+        interval = Interval(section.addr, section.addr + section.size, section)
+        self.sectionsIntervalTree.add(interval)
+
+
+    def getSectionByName(self, sectionName: str) -> Section:
+        return next((sec for sec in self.sections if sectionName in sec.name ), None)
+
+
+    def getSectionByAddr(self, address: int) -> Section:
+        for section in self.sections:
+            if address >= section.addr and address <= section.addr + section.size:
+                return section
+        return None
+    
+
+    def getSectionNameByAddr(self, address: int) -> Section:
+        for section in self.sections:
+            if address >= section.addr and address <= section.addr + section.size:
+                return section.name
+        return "<unknown>"
+    
+
+    def getSectionsForRange(self, start: int, end: int) -> List[Section]:
+        res = self.sectionsIntervalTree.overlap(start, end)
+        res = [r[2] for r in res]
+        return res
+    
+
+    def printSections(self):
+        for section in self.sections:
+            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
 
 class UiDisasmLine():

@@ -177,7 +177,7 @@ def findDetectedSections(filePe, scanner):
     # remove stuff until it does not get detected anymore
     detected_sections = []
 
-    for section in filePe.sections:
+    for section in filePe.sectionsBag.sections:
         # skip header
         if section.name == 'Header':
             continue

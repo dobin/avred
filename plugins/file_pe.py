@@ -2,22 +2,14 @@ import logging
 import os
 import pefile
 
-from dataclasses import dataclass
 from model.extensions import PluginFileFormat
-
-
-@dataclass
-class Section:
-    name: str
-    addr: int
-    size: int
-    virtaddr: int
+from model.model import Section, SectionsBag
 
 
 class FilePe(PluginFileFormat):
     def __init__(self):
         super().__init__()
-        self.sections = []
+        self.sectionsBag = SectionsBag()
         self.isDotNet = False
         self.baseAddr = 0
         
@@ -48,19 +40,13 @@ class FilePe(PluginFileFormat):
             virtaddr = section.VirtualAddress
 
             if addr != 0 and size != 0:
-                self.sections += [
-                    Section(name, addr, size, virtaddr)
-                ]
-
+                self.sectionsBag.addSection(Section(name, addr, size, virtaddr))
                 if addr < min:
                     min = addr
             else:
                 logging.warn("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
 
-        self.sections += [
-            Section('Header', 0, min, 0)
-        ]
-        
+        self.sectionsBag.addSection(Section('Header', 0, min, 0))
 
         if False:
             # (not necessary?) version information
@@ -88,43 +74,16 @@ class FilePe(PluginFileFormat):
 
 
     def hideSection(self, sectionName: str):
-        section = next((sec for sec in self.sections if sectionName in sec.name ), None)
-
+        section = self.sectionsBag.getSectionByName(sectionName)
         if section is None:
-            logging.warn(f"Section {sectionName} does not exist.")
+            logging.warn(f"Section {sectionName} does not exist. Cant hide.")
             return
 
-        logging.debug(f"Hide: {hex(section.addr)} {section.size}")
+        logging.debug(f"Hide section: {section.name} at {hex(section.addr)} {section.size}")
         self.hidePart(section.addr, section.size)
 
 
     def hideAllSectionsExcept(self, sectionName: str):
-        for section in self.sections:
+        for section in self.sectionsBag.sections:
             if section.name != sectionName:
                 self.hidePart(section.addr, section.size)
-
-
-    def findSectionNameFor(self, address: int):
-        for section in self.sections:
-            if address >= section.addr and address <= section.addr + section.size:
-                return section.name
-        return "<unknown>"
-
-
-    def findSectionFor(self, address: int) -> Section:
-        for section in self.sections:
-            if address >= section.addr and address <= section.addr + section.size:
-                return section
-        return None
-
-
-    def getSectionByName(self, sectionName: str) -> Section:
-        for section in self.sections:
-            if section.name == sectionName:
-                return section
-        return None
-
-
-    def printSections(self):
-        for section in self.sections:
-            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
