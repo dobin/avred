@@ -19,7 +19,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error") )
         scanner = ScannerTest(detections)
         
-        matches = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864)]
         self.assertTrue(len(matches) == 1)
 
@@ -36,7 +36,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
         scanner = ScannerTest(detections)
         
-        matches = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(30809, 30844)]
         self.assertTrue(len(matches) == 1)
 
@@ -52,7 +52,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
         scanner = ScannerTest(detections)
 
-        matches = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(1644, 1698), Interval(29808, 29864)]
         self.assertTrue(len(matches) == 2)
 
@@ -69,7 +69,7 @@ class PeTest(unittest.TestCase):
         #detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
         scanner = ScannerTest(detections)
 
-        matches = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(31824, 31880)]
         self.assertTrue(len(matches) == 2)
 
@@ -87,6 +87,6 @@ class PeTest(unittest.TestCase):
 
         scanner = ScannerTestWeighted(detections)
 
-        matches = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
         self.assertTrue(len(matches) == 4)

@@ -20,7 +20,7 @@ class VerifierTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error") )
         scanner = ScannerTest(detections)
         
-        matchesIt = analyzeFileExe(filePe, scanner)
+        matchesIt, _ = analyzeFileExe(filePe, scanner)
         matches = convertMatchesIt(matchesIt)
         self.assertEqual(len(matches), 2)
 
@@ -53,7 +53,7 @@ class VerifierTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error") )
         scanner = ScannerTestOr(detections)
         
-        matchesIt = analyzeFileExe(filePe, scanner)
+        matchesIt, _ = analyzeFileExe(filePe, scanner)
         matches = convertMatchesIt(matchesIt)
 
         self.assertTrue(len(matches) == 2)
@@ -74,5 +74,5 @@ class VerifierTest(unittest.TestCase):
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
         self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)
 
-        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.OK)
-        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.OK)
+        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.BAD)
+        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.BAD)

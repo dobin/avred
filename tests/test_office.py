@@ -17,7 +17,7 @@ class OfficeTest(unittest.TestCase):
         detections.append( TestDetection(10656, b"e VB_Nam\x00e = ") )
 
         scanner = ScannerTestDocx(detections)
-        matches = analyzeFileWord(fileOffice, scanner)
+        matches, _ = analyzeFileWord(fileOffice, scanner)
         # [Interval(0, 13312)]
         self.assertTrue(len(matches) == 1)
 
