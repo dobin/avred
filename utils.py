@@ -83,3 +83,9 @@ def hexdmp(src, offset=0, length=16):
         text = ''.join([chr(x) if 0x20 <= x < 0x7F else '.'  for x in s])
         result.append("%08X   %-*s   %s" % (i+offset, length*(digits + 1), hexa, text) )
     return('\n'.join(result))
+
+
+def hexstr(src: bytes, offset, length):
+    byte_buffer = src[offset:offset+length]
+    hex_string = ' '.join([f'{x:02x}' for x in byte_buffer])
+    return hex_string

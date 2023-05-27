@@ -11,8 +11,9 @@ import datetime
 
 from config import Config
 from verifier import verify
-from model.model import Outcome, FileInfo
-from utils import FileType, convertMatchesIt, patchData
+from model.model import Outcome
+from filehelper import FileType, FileInfo
+from utils import convertMatchesIt, patchData
 from scanner import ScannerRest
 from model.testverify import VerifyStatus
 

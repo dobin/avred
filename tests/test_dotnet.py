@@ -110,9 +110,9 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(section.addr, 584)
         self.assertEqual(section.size, 7708)
 
-        section = sectionsBag.getSectionByName('Stream: #~')
-        self.assertEqual(section.addr, 720)
-        self.assertEqual(section.size, 424)
+        section = sectionsBag.getSectionByName('#~ Stream Header')
+        self.assertEqual(section.addr, 644)
+        self.assertEqual(section.size, 12)
 
 
     def test_dotnetsection_overlap(self):
@@ -121,7 +121,7 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag = getDotNetSections(filePe) 
         overlap = sectionsBag.getSectionsForRange(600, 750)
         
-        self.assertEqual(len(overlap), 8)
+        self.assertEqual(len(overlap), 7)
         #self.assertEqual(overlap[0].name, "Stream: #~")
         #self.assertEqual(overlap[1].name, "methods")
 

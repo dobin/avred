@@ -1,6 +1,6 @@
 from intervaltree import Interval, IntervalTree
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from model.model import Match, FileInfo, UiDisasmLine, Section, SectionsBag
 from model.extensions import Scanner
 from plugins.file_pe import FilePe, Section
@@ -30,13 +30,15 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         if dotnetSectionsBag is not None:
             # set info: .NET sections/streams name next if found
             sections = dotnetSectionsBag.getSectionsForRange(match.start(), match.end())
-            if len(sections) > 0:
-                info += ','.join(s.name for s in sections)
+            info += ','.join(s.name for s in sections)
 
         if sectionName == ".text":  # only disassemble in .text
             # set info: precise disassembly info (e.g. function name)
-            uiDisasmLines, info2 = getDotNetDisassembly(match.start(), match.size, dncilParser)
-            info += " " + info2
+            uiDisasmLines, methodNames = getDotNetDisassemblyMethods(match.start(), match.size, dncilParser)
+            more1 = getDotNetDisassemblyHeader(filePe, match.start(), match.size)
+            uiDisasmLines += more1
+
+            info += " " + " ".join(methodNames)
 
         match.setData(data)
         match.setDataHexdump(dataHexdump)
@@ -53,15 +55,45 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     return s
 
 
-def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine], str]:
-    """Get section-info & disassembly with dncilParser for range offset/+size"""
-    uiDisasmLines = []  # all diasassmbled IL 
-    methodNames = set()  # a set with unique function names
+def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[UiDisasmLine]:
+    uiDisasmLines: List[UiDisasmLine] = []  # all diasassmbled IL
+    dotnet_file = DotNetPE(filePe.filepath)
+
+    textSection = filePe.sectionsBag.getSectionByName('.text')
+    addrOffset = textSection.virtaddr - textSection.addr
+
+    entry: BinaryStructureField
+    for entry in dotnet_file.dotnet_metadata_header.structure_fields:
+        hdrFileOffset = entry.address - addrOffset
+        hdrSize = entry.size
+        if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
+            
+            text = "        {:18}  Metadata Header: {}: {}".format(
+                hexstr(filePe.data, hdrFileOffset, hdrSize),
+                entry.display_name, 
+                entry.value)
+            uiDisasmLine = UiDisasmLine(
+                hdrFileOffset,
+                entry.address,
+                True,
+                text,
+                text
+            )
+            print("AAA: {}: {}".format(hex(hdrFileOffset), text))
+            uiDisasmLines.append(uiDisasmLine)
+    
+    return uiDisasmLines
+
+
+def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser) -> Tuple[List[UiDisasmLine], Set[str]]:
+    """Get section-info & disassembly as UiDisasmLine's with dncilParser for range offset/+size"""
+    uiDisasmLines: List[UiDisasmLine] = []  # all diasassmbled IL
+    methodNames: Set[str] = set()  # a set with unique function names
 
     ilMethods = dncilParser.query(offset, offset+size)
     if ilMethods is None or len(ilMethods) == 0:
-        logging.debug("No disassembly found for {:X}", offset)
-        return uiDisasmLines, ''
+        #logging.debug("No disassembly found for {:X}", offset)
+        return [], ''
     logging.info("Match physical {}/0x{:X}, method disassemblies found: {}".format(
         offset, offset, len(ilMethods)))
 
@@ -115,9 +147,9 @@ def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine],
                     isPart = True
                 
                 uiDisasmLine = UiDisasmLine(
-                    ilInstruction.fileOffset, 
+                    ilInstruction.fileOffset,
                     ilInstruction.rva,
-                    isPart, 
+                    isPart,
                     ilInstruction.text,
                     ilInstruction.text
                 )
@@ -125,8 +157,7 @@ def getDotNetDisassembly(offset, size, dncilParser) -> Tuple[List[UiDisasmLine],
 
                 methodNames.add(ilMethod.getName())
 
-    info = str(methodNames)
-    return uiDisasmLines, info
+    return uiDisasmLines, methodNames
 
 
 def getDotNetSections(filePe) -> SectionsBag:
@@ -175,23 +206,6 @@ def getDotNetSections(filePe) -> SectionsBag:
         metadata_directory_size, 
         0)
     sectionsBag.addSection(s)
-
-    entry: BinaryStructureField
-    for entry in dotnet_file.dotnet_metadata_header.structure_fields:
-        #print("Metadata header: {} {}: {} -> {}".format(
-        #    entry.address- addrOffset, 
-        #    entry.size,
-        #    entry.display_name,
-        #    entry.value))
-        pass
-
-    entry: FileLocation
-    for entry in dotnet_file.dotnet_streams:
-        s = Section('Stream: {}'.format(entry.string_representation), 
-            entry.address- addrOffset, 
-            entry.size,
-            0)
-        sectionsBag.addSection(s)
 
     # signature
     signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value

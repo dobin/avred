@@ -183,6 +183,7 @@ class DncilParser():
 
         pe: dnPE = dnfile.dnPE(path)
 
+        # dncil works on methods
         row: MethodDefRow
         for row in pe.net.mdtables.MethodDef:
             if not row.ImplFlags.miIL or any((row.Flags.mdAbstract, row.Flags.mdPinvokeImpl)):
@@ -226,7 +227,7 @@ class DncilParser():
             
             self.methods.append(ilMethod)
                 
-        # convert
+        # convert method list to method intervals
         for method in self.methods:
             if method.getOffset() is None or method.getCodeSize is None or method.getHeaderSize is None:
                 #logging.error("Error in parsing: " + str(method))
@@ -240,9 +241,11 @@ class DncilParser():
 
 
     def query(self, begin, end) -> List[IlMethod]:
+
+        # methods
         res = self.methodsIt.overlap(begin, end)
         if len(res) == 0:
             return None
-
         res = [r[2] for r in res]
+
         return res

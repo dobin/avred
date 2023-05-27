@@ -262,7 +262,7 @@ class BinaryStructure(object):
         else:
             addr = None
 
-        structure_field = BinaryStructureField(addr, display_name, format_str, value_bytes, self.current_field_offset)
+        structure_field = BinaryStructureField(addr, display_name, format_str, value_bytes, self.current_field_offset, length)
         self.current_field_offset += length
         self.size += length
         self.structure_fields.append(structure_field)
@@ -291,8 +291,8 @@ class BinaryStructureField(FileLocation):
     around with any function that can deal with those.
     """
 
-    def __init__(self, addr: Optional[int], display_name: str, format_str: str, value_bytes: bytes, offset: int) -> None:
-        super(BinaryStructureField, self).__init__(addr)
+    def __init__(self, addr: Optional[int], display_name: str, format_str: str, value_bytes: bytes, offset: int, length: int = None) -> None:
+        super(BinaryStructureField, self).__init__(addr, size=length)
 
         self.format_str = format_str
         self.offset = offset
