@@ -3,7 +3,7 @@ import json
 import os
 import base64
 
-from model.model import Match, FileInfo, FileType
+from model.model import Match
 from model.testverify import FillType
 
 

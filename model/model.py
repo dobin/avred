@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from re import S
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 from intervaltree import Interval, IntervalTree
@@ -25,12 +24,6 @@ class UiDisasmLine():
             self.text
         )
         return s
-
-
-class FileType(Enum):
-    EXE = 1
-    OFFICE = 3
-    PLAIN = 4
     
 
 class Match():
