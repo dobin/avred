@@ -8,6 +8,7 @@ import requests
 import sys
 import zipfile
 import logging
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
 
 from model.model import *
 #from waitress import serve
@@ -25,10 +26,8 @@ def index():
 
 
 @views.route("/files")
+@login_required
 def files():
-    if not current_app.config['LIST_FILES']:
-        return render_template('index.html')
-    
     examples = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
     res = []
     for example in examples:
@@ -38,10 +37,8 @@ def files():
 
 
 @views.route("/files_results")
+@login_required
 def files_results():
-    if not current_app.config['LIST_FILES']:
-        return render_template('index.html')
-
     filepaths = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
     outcomes = []
     for filepath in filepaths:
@@ -70,9 +67,8 @@ def file(filename):
 
 
 @views.route("/file/<filename>/download")
+@login_required
 def fileDownload(filename):
-    if not current_app.config['DOWNLOAD_FILES']:
-        return render_template('index.html')
     filename = secure_filename(filename)
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     return send_file(filepath, as_attachment=True)
@@ -111,8 +107,6 @@ def examples_list():
 
 @views.route("/example/<filename>/download")
 def fileDownloadExample(filename):
-    if not current_app.config['DOWNLOAD_FILES']:
-        return render_template('index.html')
     filename = secure_filename(filename)
     filepath = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
     return send_file(filepath, as_attachment=True)

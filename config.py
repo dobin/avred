@@ -12,4 +12,7 @@ class Config(object):
             self.data = json.load(jsonfile)
 
     def get(self, value):
-        return self.data[value]
+        if value in self.data:
+            return self.data[value]
+        else:
+            return ""

@@ -15,10 +15,13 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/' else '' }}" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/upload' else '' }}" href="/upload">Upload</a></li>
-                {% if 'localhost' in request.host_url %}
+                {% if current_user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files_results' else '' }}" href="/files_results">Files</a></li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path.startswith('/examples') else ''}}" href="/examples">Examples</a></li>
+                {% if not current_user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/login' else '' }}" href="/login">Login</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
