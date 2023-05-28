@@ -6,6 +6,7 @@ from model.extensions import Scanner
 from plugins.file_pe import FilePe, Section
 from utils import *
 from dotnetfile import DotNetPE
+from dotnetfile.structures import DOTNET_CLR_HEADER
 from dotnetfile.parser import DOTNET_STREAM_HEADER
 from dotnetfile.util import BinaryStructureField, FileLocation
 from plugins.dncilparser import DncilParser
@@ -61,6 +62,25 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
 
     textSection = filePe.sectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.addr
+
+    # DotNet header / CLI header / CLR header
+    clrHeader: DOTNET_CLR_HEADER = dotnet_file.clr_header
+    for entry in clrHeader.structure_fields:
+        hdrFileOffset = entry.address
+        hdrSize = entry.size
+        if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
+            text = "        {:18}  CLR Header: {}: {}".format(
+                hexstr(filePe.data, hdrFileOffset, hdrSize),
+                entry.display_name, 
+                entry.value)
+            uiDisasmLine = UiDisasmLine(
+                hdrFileOffset,
+                entry.address,
+                True,
+                text,
+                text
+            )
+            uiDisasmLines.append(uiDisasmLine)
 
     # metadata header
     entry: BinaryStructureField

@@ -133,6 +133,10 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag = getDotNetSections(filePe) 
         sectionsBag.printSections()
 
+        section = sectionsBag.getSectionByName("DotNet Header")
+        self.assertEqual(section.addr, 512)
+        self.assertEqual(section.size, 72)
+
         section = sectionsBag.getSectionByName("#~ Stream Header")
         self.assertEqual(section.addr, 644)
         self.assertEqual(section.size, 12)
@@ -140,6 +144,10 @@ class DotnetDisasmTest(unittest.TestCase):
         section = sectionsBag.getSectionByName("Metadata Directory")
         self.assertEqual(section.addr, 612)
         self.assertEqual(section.size, 1316)
+
+        uiDisasmLines = getDotNetDisassemblyHeader(filePe, 512, 72)
+        self.assertTrue("CLR Header: HeaderSize: 72" in uiDisasmLines[0].text)
+        self.assertTrue("CLR Header: MajorRuntimeVersion: 2" in uiDisasmLines[1].text)
 
         uiDisasmLines = getDotNetDisassemblyHeader(filePe, 612, 640)
         self.assertTrue("Metadata Header: Signature: 1112167234" in uiDisasmLines[0].text)
