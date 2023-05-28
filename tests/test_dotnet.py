@@ -1,5 +1,5 @@
 import unittest
-from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections
+from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
 from plugins.dncilparser import IlMethod
 from model.model import Match
 from plugins.file_pe import FilePe
@@ -124,6 +124,31 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(len(overlap), 7)
         #self.assertEqual(overlap[0].name, "Stream: #~")
         #self.assertEqual(overlap[1].name, "methods")
+
+
+    def test_dotnetheaders(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/HelloWorld.dll")
+
+        sectionsBag = getDotNetSections(filePe) 
+        sectionsBag.printSections()
+
+        section = sectionsBag.getSectionByName("#~ Stream Header")
+        self.assertEqual(section.addr, 644)
+        self.assertEqual(section.size, 12)
+
+        section = sectionsBag.getSectionByName("Metadata Directory")
+        self.assertEqual(section.addr, 612)
+        self.assertEqual(section.size, 1316)
+
+        uiDisasmLines = getDotNetDisassemblyHeader(filePe, 612, 640)
+        self.assertTrue("Metadata Header: Signature: 1112167234" in uiDisasmLines[0].text)
+        self.assertTrue("Metadata Header: MajorVersion: 1" in uiDisasmLines[1].text)
+
+        uiDisasmLines = getDotNetDisassemblyHeader(filePe, 644, 654)
+        self.assertTrue("Stream Header: Offset: 108" in uiDisasmLines[0].text)
+        self.assertTrue("Stream Header: Size: 424" in uiDisasmLines[1].text)
+
 
 
     def test_dotnetsections_signed(self):

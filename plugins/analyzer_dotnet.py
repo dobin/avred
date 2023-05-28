@@ -62,12 +62,12 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
     textSection = filePe.sectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.addr
 
+    # metadata header
     entry: BinaryStructureField
     for entry in dotnet_file.dotnet_metadata_header.structure_fields:
         hdrFileOffset = entry.address - addrOffset
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
-            
             text = "        {:18}  Metadata Header: {}: {}".format(
                 hexstr(filePe.data, hdrFileOffset, hdrSize),
                 entry.display_name, 
@@ -79,8 +79,27 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
                 text,
                 text
             )
-            print("AAA: {}: {}".format(hex(hdrFileOffset), text))
             uiDisasmLines.append(uiDisasmLine)
+    
+    # all 5 stream headers
+    streamHeader: DOTNET_STREAM_HEADER
+    for streamHeader in dotnet_file.dotnet_stream_headers:
+        for entry in streamHeader.structure_fields:
+            hdrFileOffset = streamHeader.address - addrOffset
+            hdrSize = streamHeader.size
+            if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
+                text = "        {:18}  Stream Header: {}: {}".format(
+                    hexstr(filePe.data, hdrFileOffset, hdrSize),
+                    entry.display_name, 
+                    entry.value)
+                uiDisasmLine = UiDisasmLine(
+                    hdrFileOffset,
+                    entry.address,
+                    True,
+                    text,
+                    text
+                )
+                uiDisasmLines.append(uiDisasmLine)
     
     return uiDisasmLines
 

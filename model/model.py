@@ -56,7 +56,7 @@ class SectionsBag:
 
     def printSections(self):
         for section in self.sections:
-            logging.info(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
+            print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
 
 class UiDisasmLine():
