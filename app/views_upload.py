@@ -3,7 +3,6 @@ from werkzeug.utils import secure_filename
 import os
 import random
 import subprocess
-import pickle
 import requests
 import sys
 import zipfile

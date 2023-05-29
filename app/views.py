@@ -1,16 +1,12 @@
 from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template, send_file
 from werkzeug.utils import secure_filename
 import os
-import random
-import subprocess
 import pickle
-import requests
-import sys
-import zipfile
 import logging
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
 
 from model.model import *
+from app.views_auth import load_user
 #from waitress import serve
 
 EXT_INFO = ".outcome"
@@ -21,6 +17,11 @@ views = Blueprint('views', __name__)
 
 @views.route("/")
 def index():
+    # if no password is set, just login the user so he has access to his 
+    # /files (for @login_required api's)
+    if current_app.config["PASSWORD"] == "":
+        login_user(user = load_user('1'))
+
     examples = os.listdir("app/examples/")
     return render_template('index.html', examples=examples)
 

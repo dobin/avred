@@ -94,7 +94,7 @@ Lets install and configure avred-server on windows VM `1.1.1.1:9001`.
 Follow install instructions on [avred-server](https://github.com/dobin/avred-server) README. 
 
 Once you have this and its working properly (`use curl 1.1.1.1:9001/test`), you can setup avred:
-* Configure your server IP in `config.json` (eg `"amsi": "1.1.1.1:9001"`)
+* Configure your server IP in `config.yaml` (eg `"amsi": "1.1.1.1:9001"`)
 * Test it by scanning a file with: `./avred.py --file test.ps1 --server amsi`
 
 It should look like this:
@@ -103,13 +103,9 @@ $ r2 -v
 radare2 5.7.2 0 @ linux-x86-64 git.
 commit: 5.7.2 build: 2022-07-02__14:15:22
 
-$ cat config.json
-{
-        "server": 
-                {
-                        "amsi": "http://1.1.1.1:8001/"
-                }
-}
+$ cat config.yaml
+server:
+  amsi: "http://1.1.1.1:8001/"
 
 $ curl http://1.1.1.1:8001/test
 {"benign detected":false,"malicous detected":true,"msg":"working as intended"}
@@ -131,12 +127,13 @@ As a web server:
 $ python3 avredweb.py --listenip 127.0.0.1 --listenport 8080
 ```
 
-For login, use username "admin" and password configured in `config.json` in key `password`.
+If you dont want that every user is able to see every uploaded file,
+set password in `config.yaml` in key `password`, use username `admin`.
 
 
 From command line: 
 ```sh
-$ python3 avred.py --server amsi --file malware/evil.exe
+$ python3 avred.py --server amsi --file app/upload/evil.exe
 ```
 
 
