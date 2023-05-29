@@ -7,6 +7,9 @@
 table.table th {
   white-space: nowrap;
 }
+table.table td {
+  white-space: nowrap;
+}
 
 .container {
   margin-left: 1em;
