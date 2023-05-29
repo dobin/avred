@@ -8,8 +8,6 @@ from config import Config
 from app.views import views
 from app.views_upload import views_upload
 from app.views_auth import views_auth, login_manager
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-
 
 
 if __name__ == "__main__":

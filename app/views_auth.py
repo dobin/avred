@@ -1,15 +1,6 @@
 from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template
-from werkzeug.utils import secure_filename
-import os
-import random
-import subprocess
-import pickle
-import requests
-import sys
-import zipfile
-import logging
-import psutil
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+
 
 views_auth = Blueprint('views_auth', __name__)
 
@@ -26,7 +17,7 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     if user_id == '1':
-        return User('admin', 'password')
+        return User('admin', current_app.config["PASSWORD"])
     
     
 @views_auth.route('/login', methods=['GET', 'POST'])

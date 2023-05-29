@@ -13,3 +13,4 @@ olefile
 oletools
 python-magic-bin
 psutil
+flask-login
