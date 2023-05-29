@@ -104,12 +104,15 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
     # all 5 stream headers
     streamHeader: DOTNET_STREAM_HEADER
     for streamHeader in dotnet_file.dotnet_stream_headers:
+        hdrFileOffset = streamHeader.address - addrOffset
+        hdrSize = streamHeader.size
+
         for entry in streamHeader.structure_fields:
-            hdrFileOffset = streamHeader.address - addrOffset
-            hdrSize = streamHeader.size
-            if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
+            entryFileOffset = entry.address - addrOffset
+            entrySize = entry.size
+            if entryFileOffset >= offset and entryFileOffset + entrySize <= offset + size:
                 text = "        {:18}  Stream Header: {}: {}".format(
-                    hexstr(filePe.data, hdrFileOffset, hdrSize),
+                    hexstr(filePe.data, entryFileOffset, entrySize),
                     entry.display_name, 
                     entry.value)
                 uiDisasmLine = UiDisasmLine(
