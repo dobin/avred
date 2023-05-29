@@ -11,7 +11,7 @@ import datetime
 
 from config import Config
 from verifier import verify
-from model.model import Outcome
+from model.model import Outcome, Appraisal
 from filehelper import FileType, FileInfo
 from utils import convertMatchesIt, patchData
 from scanner import ScannerRest
@@ -150,7 +150,7 @@ def handleFile(filename, args, scanner):
         outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
         outcome.saveToFile(file.filepath)
 
-    if not outcome.isDetected or outcome.appraisal == 'Hash based':
+    if not outcome.isDetected or outcome.appraisal == Appraisal.Hash:
         # no need to verify or augment if it is not detected
         print("isDetected: {}".format(outcome.isDetected))
         print("Appraisal: {}".format(outcome.appraisal))
@@ -183,7 +183,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
         outcome.isDetected = False
         outcome.isScanned = True
         outcome.matchesIt = []
-        outcome.appraisal = 'Undetected'
+        outcome.appraisal = Appraisal.Undetected
         return outcome
     
     # pre check: defeat hash of binary (or scan would take very long for nothing)
@@ -192,7 +192,7 @@ def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
         outcome.isDetected = True
         outcome.isScanned = True
         outcome.matchesIt = [ ]
-        outcome.appraisal = 'Hash'
+        outcome.appraisal = Appraisal.Hash
         return outcome
     
     logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
@@ -224,11 +224,11 @@ def verifyFile(outcome, file, scanner):
     okCount = verification.matchConclusions.getCount(VerifyStatus.OK)
 
     if badCount == allCount:
-        outcome.appraisal = 'OR Sig'
+        outcome.appraisal = Appraisal.OrSig
     elif (goodCount + okCount) == 1:
-        outcome.appraisal = 'One'
+        outcome.appraisal = Appraisal.One
     elif (goodCount + okCount) > 1:
-        outcome.appraisal = 'AND Sig'
+        outcome.appraisal = Appraisal.AndSig
 
     return outcome
 

@@ -9,6 +9,15 @@ from dataclasses import dataclass
 from model.testverify import *
 
 
+class Appraisal(Enum):
+    Unknown = "Unknown"
+    Undetected = "Undetected"
+    Hash = "Hash"
+    One = "One"
+    OrSig = "Or-Signature"
+    AndSig = "And-Signature"
+
+
 @dataclass
 class Section:
     name: str
@@ -156,7 +165,7 @@ class Outcome():
         self.scanTime: str = ''
         self.fileStructure: str = ''
 
-        self.appraisal: str = ''
+        self.appraisal: Appraisal = Appraisal.Unknown
 
 
     @staticmethod
