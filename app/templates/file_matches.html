@@ -67,9 +67,9 @@
                                 <div class="mycode">
                                     {% for disasmLine in match.getDisasmLines() %}
                                         {% if disasmLine.isPart %}
-                                            <div class="mycodeline"><b>-> {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</b></div>
+                                            <div class="mycodeline">{{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</div>
                                         {% else %}
-                                            <div class="mycodeline">   {{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</div>
+                                            <div class="mycodeline fgrey">{{disasmLine.offset}}: {{disasmLine.textHtml|safe}}</div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>

@@ -69,7 +69,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrFileOffset = entry.address
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
-            text = "        {:18}  CLR Header: {}: {}".format(
+            text = "{:18}  CLR Header: {}: {}".format(
                 hexstr(filePe.data, hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
@@ -88,7 +88,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrFileOffset = entry.address - addrOffset
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
-            text = "        {:18}  Metadata Header: {}: {}".format(
+            text = "{:18}  Metadata Header: {}: {}".format(
                 hexstr(filePe.data, hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
@@ -111,7 +111,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
             entryFileOffset = entry.address - addrOffset
             entrySize = entry.size
             if entryFileOffset >= offset and entryFileOffset + entrySize <= offset + size:
-                text = "        {:18}  Stream Header: {}: {}".format(
+                text = "{:18}  Stream Header: {}: {}".format(
                     hexstr(filePe.data, entryFileOffset, entrySize),
                     entry.display_name, 
                     entry.value)
@@ -170,14 +170,14 @@ def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser
         )
         uiDisasmLines.append(uiDisasmLine)
 
-        uiDisasmLine = UiDisasmLine(
-            ilMethod.getOffset(), 
-            ilMethod.getRva(),
-            isPart, 
-            "Header size: {}".format(ilMethod.getHeaderSize()),
-            "Header size: {}".format(ilMethod.getHeaderSize())
-        )
-        uiDisasmLines.append(uiDisasmLine)
+        #uiDisasmLine = UiDisasmLine(
+        #    ilMethod.getOffset(), 
+        #    ilMethod.getRva(),
+        #    isPart, 
+        #    "Header size: {}".format(ilMethod.getHeaderSize()),
+        #    "Header size: {}".format(ilMethod.getHeaderSize())
+        #)
+        #uiDisasmLines.append(uiDisasmLine)
 
         # find all instructions of method which are part of the match
         for ilInstruction in ilMethod.instructions:

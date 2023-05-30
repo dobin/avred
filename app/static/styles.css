@@ -11,6 +11,10 @@ table.table td {
   white-space: nowrap;
 }
 
+.fgrey {
+  color: #b6b6b6;
+}
+
 .container {
   margin-left: 1em;
   margin-right: 1em;

@@ -216,8 +216,9 @@ class DncilParser():
                     ilMethod.setHeaderSize(headerSize)
                     flag = True
 
-                ilText = "{:04X}".format(offset)
-                ilText += "    "
+                #ilText = "{:04X}".format(offset)
+                #ilText += "    "
+                ilText = '  '
                 ilText += f"{' '.join('{:02x}'.format(b) for b in insn.get_bytes()) : <20}"
                 ilText += f"{str(insn.opcode) : <15}"
                 ilText += format_operand(pe, insn.operand)
