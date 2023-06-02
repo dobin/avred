@@ -48,7 +48,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         dataHexdump = hexdmp(data, offset=match.start())
         detail = []
 
-        section = filePe.findSectionFor(match.fileOffset)
+        section = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
         sectionName = '<unknown>'
         if section is not None:
             sectionName = section.name
@@ -92,7 +92,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
     # file structure
     s = ''
-    for section in filePe.sections:
+    for section in filePe.sectionsBag.sections:
         s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
             section.name, section.addr, section.virtaddr, section.size)
     return s
