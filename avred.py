@@ -13,7 +13,7 @@ from config import Config
 from verifier import verify
 from model.model import Outcome, Appraisal
 from filehelper import FileType, FileInfo
-from utils import convertMatchesIt, patchData
+from utils import convertMatchesIt, patchDataFill
 from scanner import ScannerRest
 from model.testverify import VerifyStatus
 
@@ -173,12 +173,12 @@ def handleFile(filename, args, scanner):
 
     #if outflank is not None and (not outcome.isOutflanked or args.reoutflank):
     if outflanker is not None:
-        outcome = outflankFile(outflanker, outcome, file)
+        outcome = outflankFile(outflanker, outcome, file, scanner)
         outcome.saveToFile(file.filepath)
 
     # output for cmdline users
-    print("Result:")
-    print(outcome)
+    #print("Result:")
+    #print(outcome)
 
 
 def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
@@ -252,9 +252,9 @@ def augmentFile(outcome, file, augmenter):
     return outcome
 
 
-def outflankFile(outflank, outcome: Outcome, file):
+def outflankFile(outflank, outcome: Outcome, file, scanner):
     logging.info("Attempt to outflank the file")
-    outflankPatches = outflank(file, outcome.matches, outcome.verification.matchConclusions)
+    outflankPatches = outflank(file, outcome.matches, outcome.verification.matchConclusions, scanner)
 
     for p in outflankPatches:
         print("patch: " + str(p))
@@ -282,12 +282,12 @@ def scanIsHash(file, scanner) -> bool:
     size = len(data)
 
     firstOff = int(size//3)
-    firstData = patchData(data, firstOff, 1)
+    firstData = patchDataFill(data, firstOff, 1)
     firstFile = file.getFileWithNewData(firstData)
     firstRes = scanner.scan(firstFile, file.filename)
 
     lastOff = int((size//3) * 2)
-    lastData = patchData(data, lastOff, 1)
+    lastData = patchDataFill(data, lastOff, 1)
     lastFile = file.getFileWithNewData(lastData)
     lastRes = scanner.scan(lastFile, file.filename)
 

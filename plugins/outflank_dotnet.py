@@ -6,12 +6,17 @@ from plugins.file_pe import FilePe
 
 from dotnetfile import DotNetPE
 from dotnetfile.util import BinaryStructureField, FileLocation
+import logging
+from model.extensions import Scanner
+from utils import patchData
 
 
-def outflankDotnet(filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion) -> List[OutflankPatch]:
-    ret: List[OutflankPatch] = []
+def outflankDotnet(
+        filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
+) -> List[OutflankPatch]:
+    results: List[OutflankPatch] = []
 
-    # Find:
+    # Metadata header patch
     # 0x25fa4: 00 00 00 00         Metadata Header: Reserved1: 0
     metadataPatch = False
     matchIdx = -1
@@ -27,11 +32,11 @@ def outflankDotnet(filePe: FilePe, matches: List[Match], matchConclusion: MatchC
 
     # should be a good match
     if matchConclusion.verifyStatus[matchIdx] != VerifyStatus.GOOD:
-        return ret
+        return []
 
     # nothing found
     if not metadataPatch:
-        return ret
+        return []
     
     dotnet_file = DotNetPE(filePe.filepath)
     textSection = filePe.sectionsBag.getSectionByName('.text')
@@ -44,9 +49,22 @@ def outflankDotnet(filePe: FilePe, matches: List[Match], matchConclusion: MatchC
             outflankPatch = OutflankPatch(
                 matchIdx,
                 addr, 
-                "\x01", 
+                b"\x01", 
                 "Modify Metadata Header: Reserved1 field", 
                 "Very reliable, no side effects, but may be sigged in the future")
-            ret.append(outflankPatch)
-    
+            results.append(outflankPatch)
+
+    # scan results, remove one's which gets detected
+    if scanner is None:
+        return results
+    ret = []
+    for patch in results:
+        data = filePe.getData()
+        patchedData = patchData(data, patch.offset, patch.replaceBytes)
+        if not scanner.scan(patchedData, filePe.filename):
+            logging.info("outflank ok")
+            ret.append(patch)
+        else:
+            logging.warn("Outflank failed: " + str(patch))
+
     return ret

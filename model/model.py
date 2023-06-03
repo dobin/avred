@@ -23,6 +23,7 @@ class Section:
     addr: int
     size: int
     virtaddr: int
+    scan: bool = True
 
 
 class SectionsBag:
@@ -37,6 +38,12 @@ class SectionsBag:
         interval = Interval(section.addr, section.addr + section.size, section)
         self.sectionsIntervalTree.add(interval)
 
+    def removeSectionByName(self, sectionName):
+        new = []
+        for section in self.sections:
+            if section.name != sectionName:
+                new.append(section)
+        self.sections = new
 
     def getSectionByName(self, sectionName: str) -> Section:
         return next((sec for sec in self.sections if sectionName in sec.name ), None)
@@ -197,7 +204,7 @@ class Outcome():
     
 
 class OutflankPatch():
-    def __init__(self, matchIdx: int, offset: int, replaceBytes: List[bytes], info: str, considerations: str):
+    def __init__(self, matchIdx: int, offset: int, replaceBytes: bytes, info: str, considerations: str):
         self.matchIdx = matchIdx
         self.offset = offset
         self.replaceBytes = replaceBytes

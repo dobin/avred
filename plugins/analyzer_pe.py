@@ -92,8 +92,8 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # file structure
     s = ''
     for section in filePe.sectionsBag.sections:
-        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
-            section.name, section.addr, section.virtaddr, section.size)
+        s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
+            section.name, section.addr, section.virtaddr, section.size, section.scan)
     return s
 
 
@@ -121,7 +121,7 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
 
     reducer = Reducer(filePe, scanner)
     matches = []
-    if len(detected_sections) == 0 or len(detected_sections) > 3:
+    if len(detected_sections) == 0:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer")
         scannerInfos.append('flat-scan')
         match = reducer.scan(0, len(filePe.data))
@@ -155,9 +155,8 @@ def findDetectedSectionsIsolate(filePe, scanner):
     # isolate individual sections, and see which one gets detected
     detected_sections = []
 
-    for section in filePe.sections:
-        # skip header
-        if section.name == 'Header':
+    for section in filePe.sectionsBag.sections:
+        if not section.scan:
             continue
         filePeCopy = deepcopy(filePe)
 
@@ -177,8 +176,7 @@ def findDetectedSections(filePe, scanner):
     detected_sections = []
 
     for section in filePe.sectionsBag.sections:
-        # skip header
-        if section.name == 'Header':
+        if not section.scan:
             continue
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section.name)

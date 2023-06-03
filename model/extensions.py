@@ -1,4 +1,4 @@
-from utils import patchData, FillType
+from utils import patchData, FillType, patchDataFill
 from dataclasses import dataclass
 import os
 
@@ -9,7 +9,7 @@ class Scanner:
     scanner_path: str = ""
     scanner_name: str = ""
 
-    def scan(self, data, filename):
+    def scan(self, data: bytes, filename: str):
         pass
 
 
@@ -45,6 +45,7 @@ class PluginFileFormat():
 
 
     def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
-        self.data = patchData(self.data, base, size, fillType)
+        self.data = patchDataFill(self.data, base, size, fillType)
 
-        
+    #def changePart(self, base: int, replace: bytes):
+    #    self.data = patchData(self.data, base, len(replace), replace)

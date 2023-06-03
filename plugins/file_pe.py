@@ -1,9 +1,15 @@
 import logging
 import os
 import pefile
+import inspect
 
 from model.extensions import PluginFileFormat
 from model.model import Section, SectionsBag
+
+from dotnetfile import DotNetPE
+from dotnetfile.structures import DOTNET_CLR_HEADER
+from dotnetfile.parser import DOTNET_STREAM_HEADER
+from dotnetfile.util import BinaryStructureField, FileLocation
 
 
 class FilePe(PluginFileFormat):
@@ -46,7 +52,15 @@ class FilePe(PluginFileFormat):
             else:
                 logging.warn("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
 
-        self.sectionsBag.addSection(Section('Header', 0, min, 0))
+        self.sectionsBag.addSection(Section('Header', 0, min, 0, False))
+
+        # handle dotnet
+        if not self.isDotNet:
+            return
+        dotnetSections = getDotNetSections(self)
+        for section in dotnetSections.sections:
+            self.sectionsBag.sections.append(section)
+        self.sectionsBag.getSectionByName(".text").scan = False
 
         if False:
             # (not necessary?) version information
@@ -87,3 +101,87 @@ class FilePe(PluginFileFormat):
         for section in self.sectionsBag.sections:
             if section.name != sectionName:
                 self.hidePart(section.addr, section.size)
+
+
+def getDotNetSections(filePe) -> SectionsBag:
+    # Get more details about .net executable (e.g. streams)
+    # as most of it is just in PE .text
+    sectionsBag = SectionsBag()
+
+    dotnet_file = DotNetPE(filePe.filepath)
+
+    textSection = filePe.sectionsBag.getSectionByName('.text')
+    addrOffset = textSection.virtaddr - textSection.addr
+    logging.info("Offset: {}".format(addrOffset))
+
+    # header
+    cli_header_addr = textSection.addr
+    cli_header_size = dotnet_file.clr_header.HeaderSize.value
+    s = Section('DotNet Header', 
+        cli_header_addr,   
+        cli_header_size, 
+        0,
+        False)
+    sectionsBag.addSection(s)
+
+    # metadata header
+    metadata_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
+    metadata_header_size = dotnet_file.dotnet_metadata_header.size
+    s = Section('Metadata Header', 
+        metadata_header_addr,
+        metadata_header_size, 
+        0,
+        False)
+    sectionsBag.addSection(s)
+
+    # methods
+    methods_addr = cli_header_addr + cli_header_size
+    methods_size = metadata_header_addr - methods_addr
+    s = Section('methods', 
+        methods_addr,    
+        methods_size, 
+        0)
+    sectionsBag.addSection(s)
+    
+    # metadata directory
+    #metadata_directory_addr = dotnet_file.clr_header.MetaDataDirectoryAddress.value
+    #metadata_directory_addr -= addrOffset
+    #metadata_directory_size = dotnet_file.clr_header.MetaDataDirectorySize.value
+    #s = Section('Metadata Directory', 
+    #    metadata_directory_addr,
+    #    metadata_directory_size, 
+    #    0)
+    #sectionsBag.addSection(s)
+
+    # signature
+    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
+    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value    
+    if (signature_addr != 0):
+        signature_addr -= addrOffset
+        s = Section('Signature', 
+            signature_addr,
+            signature_size, 
+            0,
+            False)
+        sectionsBag.addSection(s)
+
+    # All stream headers
+    for streamHeader in dotnet_file.dotnet_stream_headers:
+        s = Section(streamHeader.string_representation,
+            streamHeader.address - addrOffset, 
+            streamHeader.size,
+            0,
+            False)
+        sectionsBag.addSection(s)
+
+    # All streams
+    stream: FileLocation
+    for stream in dotnet_file.dotnet_streams:
+        s = Section(stream.string_representation,
+            stream.address - addrOffset, 
+            stream.size, 
+            0)
+        sectionsBag.addSection(s)
+
+    return sectionsBag
+

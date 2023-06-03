@@ -10,7 +10,8 @@ class ScannerRest(Scanner):
         self.scanner_name = name
         
 
-    def scan(self, data, filename):
+    def scan(self, data: bytes, filename: str):
+        """Returns true if file is detected"""
         params = { 'filename': filename }
 
         res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)

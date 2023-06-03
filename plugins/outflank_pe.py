@@ -1,10 +1,11 @@
 from model.model import Outcome, OutflankPatch, Match, MatchConclusion
 from model.testverify import VerifyStatus
-
+from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from typing import List, Set, Dict, Tuple, Optional
+from utils import patchData
 import re
-
+import logging
 
 class PossiblePatch():
     def __init__(self, offset, matchId):
@@ -12,8 +13,10 @@ class PossiblePatch():
         self.matchId = matchId
 
 
-def outflankPe(filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion) -> List[OutflankPatch]:
-    ret: List[OutflankPatch] = []
+def outflankPe(
+        filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
+) -> List[OutflankPatch]:
+    results: List[OutflankPatch] = []
 
     #for line in matches[0].disasmLines:
     #    print(escape_ansi(str(line)))
@@ -43,43 +46,57 @@ def outflankPe(filePe: FilePe, matches: List[Match], matchConclusion: MatchConcl
             # $ rasm2 -a x86 -b 64 -d '89c0'
             # mov eax, eax
             outflankPatch = OutflankPatch(
-                1337,
+                possibleMatch.matchId,
                 possibleMatch.offset,
-                "\x89\xc0",
+                b"\x89\xc0",
                 "Replace NOP;NOP with mov eax,eax",
                 "No side effects"
             )
-            ret.append(outflankPatch)
+            results.append(outflankPatch)
 
     # double nop is enough
-    if len(ret) > 0:
-        return ret
+    #if len(results) > 0:
+    #    return results
     
     # check for int3
     for idx, possibleMatch in enumerate(int3Lines):
         outflankPatch = OutflankPatch(
             possibleMatch.matchId,
             possibleMatch.offset,
-            "\xfc",
+            b"\x90",
             "Replace int3 with NOP",
             "No real side effects"
         )
-        ret.append(outflankPatch)
+        results.append(outflankPatch)
 
     # int3 replace is fine
-    if len(ret) > 0:
-        return ret
+    #if len(results) > 0:
+    #    return results
     
     # find single-nops
     for idx, possibleMatch in enumerate(nopLines):
         outflankPatch = OutflankPatch(
             possibleMatch.matchId,
             possibleMatch.offset,
-            "\xfc",
+            b"\xfc",
             "Replace NOP with cld (clear direction flag)",
             "Few side effects"
         )
-        ret.append(outflankPatch)
+        results.append(outflankPatch)
+
+    # scan results, remove one's which gets detected
+    if scanner is None:
+        return results
+    ret = []
+    for patch in results:
+        data = filePe.getData()
+        patchedData = patchData(data, patch.offset, patch.replaceBytes)
+        if not scanner.scan(patchedData, filePe.filename):
+            logging.warn("Outflank OK! " + str(patch))
+
+            ret.append(patch)
+        else:
+            logging.warn("Outflank failed: " + str(patch))
 
     return ret
 

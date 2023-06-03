@@ -17,6 +17,7 @@ class TestMatchOrder(Enum):
     DECREMENTAL = 3
     LAST_TWO = 4
     FIRST_TWO = 5
+    ALL = 6
     
 
 class TestMatchModify(Enum):

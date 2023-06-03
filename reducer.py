@@ -55,8 +55,8 @@ class Reducer():
             logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
             return
 
-        chunkTopNull = patchData(data, sectionStart, chunkSize)
-        chunkBotNull = patchData(data, sectionStart+chunkSize, chunkSize)
+        chunkTopNull = patchDataFill(data, sectionStart, chunkSize)
+        chunkBotNull = patchDataFill(data, sectionStart+chunkSize, chunkSize)
 
         detectTopNull = self._scanData(chunkTopNull)
         detectBotNull = self._scanData(chunkBotNull)

@@ -21,7 +21,7 @@ def saveMatchesToFile(filename, matches):
         json.dump(results, outfile)
 
 
-def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
+def patchDataFill(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
     origLen = len(data)
 
     fill = None # has to be exactly <size> bytes
@@ -38,14 +38,19 @@ def patchData(data: bytes, base: int, size: int, fillType: FillType=FillType.nul
         temp = base64.b64encode(temp)
         fill = temp[:size]
 
-    #d = bytearray(data)
-    #d[base:base+size] = fill
-    #data = bytes(d)
-    data = data[:base] + fill + data[base+size:]
-
+    data = patchData(data, base, fill)
     if len(data) != origLen:
         raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(data)))
 
+    return data
+
+
+def patchData(data: bytes, base: int, replace: bytes) -> bytes:
+    #d = bytearray(data)
+    #d[base:base+size] = fill
+    #data = bytes(d)
+    size = len(replace)
+    data = data[:base] + replace + data[base+size:]
     return data
 
 

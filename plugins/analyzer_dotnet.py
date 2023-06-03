@@ -3,13 +3,14 @@ import logging
 from typing import List, Tuple, Set
 from model.model import Match, FileInfo, UiDisasmLine, Section, SectionsBag
 from model.extensions import Scanner
-from plugins.file_pe import FilePe, Section
+from plugins.file_pe import FilePe, Section, getDotNetSections
 from utils import *
+
+from plugins.dncilparser import DncilParser
 from dotnetfile import DotNetPE
 from dotnetfile.structures import DOTNET_CLR_HEADER
 from dotnetfile.parser import DOTNET_STREAM_HEADER
 from dotnetfile.util import BinaryStructureField, FileLocation
-from plugins.dncilparser import DncilParser
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
@@ -48,11 +49,8 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
 
     s = ''
     for section in filePe.sectionsBag.sections:
-        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
-            section.name, section.addr, section.virtaddr, section.size)
-    for section in dotnetSectionsBag.sections:
-        s += "{}: File Offset: {}  Virtual Addr: {}  size {}\n".format(
-            section.name, section.addr, section.virtaddr, section.size)
+        s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
+            section.name, section.addr, section.virtaddr, section.size, section.scan)
     return s
 
 
@@ -170,6 +168,9 @@ def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser
         )
         uiDisasmLines.append(uiDisasmLine)
 
+        #if ilMethod.getHeaderSize() > 1: # should be either 1 or 12
+        #    asdf
+
         #uiDisasmLine = UiDisasmLine(
         #    ilMethod.getOffset(), 
         #    ilMethod.getRva(),
@@ -200,73 +201,3 @@ def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser
                 methodNames.add(ilMethod.getName())
 
     return uiDisasmLines, methodNames
-
-
-def getDotNetSections(filePe) -> SectionsBag:
-    # Get more details about .net executable (e.g. streams)
-    # as most of it is just in PE .text
-    sectionsBag = SectionsBag()
-
-    dotnet_file = DotNetPE(filePe.filepath)
-
-    textSection = filePe.sectionsBag.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.addr
-
-    # header
-    cli_header_addr = textSection.addr
-    cli_header_size = dotnet_file.clr_header.HeaderSize.value
-    s = Section('DotNet Header', 
-        cli_header_addr,   
-        cli_header_size, 
-        0)
-    sectionsBag.addSection(s)
-
-    # metadata header
-    metadata_header_addr = dotnet_file.dotnet_metadata_header.address
-    metadata_header_size = dotnet_file.dotnet_metadata_header.size
-    s = Section('Metadata Header', 
-        metadata_header_addr,
-        metadata_header_size, 
-        0)
-    sectionsBag.addSection(s)
-
-    # methods
-    methods_addr = cli_header_addr + cli_header_size
-    methods_size = metadata_header_addr - methods_addr
-    s = Section('methods', 
-        methods_addr,    
-        methods_size, 
-        0)
-    sectionsBag.addSection(s)
-    
-    # metadata directory
-    metadata_directory_addr = dotnet_file.clr_header.MetaDataDirectoryAddress.value
-    metadata_directory_addr -= addrOffset
-    metadata_directory_size = dotnet_file.clr_header.MetaDataDirectorySize.value
-    s = Section('Metadata Directory', 
-        metadata_directory_addr,
-        metadata_directory_size, 
-        0)
-    sectionsBag.addSection(s)
-
-    # signature
-    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
-    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value    
-    if (signature_addr != 0):
-        signature_addr -= addrOffset
-        s = Section('Signature', 
-            signature_addr,
-            signature_size, 
-            0)
-        sectionsBag.addSection(s)
-
-    # All streams
-    for stream in dotnet_file.dotnet_stream_headers:
-        s = Section(stream.string_representation,
-            stream.address - addrOffset, 
-            stream.size, 
-            0)
-        sectionsBag.addSection(s)
-
-    return sectionsBag
-
