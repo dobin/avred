@@ -9,9 +9,9 @@ from model.model import Section, SectionsBag
 class FilePe(PluginFileFormat):
     def __init__(self):
         super().__init__()
-        self.sectionsBag = SectionsBag()
-        self.isDotNet = False
-        self.baseAddr = 0
+        self.sectionsBag: SectionsBag = SectionsBag()
+        self.isDotNet: bool = False
+        self.baseAddr: int = 0
         
 
     def parseFile(self) -> bool:

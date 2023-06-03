@@ -85,7 +85,9 @@ def hexdmp(src, offset=0, length=16):
     return('\n'.join(result))
 
 
-def hexstr(src: bytes, offset, length):
+def hexstr(src: bytes, offset=0, length=0):
+    if length == 0:
+        length = len(src)
     byte_buffer = src[offset:offset+length]
     hex_string = ' '.join([f'{x:02x}' for x in byte_buffer])
     return hex_string

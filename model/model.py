@@ -8,7 +8,6 @@ from dataclasses import dataclass
 
 from model.testverify import *
 
-
 class Appraisal(Enum):
     Unknown = "Unknown"
     Undetected = "Undetected"
@@ -70,7 +69,7 @@ class SectionsBag:
 
 class UiDisasmLine():
     def __init__(self, fileOffset, rva, isPart, text, textHtml):
-        self.offset = str(hex(fileOffset))  # offset in file
+        self.offset = fileOffset  # offset in file
         self.rva = rva  # relative offset (usually created by external disasm tool)
         self.isPart = isPart  # is this part of the data, or supplemental?
         self.text = text  # the actual disassembled data
@@ -154,11 +153,13 @@ class Outcome():
         self.matches: List[Match] = []
         self.verification: Verification = None
         self.matchesIt: IntervalTree = IntervalTree()
+        self.outflankPatches: List[OutflankPatch] = []
 
         self.isDetected: bool = False
         self.isScanned: bool = False
         self.isVerified: bool = False
         self.isAugmented: bool = False
+        self.isOutflanked: bool = False
 
         self.scannerInfo: str = ''
         self.scannerName: str = ''
@@ -192,4 +193,20 @@ class Outcome():
         s += "\nVerification: \n"
         s += str(self.verification)
         s += "\n"    
+        return s
+    
+
+class OutflankPatch():
+    def __init__(self, matchIdx: int, offset: int, replaceBytes: List[bytes], info: str, considerations: str):
+        self.matchIdx = matchIdx
+        self.offset = offset
+        self.replaceBytes = replaceBytes
+        self.info = info
+        self.considerations = considerations
+
+    def __str__(self):
+        s = ''
+        s += "Patch at Offset: {}  Bytes: {}\n".format(self.offset, self.replaceBytes)
+        s += "  {}\n".format(self.info)
+        s += "  {}\n".format(self.considerations)
         return s

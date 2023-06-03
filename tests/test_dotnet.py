@@ -2,7 +2,10 @@ import unittest
 from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
 from plugins.dncilparser import IlMethod
 from model.model import Match
+from model.testverify import MatchConclusion, VerifyStatus
 from plugins.file_pe import FilePe
+from plugins.outflank_dotnet import outflankDotnet
+from typing import List
 
 
 class DotnetDisasmTest(unittest.TestCase):
@@ -27,7 +30,7 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(ilMethod.getSize(), headerSize + codeSize)
         self.assertEqual(ilMethod.getCodeSize(), codeSize)
         self.assertEqual(ilMethod.getHeaderSize(), headerSize)
-        self.assertEqual(ilMethod.instructions[0].text, "0001    03                  ldarg.1        ")
+        self.assertTrue("ldarg.1" in ilMethod.instructions[0].text)
 
 
     def test_augmentFileDotnet(self):
@@ -90,9 +93,8 @@ class DotnetDisasmTest(unittest.TestCase):
         disasmLines = match.getDisasmLines()
 
         self.assertTrue('Function: ::<<Main>$>g__MyMethod' in disasmLines[0].text)
-        self.assertTrue('Header size: 1' in disasmLines[1].text)
-        self.assertTrue('ldarg.1' in disasmLines[2].text)
-        self.assertTrue('ldc.i4.s       0xa' in disasmLines[3].text)
+        self.assertTrue('ldarg.1' in disasmLines[1].text)
+        self.assertTrue('ldc.i4.s       0xa' in disasmLines[2].text)
 
 
     def test_dotnetsections(self):
@@ -169,3 +171,25 @@ class DotnetDisasmTest(unittest.TestCase):
         section = sectionsBag.getSectionByName("Signature")
         self.assertEqual(section.addr, 2088)
         self.assertEqual(section.size, 128)
+
+
+    def test_dotnetheaderpatch(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/HelloWorld.dll")
+
+        matches: List[Match] = []
+        match = Match(0, 0x268, 32)
+        matches.append(match)
+
+        # the match should be good
+        verifyStatus = [ VerifyStatus.GOOD ]
+        matchConclusion = MatchConclusion(verifyStatus)
+
+        augmentFileDotnet(filePe, matches)
+        disasmLines = match.getDisasmLines()
+
+        self.assertTrue("Metadata Header: Reserved1: 0" in disasmLines[2].text)
+        patches = outflankDotnet(filePe, matches, matchConclusion)
+        self.assertEqual(1, len(patches))
+        self.assertEqual(620, patches[0].offset)
+        self.assertEqual(1, len(patches[0].replaceBytes))

@@ -5,7 +5,11 @@ from webbrowser import get
 from plugins.analyzer_pe import analyzeFileExe
 from tests.helpers import TestDetection
 from plugins.file_pe import FilePe
+from plugins.analyzer_pe import augmentFilePe
+from plugins.outflank_pe import outflankPe
 from tests.scanners import *
+from model.model import Match, OutflankPatch
+from model.testverify import MatchConclusion, VerifyStatus
 
 
 class PeTest(unittest.TestCase):
@@ -90,3 +94,24 @@ class PeTest(unittest.TestCase):
         matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
         self.assertTrue(len(matches) == 4)
+
+
+    def test_pe_patch(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/test.exe")
+
+        # 0   0x00000600  0x6c00 0x00401000  0x7000 -r-x .text
+        matches = []
+        match = Match(0, 0x600 + 0x4d0, 8)  # 8 is another NOP
+        matches.append(match)
+
+        # the match should be good
+        verifyStatus = [ VerifyStatus.GOOD ]
+        matchConclusion = MatchConclusion(verifyStatus)
+
+        augmentFilePe(filePe, matches)
+
+        patches = outflankPe(filePe, matches, matchConclusion)
+        self.assertEqual(1, len(patches))
+        self.assertEqual(2774, patches[0].offset)
+        self.assertEqual(2, len(patches[0].replaceBytes))

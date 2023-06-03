@@ -24,6 +24,8 @@ from plugins.analyzer_plain import analyzeFilePlain, augmentFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
 from plugins.file_plain import FilePlain
+from plugins.outflank_dotnet import outflankDotnet
+from plugins.outflank_pe import outflankPe
 from filehelper import *
 
 
@@ -40,6 +42,7 @@ def main():
     parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
+    parser.add_argument("--reoutflank", help="Debug: Re-do the Outflanking", default=False, action='store_true')
 
     # analyzer options
     parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
@@ -102,6 +105,7 @@ def handleFile(filename, args, scanner):
     analyzer = None
     analyzerOptions = {}
     augmenter = None
+    outflanker = None
     filenameOutcome = filename + ".outcome"
     logging.info("Handle file: " + filename)
 
@@ -116,15 +120,17 @@ def handleFile(filename, args, scanner):
         file = FileOffice()
         file.loadFromFile(filename)
         analyzer = analyzeFileWord
-        augmenter = augmentFileWord 
+        augmenter = augmentFileWord
     elif fileScannerType is FileType.EXE:
         file = FilePe()
         file.loadFromFile(filename)
         analyzer = analyzeFileExe
         if file.isDotNet:
             augmenter = augmentFileDotnet
+            outflanker = outflankDotnet
         else:
             augmenter = augmentFilePe
+            outflanker = outflankPe
         analyzerOptions["isolate"] = args.pe_isolate
         analyzerOptions["remove"] = args.pe_remove
         analyzerOptions["ignoreText"] = args.pe_ignoreText
@@ -163,6 +169,11 @@ def handleFile(filename, args, scanner):
 
     if not outcome.isAugmented or args.reaugment:
         outcome = augmentFile(outcome, file, augmenter)
+        outcome.saveToFile(file.filepath)
+
+    #if outflank is not None and (not outcome.isOutflanked or args.reoutflank):
+    if outflanker is not None:
+        outcome = outflankFile(outflanker, outcome, file)
         outcome.saveToFile(file.filepath)
 
     # output for cmdline users
@@ -241,6 +252,18 @@ def augmentFile(outcome, file, augmenter):
     return outcome
 
 
+def outflankFile(outflank, outcome: Outcome, file):
+    logging.info("Attempt to outflank the file")
+    outflankPatches = outflank(file, outcome.matches, outcome.verification.matchConclusions)
+
+    for p in outflankPatches:
+        print("patch: " + str(p))
+
+    outcome.outflankPatches = outflankPatches
+    outcome.isOutflanked = True
+    return outcome
+
+
 # Check if file gets detected by the scanner
 def checkFile(filepath, scanner):
     data = None
@@ -251,7 +274,6 @@ def checkFile(filepath, scanner):
         print(f"File is detected")
     else:
         print(f"File is not detected")
-
 
 
 def scanIsHash(file, scanner) -> bool:
@@ -282,4 +304,3 @@ def printMatches(matches):
 
 if __name__ == "__main__":
     main()
-    

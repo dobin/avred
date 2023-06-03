@@ -40,8 +40,28 @@
 File is not detected by AV.
 {% endif %}
 
+{% if outcome.outflankPatches|length > 0 %}
+<h2>Patches</h2>
+<table class="table">
+    <tr>
+        <th>Match ID</th>
+        <th>Offset</th>
+        <th>Info</th>
+        <th>Considereations</th>
+    </tr>
+    {% for patch in outcome.outflankPatches %}
+    <tr>
+        <td>{{patch.matchIdx}}</td>
+        <td>{{patch.offset}}</td>
+        <td>{{patch.info}}</td>
+        <td>{{patch.considerations}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
 {% if outcome.matches|length > 0 %}
-<h2>Matches Summary</h2>
+<h2>Matches</h2>
 <table class="table">
     <tr>
         <th>#</th>

@@ -10,8 +10,8 @@
         <thead>
         <tr>
             <th>Name <span>&uarr;</span</th>
-            <th>Size</th>
             <th>Type <span>&uarr;</span</th>
+            <th>Outflank</th>
             <th>Appraisal <span>&uarr;</span</th>
             <th>Cnt <span>&uarr;</span</th>
         </tr>
@@ -29,8 +29,8 @@
                 </a>
                 {% endif %}
             </td>
-            <td>{{outcome.fileInfo.size|prettynumber}}</td>
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
+            <td>{{'y' if outcome.outflankPatches|length > 0}}</td>
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
             <td>{{outcome.matches|length}}</td>
 

@@ -63,7 +63,6 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
             addrDisasm = baseAddr + section.virtaddr + offset - MORE
             sizeDisasm = match.size + MORE + MORE
 
-            
             # r2: Print Dissabled (by bytes)
             asm = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
             asm = json.loads(asm)
@@ -78,7 +77,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
             
                 disasmLine = UiDisasmLine(
                     relOffset + section.addr, 
-                    a['offset'],
+                    int(a['offset']),
                     isPart,
                     text, 
                     textHtml
