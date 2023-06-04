@@ -8,7 +8,7 @@ class ScannerTest(Scanner):
         self.detections = detections
         pprint(detections, indent=4)
 
-    def scan(self, data, filename):
+    def scannerDetectsBytes(self, data, filename):
         for detection in self.detections:
             dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
             if dataSnippet != detection.refData:
@@ -22,7 +22,7 @@ class ScannerTestOr(Scanner):
         self.detections = detections
         pprint(detections, indent=4)
 
-    def scan(self, data, filename):
+    def scannerDetectsBytes(self, data, filename):
         for detection in self.detections:
             dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 
             if dataSnippet == detection.refData:
@@ -36,7 +36,7 @@ class ScannerTestWeighted(Scanner):
         self.detections = detections
         pprint(detections, indent=4)
 
-    def scan(self, data, filename):
+    def scannerDetectsBytes(self, data, filename):
         n = 0
         for detection in self.detections:
             dataSnippet = data[detection.refPos:detection.refPos+len(detection.refData)] 

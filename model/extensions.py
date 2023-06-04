@@ -1,6 +1,8 @@
-from utils import patchData, FillType, patchDataFill
 from dataclasses import dataclass
 import os
+import copy
+
+from model.model import Data
 
 
 @dataclass
@@ -9,28 +11,36 @@ class Scanner:
     scanner_path: str = ""
     scanner_name: str = ""
 
-    def scan(self, data: bytes, filename: str):
+    def scannerDetectsBytes(self, data: bytes, filename: str):
         pass
 
 
 class PluginFileFormat():
     """Interface for file format plugins"""
     def __init__(self):
-        self.filepath = None
-        self.filename = None
-        self.fileData = b""  # The content of the file
-        self.data = b""      # The data we work on
+        self.filepath: str = None
+        self.filename: str = None
+        self.fileData: Data = Data(b'')  # The content of the file
+        self.data: Data = Data(b'')      # The data we work on
         
 
     def parseFile(self) -> bool:
         self.data = self.fileData  # Default: File is Data
 
 
-    def getData(self):
+    def Data(self) -> Data:
         return self.data
+    
+    
+    def DataCopy(self) -> Data:
+        return copy.deepcopy(self.data)
 
 
-    def getFileWithNewData(self, data):
+    def DataAsBytes(self) -> bytes:
+        return self.data.getBytes()
+
+
+    def getFileDataWith(self, data: Data) -> Data:
         return data  # Default: Data is the File. No need to modify.
 
 
@@ -39,13 +49,13 @@ class PluginFileFormat():
         self.filename = os.path.basename(filepath)
 
         with open(self.filepath, "rb") as f:
-            self.fileData = f.read()
+            self.fileData = Data(f.read())
 
         return self.parseFile()
 
 
-    def hidePart(self, base: int, size: int, fillType: FillType=FillType.null):
-        self.data = patchDataFill(self.data, base, size, fillType)
-
-    #def changePart(self, base: int, replace: bytes):
-    #    self.data = patchData(self.data, base, len(replace), replace)
+    def loadFromMem(self, data: bytes, filename: str) -> bool:
+        self.filepath = filename
+        self.filename = filename
+        self.fileData = Data(data)
+        return self.parseFile()

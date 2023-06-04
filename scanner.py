@@ -10,7 +10,7 @@ class ScannerRest(Scanner):
         self.scanner_name = name
         
 
-    def scan(self, data: bytes, filename: str):
+    def scannerDetectsBytes(self, data: bytes, filename: str):
         """Returns true if file is detected"""
         params = { 'filename': filename }
 

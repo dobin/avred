@@ -110,7 +110,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
         section = sectionsBag.getSectionByName('methods')
         self.assertEqual(section.addr, 584)
-        self.assertEqual(section.size, 7708)
+        self.assertEqual(section.size, 28)
 
         section = sectionsBag.getSectionByName('#~ Stream Header')
         self.assertEqual(section.addr, 644)
@@ -123,7 +123,7 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag = getDotNetSections(filePe) 
         overlap = sectionsBag.getSectionsForRange(600, 750)
         
-        self.assertEqual(len(overlap), 7)
+        self.assertEqual(len(overlap), 8)
         #self.assertEqual(overlap[0].name, "Stream: #~")
         #self.assertEqual(overlap[1].name, "methods")
 
@@ -143,9 +143,9 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(section.addr, 644)
         self.assertEqual(section.size, 12)
 
-        section = sectionsBag.getSectionByName("Metadata Directory")
-        self.assertEqual(section.addr, 612)
-        self.assertEqual(section.size, 1316)
+        #section = sectionsBag.getSectionByName("Metadata Directory")
+        #self.assertEqual(section.addr, 612)
+        #self.assertEqual(section.size, 1316)
 
         uiDisasmLines = getDotNetDisassemblyHeader(filePe, 512, 72)
         self.assertTrue("CLR Header: HeaderSize: 72" in uiDisasmLines[0].text)

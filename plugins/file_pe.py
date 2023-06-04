@@ -23,7 +23,8 @@ class FilePe(PluginFileFormat):
     def parseFile(self) -> bool:
         self.data = self.fileData  # no container, file is the data
 
-        pepe = pefile.PE(data=self.data)
+        dataBytes = self.data.getBytes()
+        pepe = pefile.PE(data=dataBytes)
 
         # https://stackoverflow.com/questions/45574925/is-there-a-way-to-check-if-an-exe-is-dot-net-with-python-pefile
         isDotNet = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[14]
@@ -33,7 +34,7 @@ class FilePe(PluginFileFormat):
         self.baseAddr = pepe.OPTIONAL_HEADER.ImageBase
 
         # Normal sections
-        min = len(self.data)
+        min = len(dataBytes)
         for section in pepe.sections:
             name = ''
             try:
@@ -94,13 +95,13 @@ class FilePe(PluginFileFormat):
             return
 
         logging.debug(f"Hide section: {section.name} at {hex(section.addr)} {section.size}")
-        self.hidePart(section.addr, section.size)
+        self.Data().hidePart(offset=section.addr, size=section.size)
 
 
     def hideAllSectionsExcept(self, sectionName: str):
         for section in self.sectionsBag.sections:
             if section.name != sectionName:
-                self.hidePart(section.addr, section.size)
+                self.Data().hidePart(offset=section.addr, size=section.size)
 
 
 def getDotNetSections(filePe) -> SectionsBag:

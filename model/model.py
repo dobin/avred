@@ -5,8 +5,63 @@ from intervaltree import Interval, IntervalTree
 import logging
 import pickle
 from dataclasses import dataclass
+import os
+import base64
 
 from model.testverify import *
+
+
+# All Input:    bytes
+# All Output:   bytes
+# All Internal: bytearray
+class Data():
+    def __init__(self, data: bytes):
+        self._data: bytearray = bytearray(data)
+
+
+    def getBytes(self) -> bytes:
+        return bytes(self._data)
+    
+
+    def getBytesRange(self, start: int, end: int) -> bytes:
+        data = self._data[start:end]
+        return bytes(data)
+
+
+    def getLength(self) -> int:
+        return len(self._data)
+
+
+    def hidePart(self, offset: int, size: int, fillType: FillType=FillType.null):
+        """Overwrites size bytes at base with fillType"""
+        self.patchDataFill(offset, size, fillType)
+
+
+    def patchDataFill(self, offset: int, size: int, fillType: FillType=FillType.null):
+        origLen = len(self._data)
+
+        fill = None # has to be exactly <size> bytes
+        if fillType is FillType.null:
+            fill = b"\x00" * size
+        elif fillType is FillType.space:
+            fill = b" " * size
+        elif fillType is FillType.highentropy:
+            #fill = random.randbytes(size) # 3.9..
+            fill = os.urandom(size)
+        elif fillType is FillType.lowentropy:
+            #temp = random.randbytes(size) # 3.9..
+            temp = os.urandom(size)
+            temp = base64.b64encode(temp)
+            fill = temp[:size]
+
+        self.patchData(offset, fill)
+        if len(self._data) != origLen:
+            raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(data)))
+    
+
+    def patchData(self, offset: int, replace: bytes) -> bytes:
+        self._data[offset:offset+len(replace)] = replace
+
 
 class Appraisal(Enum):
     Unknown = "Unknown"

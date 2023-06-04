@@ -16,10 +16,8 @@ from pcodedmp.disasm import DisasmEntry
 def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[IntervalTree, str]:
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
-    makroData = fileOffice.data
-
     reducer = Reducer(fileOffice, scanner)
-    matchesIntervalTree = reducer.scan(0, len(makroData))
+    matchesIntervalTree = reducer.scan(0, fileOffice.Data().getLength())
     return matchesIntervalTree, ''
 
 
@@ -32,18 +30,18 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:
     disasmList = pcodedmp.processFile(fileOffice.filepath, output_file=fd)
     fd.close()
 
-    oleFile = olefile.OleFileIO(fileOffice.data)
+    oleFile = olefile.OleFileIO(fileOffice.DataAsBytes())
     disasmList = convertDisasmAddr(oleFile, disasmList)
     ac = OleStructurizer(oleFile)
 
     # correlate the matches with the dumped code
     m: Match
     for m in matches:
-        uiDisasmLines = []
+        matchDisasmLines: List[UiDisasmLine] = []
 
-        data = fileOffice.data[m.start():m.end()]
-        dataHexdump = hexdmp(data, offset=m.start())
-        sectionName = ac.getSectionsForAddr(m.start(), m.size)
+        matchBytes = fileOffice.Data().getBytesRange(m.start(), m.end())
+        matchHexdump = hexdmp(matchBytes, offset=m.start())
+        matchSectionName = ac.getSectionsForAddr(m.start(), m.size)
 
         disasmMatches = disasmList.overlap(m.fileOffset, m.fileOffset+m.size)
         for item in sorted(iter(disasmMatches)):
@@ -57,12 +55,12 @@ def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:
                 text,
                 text,
             )
-            uiDisasmLines.append(disasmLine)
+            matchDisasmLines.append(disasmLine)
 
-        m.setData(data)
-        m.setDataHexdump(dataHexdump)
-        m.setSectionInfo(sectionName)
-        m.setDisasmLines(uiDisasmLines)
+        m.setData(matchBytes)
+        m.setDataHexdump(matchHexdump)
+        m.setSectionInfo(matchSectionName)
+        m.setDisasmLines(matchDisasmLines)
 
     return ac.getStructure()
 

@@ -28,13 +28,13 @@ class ScannerTestDocx(Scanner):
         pprint(detections, indent=4)
 
 
-    def scan(self, data, filename):
+    def scannerDetectsBytes(self, data, filename):
         # unpack office file
         fileOffice = FileOffice()
         fileOffice.loadFromMem(data)
 
         for detection in self.detections:
-            data = fileOffice.data[detection.refPos:detection.refPos+len(detection.refData)] 
+            data = fileOffice.Data().getBytesRange(detection.refPos, detection.refPos+len(detection.refData))
             if data != detection.refData:
                 return False
 

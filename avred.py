@@ -11,9 +11,9 @@ import datetime
 
 from config import Config
 from verifier import verify
-from model.model import Outcome, Appraisal
+from model.model import Outcome, Appraisal, Data
 from filehelper import FileType, FileInfo
-from utils import convertMatchesIt, patchDataFill
+from utils import convertMatchesIt
 from scanner import ScannerRest
 from model.testverify import VerifyStatus
 
@@ -181,14 +181,14 @@ def handleFile(filename, args, scanner):
     #print(outcome)
 
 
-def scanFile(outcome, file, scanner, analyzer, analyzerOptions):
+def scanFile(outcome: Outcome, file: PluginFileFormat, scanner, analyzer, analyzerOptions):
     matchesIt: List[Interval]
 
     outcome.scanTime = datetime.datetime.now()
     outcome.scannerName = scanner.scanner_name
 
     # check if its really being detected first as a quick check
-    detected = scanner.scan(file.data, file.filename)
+    detected = scanner.scannerDetectsBytes(file.DataAsBytes(), file.filename)
     if not detected:
         logging.error(f"QuickCheck: {file.filename} is not detected by {scanner.scanner_name}")
         outcome.isDetected = False
@@ -269,27 +269,29 @@ def checkFile(filepath, scanner):
     data = None
     with open(filepath, 'rb') as file:
         data = file.read()
-    detected = scanner.scan(data, os.path.basename(filepath))
+    detected = scanner.scannerDetectsBytes(data, os.path.basename(filepath))
     if detected:
         print(f"File is detected")
     else:
         print(f"File is not detected")
 
 
-def scanIsHash(file, scanner) -> bool:
+def scanIsHash(file: PluginFileFormat, scanner) -> bool:
     """check if the detection is hash based (complete file)"""
-    data = file.getData()
-    size = len(data)
 
+    size = file.Data().getLength()
+
+    firstData: Data = file.DataCopy()
     firstOff = int(size//3)
-    firstData = patchDataFill(data, firstOff, 1)
-    firstFile = file.getFileWithNewData(firstData)
-    firstRes = scanner.scan(firstFile, file.filename)
+    firstData.patchDataFill(firstOff, 1)
+    firstFileData: Data = file.getFileDataWith(firstData)
+    firstRes = scanner.scannerDetectsBytes(firstFileData.getBytes(), file.filename)
 
     lastOff = int((size//3) * 2)
-    lastData = patchDataFill(data, lastOff, 1)
-    lastFile = file.getFileWithNewData(lastData)
-    lastRes = scanner.scan(lastFile, file.filename)
+    lastData: Data = file.DataCopy()
+    lastData.patchDataFill(lastOff, 1)
+    lastFileData: Data = file.getFileDataWith(lastData)
+    lastRes = scanner.scannerDetectsBytes(lastFileData.getBytes(), file.filename)
 
     if not firstRes and not lastRes:
         return True

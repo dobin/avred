@@ -21,39 +21,6 @@ def saveMatchesToFile(filename, matches):
         json.dump(results, outfile)
 
 
-def patchDataFill(data: bytes, base: int, size: int, fillType: FillType=FillType.null) -> bytes:
-    origLen = len(data)
-
-    fill = None # has to be exactly <size> bytes
-    if fillType is FillType.null:
-        fill = b"\x00" * size
-    elif fillType is FillType.space:
-        fill = b" " * size
-    elif fillType is FillType.highentropy:
-        #fill = random.randbytes(size) # 3.9..
-        fill = os.urandom(size)
-    elif fillType is FillType.lowentropy:
-        #temp = random.randbytes(size) # 3.9..
-        temp = os.urandom(size)
-        temp = base64.b64encode(temp)
-        fill = temp[:size]
-
-    data = patchData(data, base, fill)
-    if len(data) != origLen:
-        raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(data)))
-
-    return data
-
-
-def patchData(data: bytes, base: int, replace: bytes) -> bytes:
-    #d = bytearray(data)
-    #d[base:base+size] = fill
-    #data = bytes(d)
-    size = len(replace)
-    data = data[:base] + replace + data[base+size:]
-    return data
-
-
 def printMatches(data, matches):
     for i in matches:
         size = i.end - i.begin

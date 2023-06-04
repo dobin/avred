@@ -16,7 +16,7 @@ class FileType(Enum):
 
 def getFileInfo(file: PluginFileFormat):
     size = pathlib.Path(file.filepath).stat().st_size
-    hash = hashlib.md5(file.fileData).digest()
+    hash = hashlib.md5(file.fileData.getBytes()).digest()
     time = pathlib.Path(file.filepath).stat().st_ctime
     ident = magic.from_file(file.filepath)
 

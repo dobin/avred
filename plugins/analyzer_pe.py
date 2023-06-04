@@ -31,6 +31,8 @@ def cmdcmd(r, cmd):
 
 
 def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
+    """Augments all matches with additional information from filePe"""
+
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
 
@@ -44,30 +46,32 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
     MORE = 16
     for match in matches:
-        data = filePe.data[match.start():match.end()]
-        dataHexdump = hexdmp(data, offset=match.start())
-        detail = []
+        matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
+        matchHexdump: str = hexdmp(matchBytes, offset=match.start())
+        matchDisasmLines: List[UiDisasmLine] = []
 
-        section = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
-        sectionName = '<unknown>'
-        if section is not None:
-            sectionName = section.name
+        matchSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
+        matchSectionName = '<unknown>'
+        if matchSection is not None:
+            matchSectionName = matchSection.name
 
-        if section is None: 
+        if matchSection is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
-            filePe.printSections()
-        elif section.name == ".text":
+            #filePe.printSections()
+        elif matchSection.name == ".text":
+            # Decompiling
+
             # offset from .text segment (in file)
-            offset = match.start() - section.addr
+            offset = match.start() - matchSection.addr
             # base=0x400000 + .text=0x1000 + offset=0x123
-            addrDisasm = baseAddr + section.virtaddr + offset - MORE
+            addrDisasm = baseAddr + matchSection.virtaddr + offset - MORE
             sizeDisasm = match.size + MORE + MORE
 
             # r2: Print Dissabled (by bytes)
             asm = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
             asm = json.loads(asm)
             for a in asm:
-                relOffset = a['offset'] - baseAddr - section.virtaddr
+                relOffset = a['offset'] - baseAddr - matchSection.virtaddr
                 isPart = False
                 if relOffset >= offset and relOffset < offset+match.size:
                     isPart = True
@@ -76,28 +80,28 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
                 textHtml = conv.convert(text, full=False)
             
                 disasmLine = UiDisasmLine(
-                    relOffset + section.addr, 
+                    relOffset + matchSection.addr, 
                     int(a['offset']),
                     isPart,
                     text, 
                     textHtml
                 )
-                detail.append(disasmLine)
+                matchDisasmLines.append(disasmLine)
 
-        match.setData(data)
-        match.setDataHexdump(dataHexdump)
-        match.setSectionInfo(sectionName)
-        match.setDisasmLines(detail)
+        match.setData(matchBytes)
+        match.setDataHexdump(matchHexdump)
+        match.setSectionInfo(matchSectionName)
+        match.setDisasmLines(matchDisasmLines)
 
     # file structure
     s = ''
-    for section in filePe.sectionsBag.sections:
+    for matchSection in filePe.sectionsBag.sections:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
-            section.name, section.addr, section.virtaddr, section.size, section.scan)
+            matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
 
 
-def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) -> Tuple[IntervalTree, str]:
+def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText=False) -> Tuple[IntervalTree, str]:
     scannerInfos = []
     if remove:
         logging.info("Remove: Ressources, Versioninfo")
@@ -123,8 +127,10 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
     matches = []
     if len(detected_sections) == 0:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer")
-        scannerInfos.append('flat-scan')
-        match = reducer.scan(0, len(filePe.data))
+        scannerInfos.append('flat-scan1')
+        match = reducer.scan(
+            offsetStart=0, 
+            offsetEnd=filePe.Data().getLength())
         matches += match
     else:
         # analyze each detected section
@@ -134,7 +140,9 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
                 continue
 
             logging.info(f"Launching bytes analysis on section {section.name}")
-            match = reducer.scan(section.addr, section.addr+section.size)
+            match = reducer.scan(
+                offsetStart=section.addr, 
+                offsetEnd=section.addr+section.size)
             matches += match
 
         if len(matches) > 0:
@@ -144,14 +152,16 @@ def investigate(filePe, scanner, isolate=False, remove=False, ignoreText=False) 
             # there are instances where the section-based scanning does not yield any result.
             # do it again without it
             logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
-            scannerInfos.append('flat-scan')
-            match = reducer.scan(0, len(filePe.data))
+            scannerInfos.append('flat-scan2')
+            match = reducer.scan(
+                offsetStart=0, 
+                offsetEnd=filePe.Data().getLength())
             matches += match
 
     return sorted(matches), ",".join(scannerInfos)
 
 
-def findDetectedSectionsIsolate(filePe, scanner):
+def findDetectedSectionsIsolate(filePe: FilePe, scanner):
     # isolate individual sections, and see which one gets detected
     detected_sections = []
 
@@ -159,9 +169,8 @@ def findDetectedSectionsIsolate(filePe, scanner):
         if not section.scan:
             continue
         filePeCopy = deepcopy(filePe)
-
         filePeCopy.hideAllSectionsExcept(section.name)
-        status = scanner.scan(filePeCopy.data, filePeCopy.filename)
+        status = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
 
         if status:
             detected_sections += [section]
@@ -171,7 +180,7 @@ def findDetectedSectionsIsolate(filePe, scanner):
     return detected_sections
 
 
-def findDetectedSections(filePe, scanner):
+def findDetectedSections(filePe: FilePe, scanner):
     # remove stuff until it does not get detected anymore
     detected_sections = []
 
@@ -181,7 +190,7 @@ def findDetectedSections(filePe, scanner):
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section.name)
 
-        status = scanner.scan(filePeCopy.data, filePeCopy.filename)
+        status = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
         if not status:
             detected_sections += [section]
 

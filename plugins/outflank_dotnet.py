@@ -1,14 +1,12 @@
 from typing import List, Set, Dict, Tuple, Optional
+import logging
 
 from model.testverify import VerifyStatus
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion
+from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data
+from model.extensions import Scanner
 from plugins.file_pe import FilePe
-
 from dotnetfile import DotNetPE
 from dotnetfile.util import BinaryStructureField, FileLocation
-import logging
-from model.extensions import Scanner
-from utils import patchData
 
 
 def outflankDotnet(
@@ -59,9 +57,9 @@ def outflankDotnet(
         return results
     ret = []
     for patch in results:
-        data = filePe.getData()
-        patchedData = patchData(data, patch.offset, patch.replaceBytes)
-        if not scanner.scan(patchedData, filePe.filename):
+        data: Data = filePe.DataCopy()
+        data.patchData(patch.offset, patch.replaceBytes)
+        if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
             logging.info("outflank ok")
             ret.append(patch)
         else:

@@ -21,31 +21,31 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     dncilParser = DncilParser(filePe.filepath)
     
     for match in matches:
-        uiDisasmLines = []
-        data = filePe.data[match.start():match.end()]
-        dataHexdump = hexdmp(data, offset=match.start())
-        sectionName = filePe.sectionsBag.getSectionNameByAddr(match.fileOffset)
+        matchDisasmLines: List[UiDisasmLine] = []
+        matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
+        matchHexdump = hexdmp(matchBytes, offset=match.start())
+        matchSectionName = filePe.sectionsBag.getSectionNameByAddr(match.fileOffset)
 
         # set info: PE section name first
-        info = sectionName + " "
+        info = matchSectionName + " "
 
         if dotnetSectionsBag is not None:
             # set info: .NET sections/streams name next if found
             sections = dotnetSectionsBag.getSectionsForRange(match.start(), match.end())
             info += ','.join(s.name for s in sections)
 
-        if sectionName == ".text":  # only disassemble in .text
+        if matchSectionName == ".text":  # only disassemble in .text
             # set info: precise disassembly info (e.g. function name)
-            uiDisasmLines, methodNames = getDotNetDisassemblyMethods(match.start(), match.size, dncilParser)
+            matchDisasmLines, methodNames = getDotNetDisassemblyMethods(match.start(), match.size, dncilParser)
             more1 = getDotNetDisassemblyHeader(filePe, match.start(), match.size)
-            uiDisasmLines += more1
+            matchDisasmLines += more1
 
             info += " " + " ".join(methodNames)
 
-        match.setData(data)
-        match.setDataHexdump(dataHexdump)
+        match.setData(matchBytes)
+        match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)
-        match.setDisasmLines(uiDisasmLines)
+        match.setDisasmLines(matchDisasmLines)
 
     s = ''
     for section in filePe.sectionsBag.sections:
@@ -68,7 +68,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
             text = "{:18}  CLR Header: {}: {}".format(
-                hexstr(filePe.data, hdrFileOffset, hdrSize),
+                hexstr(filePe.DataAsBytes(), hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
             uiDisasmLine = UiDisasmLine(
@@ -87,7 +87,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
             text = "{:18}  Metadata Header: {}: {}".format(
-                hexstr(filePe.data, hdrFileOffset, hdrSize),
+                hexstr(filePe.DataAsBytes(), hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
             uiDisasmLine = UiDisasmLine(
@@ -110,7 +110,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
             entrySize = entry.size
             if entryFileOffset >= offset and entryFileOffset + entrySize <= offset + size:
                 text = "{:18}  Stream Header: {}: {}".format(
-                    hexstr(filePe.data, entryFileOffset, entrySize),
+                    hexstr(filePe.DataAsBytes(), entryFileOffset, entrySize),
                     entry.display_name, 
                     entry.value)
                 uiDisasmLine = UiDisasmLine(

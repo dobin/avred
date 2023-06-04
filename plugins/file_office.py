@@ -4,6 +4,7 @@ import olefile
 from math import floor
 from typing import List
 
+from model.model import Data
 from model.extensions import PluginFileFormat
 
 MAKRO_PATH = 'word/vbaProject.bin'
@@ -19,39 +20,29 @@ class FileOffice(PluginFileFormat):
 
 
     def loadFromMem(self, dataFile: bytes) -> bool:
-        self.filepath = "test.exe"
-        self.filename = "test.exe"
-        self.fileData = dataFile
+        self.filepath: str = "test.exe"
+        self.filename: str = "test.exe"
+        self.fileData: Data = Data(dataFile)
         return self.parseFile()
 
 
     def parseFile(self) -> bool:
         # get the relevant part (makro)
-        with zipfile.ZipFile(io.BytesIO(self.fileData)) as thezip:
+        with zipfile.ZipFile(io.BytesIO(self.fileData.getBytes())) as thezip:
             for zipinfo in thezip.infolist():
                 if zipinfo.filename == MAKRO_PATH:
                     with thezip.open(zipinfo) as thefile:
-                        self.data = thefile.read()
+                        self.data: Data = Data(thefile.read())
                         return True
         return False
 
 
-    def getFileWithNewData(self, data: bytes) -> bytes:
+    def getFileDataWith(self, data: Data) -> Data:
         # get office file with vbaProject replaced
-        return self.getPatchedByReplacement(data)
-
-
-    def getPatchedByOffset(self, offset: int, patch: bytes) -> bytes:
-        # get office file with parts of vbaProject replaced
-        goat = self.data[:offset] + patch + self.data[offset+len(patch):]
-        return self.getPatchedByReplacement(goat)
-
-
-    def getPatchedByReplacement(self, data: bytes) -> bytes:
         outData = io.BytesIO()
 
         # create a new zip
-        with zipfile.ZipFile(io.BytesIO(self.fileData), 'r') as zipread:
+        with zipfile.ZipFile(io.BytesIO(self.fileData.getBytes()), 'r') as zipread:
             with zipfile.ZipFile(outData, 'w') as zipwrite:
                 for item in zipread.infolist():
                     # skip existing makro
@@ -62,10 +53,10 @@ class FileOffice(PluginFileFormat):
                 # add our new makro
                 zipwrite.writestr(
                     MAKRO_PATH,
-                    data
+                    data.getBytes()
                 )
         
-        return outData.getvalue()
+        return Data(outData.getvalue())
 
 
 class VbaAddressConverter():

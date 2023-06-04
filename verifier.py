@@ -4,6 +4,7 @@ import logging
 from typing import List
 
 from model.model import *
+from model.extensions import PluginFileFormat
 
 
 def toTestEntry(scanIndex, result):
@@ -24,7 +25,7 @@ def getMatchTestsFor(verifications: List[VerificationEntry], matchOrder: TestMat
         return None
 
 
-def verify(file, matches: List[Match], scanner) -> Verification:
+def verify(file: PluginFileFormat, matches: List[Match], scanner) -> Verification:
     """Verify matches in file with scanner, and return the result"""
     verifications = runVerifications(file, matches, scanner)
     matchConclusions = verificationAnalyzer(verifications)
@@ -60,7 +61,7 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     return matchConclusions
 
 
-def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEntry]: 
+def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> List[VerificationEntry]: 
     """Perform modifications on file from matches, scan with scanner and return those results"""
     verificationRuns: List[VerificationEntry] = []
     if len(matches) == 0:
@@ -79,8 +80,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
             continue
         fileCopy = deepcopy(file)
         offset = match.fileOffset + int((match.size) // 2) - 4
-        fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     logging.info("Verification run: {}".format(verificationRun))
     verificationRuns.append(verificationRun)
@@ -97,9 +98,9 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         fileCopy = deepcopy(file)
         offset1 = match.fileOffset + int( (match.size // 3) * 1) - 4
         offset2 = match.fileOffset + int( (match.size // 3) * 2) - 4
-        fileCopy.hidePart(offset1, 8, fillType=FillType.lowentropy)
-        fileCopy.hidePart(offset2, 8, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(offset1, 8, fillType=FillType.lowentropy)
+        fileCopy.Data().hidePart(offset2, 8, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -112,8 +113,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
     )
     for match in matches:
         fileCopy = deepcopy(file)
-        fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -126,8 +127,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
     )
     for match in matches:
         fileCopy = deepcopy(file)
-        fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.highentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(match.fileOffset, match.size, fillType=FillType.highentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -147,8 +148,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         offset = match.fileOffset + int((match.size) // 2) - 4
-        fileCopy.hidePart(offset, 8, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry(match.idx, result))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -160,8 +161,8 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
         matchModify=TestMatchModify.FULL)
     fileCopy = deepcopy(file)
     for match in matches:
-        fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry(match.idx, result))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -174,12 +175,44 @@ def runVerifications(file, matches: List[Match], scanner) -> List[VerificationEn
     fileCopy = deepcopy(file)
     n = 0
     for match in reversed(matches):
-        fileCopy.hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
-        result = scanner.scan(fileCopy.data, file.filename)
+        fileCopy.Data().hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry(n, result))
         n += 1
     verificationRun.matchTests = list(reversed(verificationRun.matchTests))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
+
+    if False:
+        # All, Middle
+        verificationRun = VerificationEntry(
+            index=len(verificationRuns), 
+            matchOrder=TestMatchOrder.ALL,
+            matchModify=TestMatchModify.MIDDLE8)
+        fileCopy = deepcopy(file)
+        for match in matches:
+            offset = match.fileOffset + int((match.size) // 2) - 4
+            fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
+        for match in matches:
+            verificationRun.matchTests.append(toTestEntry(0, result))
+        verificationRun.matchTests = list(reversed(verificationRun.matchTests))
+        verificationRuns.append(verificationRun)
+        logging.info("Verification run: {}".format(verificationRun))
+
+        # All, Full
+        verificationRun = VerificationEntry(
+            index=len(verificationRuns), 
+            matchOrder=TestMatchOrder.ALL,
+            matchModify=TestMatchModify.FULL)
+        fileCopy = deepcopy(file)
+        for match in matches:
+            fileCopy.Data().hidePart(offset, match.size, fillType=FillType.lowentropy)
+        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
+        for match in matches:
+            verificationRun.matchTests.append(toTestEntry(0, result))
+        verificationRun.matchTests = list(reversed(verificationRun.matchTests))
+        verificationRuns.append(verificationRun)
+        logging.info("Verification run: {}".format(verificationRun))
 
     return verificationRuns

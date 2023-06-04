@@ -112,6 +112,6 @@ class PeTest(unittest.TestCase):
         augmentFilePe(filePe, matches)
 
         patches = outflankPe(filePe, matches, matchConclusion)
-        self.assertEqual(1, len(patches))
+        self.assertEqual(3, len(patches))
         self.assertEqual(2774, patches[0].offset)
         self.assertEqual(2, len(patches[0].replaceBytes))

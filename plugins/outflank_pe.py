@@ -1,11 +1,12 @@
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion
+from typing import List, Set, Dict, Tuple, Optional
+import re
+import logging
+
+from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data
 from model.testverify import VerifyStatus
 from model.extensions import Scanner
 from plugins.file_pe import FilePe
-from typing import List, Set, Dict, Tuple, Optional
-from utils import patchData
-import re
-import logging
+
 
 class PossiblePatch():
     def __init__(self, offset, matchId):
@@ -89,9 +90,9 @@ def outflankPe(
         return results
     ret = []
     for patch in results:
-        data = filePe.getData()
-        patchedData = patchData(data, patch.offset, patch.replaceBytes)
-        if not scanner.scan(patchedData, filePe.filename):
+        data: Data = filePe.DataCopy()
+        data.patchData(patch.offset, patch.replaceBytes)
+        if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
             logging.warn("Outflank OK! " + str(patch))
 
             ret.append(patch)
