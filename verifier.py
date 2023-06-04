@@ -183,36 +183,53 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
 
-    if False:
-        # All, Middle
-        verificationRun = VerificationEntry(
-            index=len(verificationRuns), 
-            matchOrder=TestMatchOrder.ALL,
-            matchModify=TestMatchModify.MIDDLE8)
-        fileCopy = deepcopy(file)
-        for match in matches:
-            offset = match.fileOffset + int((match.size) // 2) - 4
-            fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
-        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
-        for match in matches:
-            verificationRun.matchTests.append(toTestEntry(0, result))
-        verificationRun.matchTests = list(reversed(verificationRun.matchTests))
-        verificationRuns.append(verificationRun)
-        logging.info("Verification run: {}".format(verificationRun))
+    # All, Middle
+    verificationRun = VerificationEntry(
+        index=len(verificationRuns), 
+        matchOrder=TestMatchOrder.ALL,
+        matchModify=TestMatchModify.MIDDLE8)
+    fileCopy = deepcopy(file)
+    for match in matches:
+        offset = match.fileOffset + int((match.size) // 2) - 4
+        fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
+    result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
+    for match in matches:
+        verificationRun.matchTests.append(toTestEntry(0, result))
+    verificationRun.matchTests = list(reversed(verificationRun.matchTests))
+    verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
-        # All, Full
-        verificationRun = VerificationEntry(
-            index=len(verificationRuns), 
-            matchOrder=TestMatchOrder.ALL,
-            matchModify=TestMatchModify.FULL)
-        fileCopy = deepcopy(file)
-        for match in matches:
-            fileCopy.Data().hidePart(offset, match.size, fillType=FillType.lowentropy)
-        result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
-        for match in matches:
-            verificationRun.matchTests.append(toTestEntry(0, result))
-        verificationRun.matchTests = list(reversed(verificationRun.matchTests))
-        verificationRuns.append(verificationRun)
-        logging.info("Verification run: {}".format(verificationRun))
+    # All, Thirds
+    verificationRun = VerificationEntry(
+        index=len(verificationRuns), 
+        matchOrder=TestMatchOrder.ALL,
+        matchModify=TestMatchModify.THIRDS8)
+    fileCopy = deepcopy(file)
+    for match in matches:
+        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 4
+        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 4
+        fileCopy.Data().hidePart(offset1, 8, fillType=FillType.lowentropy)
+        fileCopy.Data().hidePart(offset2, 8, fillType=FillType.lowentropy)
+    result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
+    for match in matches:
+        verificationRun.matchTests.append(toTestEntry(0, result))
+    verificationRun.matchTests = list(reversed(verificationRun.matchTests))
+    verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
+
+    # All, Full
+    verificationRun = VerificationEntry(
+        index=len(verificationRuns), 
+        matchOrder=TestMatchOrder.ALL,
+        matchModify=TestMatchModify.FULL)
+    fileCopy = deepcopy(file)
+    for match in matches:
+        fileCopy.Data().hidePart(match.fileOffset, match.size, fillType=FillType.lowentropy)
+    result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
+    for match in matches:
+        verificationRun.matchTests.append(toTestEntry(0, result))
+    verificationRun.matchTests = list(reversed(verificationRun.matchTests))
+    verificationRuns.append(verificationRun)
+    logging.info("Verification run: {}".format(verificationRun))
 
     return verificationRuns
