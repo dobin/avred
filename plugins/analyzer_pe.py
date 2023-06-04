@@ -129,7 +129,7 @@ def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText
         logging.info("Section analysis failed. Fall back to non-section-aware reducer")
         scannerInfos.append('flat-scan1')
         match = reducer.scan(
-            offsetStart=0, 
+            offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
             offsetEnd=filePe.Data().getLength())
         matches += match
     else:
@@ -154,7 +154,7 @@ def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText
             logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
             scannerInfos.append('flat-scan2')
             match = reducer.scan(
-                offsetStart=0, 
+                offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
             matches += match
 
