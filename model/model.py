@@ -62,6 +62,14 @@ class Data():
     def patchData(self, offset: int, replace: bytes) -> bytes:
         self._data[offset:offset+len(replace)] = replace
 
+    
+    def swapData(self, offset_a, size_a, offset_b, size_b):
+        data_a = self._data[offset_a:offset_a+size_a]
+        data_b = self._data[offset_b:offset_b+size_b]
+        
+        self._data[offset_a:offset_a + size_b] = data_b
+        self._data[offset_a + size_b:offset_a + size_b + size_a] = data_a
+
 
 class Appraisal(Enum):
     Unknown = "Unknown"
@@ -129,6 +137,27 @@ class SectionsBag:
             print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
 
+class AsmInstruction():
+    def __init__(self, fileOffset, rva, esil, type, disasm, size):
+        self.offset = fileOffset  # offset in file
+        self.rva = rva
+        self.esil = esil
+        self.type = type
+        self.disasm = disasm
+        self.size = size
+
+    def __str__(self):
+        s = "Offset: {}  RVA: {}  type: {}  disasm: {}  size: {}  esil: {}".format(
+            self.offset,
+            self.rva,
+            self.type,
+            self.disasm,
+            self.size,
+            self.esil
+        )
+        return s
+
+
 class UiDisasmLine():
     def __init__(self, fileOffset, rva, isPart, text, textHtml):
         self.offset = fileOffset  # offset in file
@@ -157,6 +186,7 @@ class Match():
         self.dataHexdump: str = ''
         self.sectionInfo: str = ''
         self.disasmLines: List[UiDisasmLine] = []
+        self.asmInstructions: List[AsmInstruction] = []
 
     def start(self):
         return self.fileOffset
@@ -181,6 +211,12 @@ class Match():
 
     def getDisasmLines(self):
         return self.disasmLines
+    
+    def setAsmInstructions(self, asminstruction):
+        self.asmInstructions = asminstruction
+
+    def getAsmInstructions(self):
+        return self.asmInstructions
 
     def __str__(self):
         s = ""

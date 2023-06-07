@@ -5,11 +5,13 @@ from webbrowser import get
 from plugins.analyzer_pe import analyzeFileExe
 from tests.helpers import TestDetection
 from plugins.file_pe import FilePe
-from plugins.analyzer_pe import augmentFilePe
+from plugins.analyzer_pe import augmentFilePe, disassemble
 from plugins.outflank_pe import outflankPe
 from tests.scanners import *
 from model.model import Match, OutflankPatch
 from model.testverify import MatchConclusion, VerifyStatus
+from utils import hexdmp, hexstr
+import r2pipe
 
 
 class PeTest(unittest.TestCase):
@@ -96,7 +98,65 @@ class PeTest(unittest.TestCase):
         self.assertTrue(len(matches) == 4)
 
 
-    def test_pe_patch(self):
+    def test_disasm(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/test.exe") 
+        r2 = r2pipe.open(filePe.filepath)
+        r2.cmd("aaa")
+
+        # 0x004014e0
+        start = 2807  # AF7
+        size = 8
+        matchAsmInstructions, matchDisasmLines = disassemble(
+            r2, filePe, start, size, moreUiLines=False)
+        
+        self.assertEqual(start, matchDisasmLines[0].offset)
+        self.assertEqual(0x004014f7, matchDisasmLines[0].rva)
+        self.assertTrue('nop' in matchDisasmLines[0].text)
+        self.assertTrue('add rsp, 0x28' in matchDisasmLines[1].text)
+        self.assertTrue('ret' in matchDisasmLines[2].text)
+        
+        self.assertEqual(start, matchAsmInstructions[0].offset)
+        self.assertEqual(0x004014f7, matchAsmInstructions[0].rva)
+        self.assertEqual('nop', matchAsmInstructions[0].disasm)
+        self.assertEqual('add rsp, 0x28', matchAsmInstructions[1].disasm)
+        self.assertEqual('ret', matchAsmInstructions[2].disasm)
+        
+
+    def test_disasm_swap(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/test.exe") 
+        r2 = r2pipe.open(filePe.filepath)
+        r2.cmd("aaa")
+
+        # 0x004014e0
+        start = 2807  # AF7
+        size = 8
+        matchAsmInstructions, matchDisasmLines = disassemble(
+            r2, filePe, start, size, moreUiLines=False)
+        
+        # 0x004014f7      90             nop
+        # 0x004014f8      4883c428       add rsp, 0x28
+        # 0x004014fc      c3             ret
+        self.assertTrue('nop' in matchDisasmLines[0].text)
+        self.assertTrue('add rsp, 0x28' in matchDisasmLines[1].text)
+        self.assertTrue('ret' in matchDisasmLines[2].text)
+
+        print(hexstr(filePe.DataAsBytes(), 2807, 5))
+        filePe.data.swapData(2807, 1, 2807+1, 4)
+        print(hexstr(filePe.DataAsBytes(), 2807, 5))
+
+        self.assertEqual(filePe.data.getBytesRange(2807, 2807+4), b"\x48\x83\xc4\x28")
+        self.assertEqual(filePe.data.getBytesRange(2807+4, 2807+4+1), b"\x90")
+
+        #matchAsmInstructions, matchDisasmLines = disassemble(
+        #    r2, filePe, start, size, moreUiLines=False)
+        #self.assertEqual('nop', matchAsmInstructions[1].disasm)
+        #self.assertEqual('add rsp, 0x28', matchAsmInstructions[0].disasm)
+        #self.assertEqual('ret', matchAsmInstructions[2].disasm)
+
+
+    def test_pe_outflank(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe")
 

@@ -6,7 +6,7 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
-from model.model import Match, FileInfo, UiDisasmLine
+from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction
 from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
@@ -35,63 +35,31 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
-
-    conv = Ansi2HTMLConverter()
     r2 = r2pipe.open(filePe.filepath)
-    r2.cmd("e scr.color=2") # enable terminal color output
     r2.cmd("aaa")
 
-    baddr = cmdcmd(r2, "e bin.baddr")
-    baseAddr = int(baddr, 16)
-
-    MORE = 16
     for match in matches:
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump: str = hexdmp(matchBytes, offset=match.start())
         matchDisasmLines: List[UiDisasmLine] = []
+        matchAsmInstructions: List[AsmInstruction] = []
 
-        matchSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
+        matchSection = filePe.sectionsBag.getSectionByAddr(match.start())
         matchSectionName = '<unknown>'
         if matchSection is not None:
             matchSectionName = matchSection.name
 
         if matchSection is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
-            #filePe.printSections()
         elif matchSection.name == ".text":
-            # Decompiling
-
-            # offset from .text segment (in file)
-            offset = match.start() - matchSection.addr
-            # base=0x400000 + .text=0x1000 + offset=0x123
-            addrDisasm = baseAddr + matchSection.virtaddr + offset - MORE
-            sizeDisasm = match.size + MORE + MORE
-
-            # r2: Print Dissabled (by bytes)
-            asm = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
-            asm = json.loads(asm)
-            for a in asm:
-                relOffset = a['offset'] - baseAddr - matchSection.virtaddr
-                isPart = False
-                if relOffset >= offset and relOffset < offset+match.size:
-                    isPart = True
-                
-                text = a['text']
-                textHtml = conv.convert(text, full=False)
-            
-                disasmLine = UiDisasmLine(
-                    relOffset + matchSection.addr, 
-                    int(a['offset']),
-                    isPart,
-                    text, 
-                    textHtml
-                )
-                matchDisasmLines.append(disasmLine)
+            matchAsmInstructions, matchDisasmLines = disassemble(
+                r2, filePe, match.start(), match.size)
 
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(matchSectionName)
         match.setDisasmLines(matchDisasmLines)
+        match.setAsmInstructions(matchAsmInstructions)
 
     # file structure
     s = ''
@@ -99,6 +67,80 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
             matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
+
+
+conv = Ansi2HTMLConverter()
+def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
+    baseAddr = filePe.baseAddr
+    matchSection = filePe.sectionsBag.getSectionByAddr(fileOffset)
+
+    # Decompiling
+    # offset: of fileOffset from .text segment file offset
+    offset = fileOffset - matchSection.addr
+
+    # base=0x400000 + .text=0x1000 + offset=0x123
+    addrDisasm = baseAddr + matchSection.virtaddr + offset
+    sizeDisasm = size
+    matchDisasmLines: List[UiDisasmLine] = []
+    matchAsmInstructions: List[AsmInstruction] = []
+
+    MORE = 0
+    if moreUiLines:
+        MORE = 16
+
+    # r2: Disassemble by bytes, no color escape codes, more data (like esil, type)
+    #r2.cmd("e scr.color=0")
+    asm = cmdcmd(r2, "pdj {} @{}".format(sizeDisasm, addrDisasm))
+    asm = json.loads(asm)
+    for a in asm:
+        offset = a['offset']
+        relOffset = offset - baseAddr - matchSection.virtaddr
+        isPart = False
+        if relOffset >= offset and relOffset < offset+size:
+            isPart = True
+        
+        esil = a.get('esil', '')
+        type = a.get('type', '')
+        disasm = a.get('disasm', '')
+        size = a.get('size', 0)
+    
+        asmInstruction = AsmInstruction(
+            relOffset + matchSection.addr,
+            int(a['offset']),
+            esil,
+            type,
+            disasm,
+            size)
+        matchAsmInstructions.append(asmInstruction)
+
+    addrDisasm -= MORE
+    sizeDisasm += MORE
+
+    # r2: Disassemble by bytes, color
+    #r2.cmd("e scr.color=2")
+    asmColor = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
+    asmColor = json.loads(asmColor)
+    # ui disassemly lines
+    for a in asmColor:
+        offset = a['offset']
+        relOffset = offset - baseAddr - matchSection.virtaddr
+        isPart = False
+        if relOffset >= offset and relOffset < offset+size:
+            isPart = True
+        
+        # get disassembly with color
+        text = a['text']
+        textHtml = conv.convert(text, full=False)
+
+        disasmLine = UiDisasmLine(
+            relOffset + matchSection.addr, 
+            int(a['offset']),
+            isPart,
+            text, 
+            textHtml, 
+        )
+        matchDisasmLines.append(disasmLine)
+    return matchAsmInstructions, matchDisasmLines
 
 
 def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText=False) -> Tuple[IntervalTree, str]:
