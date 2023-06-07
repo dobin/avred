@@ -129,6 +129,9 @@ class PeTest(unittest.TestCase):
         r2 = r2pipe.open(filePe.filepath)
         r2.cmd("aaa")
 
+        self.assertEqual(0x004014f7, filePe.offsetToRva(2807))
+        self.assertEqual(2807, filePe.codeRvaToOffset(0x004014f7))
+
         # 0x004014e0
         start = 2807  # AF7
         size = 8
@@ -142,13 +145,10 @@ class PeTest(unittest.TestCase):
         self.assertTrue('add rsp, 0x28' in matchDisasmLines[1].text)
         self.assertTrue('ret' in matchDisasmLines[2].text)
 
-        print(hexstr(filePe.DataAsBytes(), 2807, 5))
         filePe.data.swapData(2807, 1, 2807+1, 4)
-        print(hexstr(filePe.DataAsBytes(), 2807, 5))
 
         self.assertEqual(filePe.data.getBytesRange(2807, 2807+4), b"\x48\x83\xc4\x28")
         self.assertEqual(filePe.data.getBytesRange(2807+4, 2807+4+1), b"\x90")
-
         #matchAsmInstructions, matchDisasmLines = disassemble(
         #    r2, filePe, start, size, moreUiLines=False)
         #self.assertEqual('nop', matchAsmInstructions[1].disasm)

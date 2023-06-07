@@ -88,6 +88,26 @@ class FilePe(PluginFileFormat):
                 )
 
 
+    def codeRvaToOffset(self, rva: int) -> int: 
+        baseAddr = self.baseAddr
+        textSection = self.sectionsBag.getSectionByName('.text')
+        offsetToBase = rva - textSection.virtaddr
+        offset = textSection.addr - baseAddr + offsetToBase
+        return offset
+
+
+    def offsetToRva(self, fileOffset: int) -> int:
+        baseAddr = self.baseAddr
+        matchSection = self.sectionsBag.getSectionByAddr(fileOffset)
+        
+        # offset: of fileOffset from .text segment file offset
+        offset = fileOffset - matchSection.addr
+        # base=0x400000 + .text=0x1000 + offset=0x123
+        addrDisasm = baseAddr + matchSection.virtaddr + offset    
+
+        return addrDisasm
+
+
     def hideSection(self, sectionName: str):
         section = self.sectionsBag.getSectionByName(sectionName)
         if section is None:
