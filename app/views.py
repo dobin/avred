@@ -119,6 +119,12 @@ def fileDownloadExample(filename):
 def hex_filter(s):
     return s.hex()
 
+@views.app_template_filter('hexint')
+def hex_filter(s):
+    return hex(s)
+
+
+
 @views.app_template_filter('mydate')
 def date_filter(s):
     return s.strftime('%Y-%m-%d %H:%M:%S')
