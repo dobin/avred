@@ -103,6 +103,7 @@ def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
         type = a.get('type', '')
         disasm = a.get('disasm', '')
         size = a.get('size', 0)
+        bytes = a.get('bytes', b'')
     
         asmInstruction = AsmInstruction(
             relOffset + matchSection.addr,
@@ -110,7 +111,8 @@ def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
             esil,
             type,
             disasm,
-            size)
+            size,
+            bytes)
         matchAsmInstructions.append(asmInstruction)
 
     addrDisasm -= MORE

@@ -138,22 +138,24 @@ class SectionsBag:
 
 
 class AsmInstruction():
-    def __init__(self, fileOffset, rva, esil, type, disasm, size):
+    def __init__(self, fileOffset, rva, esil, type, disasm, size, bytes):
         self.offset = fileOffset  # offset in file
         self.rva = rva
         self.esil = esil
         self.type = type
         self.disasm = disasm
         self.size = size
+        self.bytes = bytes
 
     def __str__(self):
-        s = "Offset: {}  RVA: {}  type: {}  disasm: {}  size: {}  esil: {}".format(
+        s = "Offset: {}  RVA: {}  type: {}  disasm: {}  size: {}  esil: {}  bytes: {}".format(
             self.offset,
             self.rva,
             self.type,
             self.disasm,
             self.size,
-            self.esil
+            self.esil,
+            self.bytes
         )
         return s
 
