@@ -10,7 +10,7 @@ from plugins.outflank_pe import outflankPe
 from tests.scanners import *
 from model.model import Match, OutflankPatch
 from model.testverify import MatchConclusion, VerifyStatus
-from utils import hexdmp, hexstr
+from utils import hexdmp, hexstr, removeAnsi
 import r2pipe
 
 
@@ -108,13 +108,16 @@ class PeTest(unittest.TestCase):
         start = 2807  # AF7
         size = 8
         matchAsmInstructions, matchDisasmLines = disassemble(
-            r2, filePe, start, size, moreUiLines=False)
+            r2, filePe, start, size, moreUiLines=0)
+
+        #for a in matchDisasmLines:
+        #    print(a)
         
         self.assertEqual(start, matchDisasmLines[0].offset)
         self.assertEqual(0x004014f7, matchDisasmLines[0].rva)
-        self.assertTrue('nop' in matchDisasmLines[0].text)
-        self.assertTrue('add rsp, 0x28' in matchDisasmLines[1].text)
-        self.assertTrue('ret' in matchDisasmLines[2].text)
+        self.assertTrue('nop' in removeAnsi(matchDisasmLines[0].text))
+        self.assertTrue('add rsp, 0x28' in removeAnsi(matchDisasmLines[1].text))
+        self.assertTrue('ret' in removeAnsi(matchDisasmLines[2].text))
         
         self.assertEqual(start, matchAsmInstructions[0].offset)
         self.assertEqual(0x004014f7, matchAsmInstructions[0].rva)
@@ -136,42 +139,58 @@ class PeTest(unittest.TestCase):
         start = 2807  # AF7
         size = 8
         matchAsmInstructions, matchDisasmLines = disassemble(
-            r2, filePe, start, size, moreUiLines=False)
+            r2, filePe, start, size, moreUiLines=0)
         
         # 0x004014f7      90             nop
         # 0x004014f8      4883c428       add rsp, 0x28
         # 0x004014fc      c3             ret
-        self.assertTrue('nop' in matchDisasmLines[0].text)
-        self.assertTrue('add rsp, 0x28' in matchDisasmLines[1].text)
-        self.assertTrue('ret' in matchDisasmLines[2].text)
+        self.assertTrue('nop' in removeAnsi(matchDisasmLines[0].text))
+        self.assertTrue('add rsp, 0x28' in removeAnsi(matchDisasmLines[1].text))
+        self.assertTrue('ret' in removeAnsi(matchDisasmLines[2].text))
 
         filePe.data.swapData(2807, 1, 2807+1, 4)
 
         self.assertEqual(filePe.data.getBytesRange(2807, 2807+4), b"\x48\x83\xc4\x28")
         self.assertEqual(filePe.data.getBytesRange(2807+4, 2807+4+1), b"\x90")
         #matchAsmInstructions, matchDisasmLines = disassemble(
-        #    r2, filePe, start, size, moreUiLines=False)
+        #    r2, filePe, start, size, moreUiLines=0)
         #self.assertEqual('nop', matchAsmInstructions[1].disasm)
         #self.assertEqual('add rsp, 0x28', matchAsmInstructions[0].disasm)
         #self.assertEqual('ret', matchAsmInstructions[2].disasm)
 
 
-    def test_pe_outflank(self):
+    def test_disasm_outflank(self):
         filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
+        filePe.loadFromFile("tests/data/test.exe") 
+        r2 = r2pipe.open(filePe.filepath)
+        r2.cmd("aaa")
 
-        # 0   0x00000600  0x6c00 0x00401000  0x7000 -r-x .text
+        fileOffset = filePe.codeRvaToOffset(0x0040154e)
+        matchAsmInstructions, _ = disassemble(
+            r2, filePe, fileOffset, 5, moreUiLines=0)
+        
+        # 0x0040154e      48894dd0       mov qword [var_30h], rcx    ; format
+        # 0x00401552      488955d8       mov qword [var_28h], rdx    ; arg2
+        # 0x00401556      4c8945e0       mov qword [var_20h], r8     ; arg3
+        # 0x0040155a      4c894de8       mov qword [var_18h], r9     ; arg4
+        #for entry in matchDisasmLines:
+        #    print(entry)
+
+        self.assertEqual(len(matchAsmInstructions), 5)
+
+        #for entry in matchAsmInstructions:
+        #    print(entry)
+
         matches = []
-        match = Match(0, 0x600 + 0x4d0, 8)  # 8 is another NOP
+        match = Match(0, fileOffset, 8)
         matches.append(match)
-
-        # the match should be good
         verifyStatus = [ VerifyStatus.GOOD ]
         matchConclusion = MatchConclusion(verifyStatus)
-
         augmentFilePe(filePe, matches)
-
         patches = outflankPe(filePe, matches, matchConclusion)
-        self.assertEqual(3, len(patches))
-        self.assertEqual(2774, patches[0].offset)
-        self.assertEqual(2, len(patches[0].replaceBytes))
+        #for patch in patches:
+        #    print(patch)
+
+        self.assertEqual(patches[0].offset, 2894)
+        self.assertEqual(patches[1].offset, 2902)
+        self.assertEqual(patches[2].offset, 2914)

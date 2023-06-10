@@ -2,6 +2,7 @@ import logging
 import json
 import os
 import base64
+import re
 
 from model.model import Match
 from model.testverify import FillType
@@ -63,3 +64,9 @@ def hexstr(src: bytes, offset=0, length=0):
     byte_buffer = src[offset:offset+length]
     hex_string = ' '.join([f'{x:02x}' for x in byte_buffer])
     return hex_string
+
+
+# https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
+def removeAnsi(line):
+    ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', line)

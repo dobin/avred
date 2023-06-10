@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
@@ -137,15 +139,30 @@ class SectionsBag:
             print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
 
+gpRegisters = [ 'rax','rbx','rcx','rdx','rsi','rdi','r8','r9','r10','r11','r12','r13','r14','r15' ]
 class AsmInstruction():
-    def __init__(self, fileOffset, rva, esil, type, disasm, size, bytes):
+    def __init__(self, fileOffset, rva, esil, type, disasm, size, rawBytes):
         self.offset = fileOffset  # offset in file
         self.rva = rva
         self.esil = esil
         self.type = type
         self.disasm = disasm
         self.size = size
-        self.bytes = bytes
+        self.rawBytes = rawBytes
+
+        # ESIL
+        self.esilComponents = esil.split(",") if esil else []
+
+        # Registers touched
+        self.esilTouchedRegisters = []
+        for a in self.esilComponents:
+            if a in gpRegisters:
+                self.esilTouchedRegisters.append(a)
+
+
+    def registersTouch(self, asmInstruction: AsmInstruction):
+        return any(element in self.esilTouchedRegisters for element in asmInstruction.esilTouchedRegisters)
+
 
     def __str__(self):
         s = "Offset: {}  RVA: {}  type: {}  disasm: {}  size: {}  esil: {}  bytes: {}".format(
@@ -155,7 +172,7 @@ class AsmInstruction():
             self.disasm,
             self.size,
             self.esil,
-            self.bytes
+            self.rawBytes
         )
         return s
 
@@ -297,12 +314,25 @@ class Outcome():
     
 
 class OutflankPatch():
-    def __init__(self, matchIdx: int, offset: int, replaceBytes: bytes, info: str, considerations: str):
+    def __init__(self, 
+                 matchIdx: int, 
+                 offset: int, 
+                 replaceBytes: bytes,
+                 asmOne: AsmInstruction,
+                 asmTwo: AsmInstruction,
+                 info: str, 
+                 considerations: str
+    ):
         self.matchIdx = matchIdx
         self.offset = offset
         self.replaceBytes = replaceBytes
+
+        self.asmOne = asmOne
+        self.asmTwo = asmTwo
+
         self.info = info
         self.considerations = considerations
+        
 
     def __str__(self):
         s = ''

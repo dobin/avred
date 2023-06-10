@@ -89,7 +89,7 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
         type = a.get('type', '')
         disasm = a.get('disasm', '')
         size = a.get('size', 0)
-        bytes = a.get('bytes', b'')
+        rawBytes = bytes(a.get('bytes', ''), 'utf-8')
     
         asmInstruction = AsmInstruction(
             asmFileOffset,
@@ -98,7 +98,7 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
             type,
             disasm,
             size,
-            bytes)
+            rawBytes)
         matchAsmInstructions.append(asmInstruction)
 
     virtAddrDisasm -= moreUiLines
@@ -128,7 +128,7 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
             textHtml, 
         )
         matchDisasmLines.append(disasmLine)
-        
+
     return matchAsmInstructions, matchDisasmLines
 
 
