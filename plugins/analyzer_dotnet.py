@@ -49,7 +49,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
 
     s = ''
     for section in filePe.sectionsBag.sections:
-        s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
+        s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             section.name, section.addr, section.virtaddr, section.size, section.scan)
     return s
 

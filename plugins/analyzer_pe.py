@@ -64,7 +64,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # file structure
     s = ''
     for matchSection in filePe.sectionsBag.sections:
-        s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scanned:{4}\n".format(
+        s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
 
