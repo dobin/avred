@@ -139,7 +139,10 @@ class SectionsBag:
             print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
 
 
-gpRegisters = [ 'rax','rbx','rcx','rdx','rsi','rdi','r8','r9','r10','r11','r12','r13','r14','r15' ]
+gpRegisters = [ 
+    'eax','ebx','ecx','edx','esi','edi',  # make sure we also check 32 bit
+    'rax','rbx','rcx','rdx','rsi','rdi',
+    'r8','r9','r10','r11','r12','r13','r14','r15' ]
 class AsmInstruction():
     def __init__(self, fileOffset, rva, esil, type, disasm, size, rawBytes):
         self.offset = fileOffset  # offset in file
@@ -332,7 +335,7 @@ class OutflankPatch():
 
         self.info = info
         self.considerations = considerations
-        
+
 
     def __str__(self):
         s = ''

@@ -8,11 +8,6 @@ from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from utils import removeAnsi
 
-class PossiblePatch():
-    def __init__(self, offset, matchId):
-        self.offset = offset
-        self.matchId = matchId
-
 
 def outflankPe(
         filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
@@ -28,7 +23,7 @@ def outflankPe(
         while n < len(match.asmInstructions) - 1:
             asm = match.asmInstructions[n]
             nextAsm = match.asmInstructions[n+1]
-            print(asm)
+            #print(asm)
 
             if (asm.type == "nop" and nextAsm.type == "nop") or (asm.type=="int3" and nextAsm.type == "int3"):
                 if not asm.registersTouch(nextAsm):
@@ -45,7 +40,7 @@ def outflankPe(
                     results.append(outflankPatch)
                     n += 1  # skip nextAsm
 
-            if (asm.type == "mov" and nextAsm.type == "mov") or (asm.type=="lea" and nextAsm.type == "lea"):
+            if (asm.type == "mov" or asm.type == "lea" or asm.type == "xor") and (nextAsm.type=="mov" or nextAsm.type == "lea"  or nextAsm.type == "xor"):
                 if not asm.registersTouch(nextAsm):
                     toPatch = nextAsm.rawBytes + asm.rawBytes
                     outflankPatch = OutflankPatch(
@@ -68,7 +63,8 @@ def outflankPe(
     ret = []
     data: Data = filePe.DataCopy()
     for patch in results:
-        print("Patch location {} with: {}  -> {}".format(patch.offset, patch.replaceBytes, patch.info))
+        print("Match {} patch location {} with: {}  -> {}".format(
+            patch.matchIdx,  hex(patch.offset), patch.replaceBytes, patch.info))
         data.patchData(patch.offset, patch.replaceBytes)
         ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
@@ -79,5 +75,8 @@ def outflankPe(
     
     # fail
     logging.info("Outflank failed with attempted {} patches".format(len(results)))
+    #with open("test2-patched.exe", "wb") as f:
+    #    f.write(data.getBytes())
+
     return []
 

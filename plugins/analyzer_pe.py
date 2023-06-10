@@ -85,11 +85,16 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
         asmVirtAddr = int(a['offset'])
         asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
 
+        if asmFileOffset > fileOffset + sizeDisasm:
+            # we print number of assembly instructions, not bytes,
+            # as bytes will possibly garble last decoded asm instruction
+            break
+
         esil = a.get('esil', '')
         type = a.get('type', '')
         disasm = a.get('disasm', '')
         size = a.get('size', 0)
-        rawBytes = bytes(a.get('bytes', ''), 'utf-8')
+        rawBytes = bytes.fromhex(a.get('bytes', ''))
     
         asmInstruction = AsmInstruction(
             asmFileOffset,
