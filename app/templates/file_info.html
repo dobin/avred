@@ -1,40 +1,56 @@
 <div class="indent">
 
-<h2>Info</h2>
+<h2>File {{outcome.fileInfo.name}}</h2>
 
-<table class="table">
-    <tr>
-        <td>Name: </td>
-        <td>
-            {{outcome.fileInfo.name}}
-        </td>
-    </tr><tr>
-        <td>Size: </td>
-        <td>{{outcome.fileInfo.size|prettynumber}} bytes</td>
-    </tr><tr>
-        <td>Type: </td>
-        <td>{{outcome.fileInfo.ident}}</td>
-    </tr><tr>
-        <td>MD5: </td>
-        <td>{{outcome.fileInfo.hash|hex}}</td>
-    </tr><tr>
-        <td>Scan date: </td>
-        <td>{{outcome.scanTime|mydate}}</td>
-    </tr><tr>
-        <td>Scanner Name: </td>
-        <td>{{outcome.scannerName}}</td>
-    </tr><tr>
-        <td>Scanner Info: </td>
-        <td>{{outcome.scannerInfo}}</td>
-    </tr><tr>
-        <td>Appraisal: </td>
-        <td>{{outcome.appraisal.value}} based</td>
-    </tr><tr>
-        <td>is Detected: </td>
-        <td>{{outcome.isDetected}}</td>
-    </tr>
+<div class="container">
+    <div class="row">
+      <div class="col-sm">
 
-</table>
+        <table class="table">
+            <tr>
+                <td>Name: </td>
+                <td>
+                    {{outcome.fileInfo.name}}
+                </td>
+            </tr><tr>
+                <td>Size: </td>
+                <td>{{outcome.fileInfo.size|prettynumber}} bytes</td>
+            </tr><tr>
+                <td>Type: </td>
+                <td>{{outcome.fileInfo.ident}}</td>
+            </tr><tr>
+                <td>MD5: </td>
+                <td>{{outcome.fileInfo.hash|hex}}</td>
+            </tr><tr>
+                <td>Scan date: </td>
+                <td>{{outcome.scanTime|mydate}}</td>
+            </tr>
+        
+        </table>
+        
+      </div>
+      <div class="col-sm">
+
+        <table class="table">
+            <tr>
+                <td>Scanner Name: </td>
+                <td>{{outcome.scannerName}}</td>
+            </tr><tr>
+                <td>Scanner Info: </td>
+                <td>{{outcome.scannerInfo}}</td>
+            </tr><tr>
+                <td>Appraisal: </td>
+                <td>{{outcome.appraisal.value}} based</td>
+            </tr><tr>
+                <td>is Detected: </td>
+                <td>{{outcome.isDetected}}</td>
+            </tr>
+        
+        </table>
+        
+      </div>
+    </div>
+  </div>
 
 {% if outcome.isScanned and not outcome.isDetected %}
 File is not detected by AV.
@@ -47,6 +63,7 @@ File is not detected by AV.
         <th>Match ID</th>
         <th>Offset</th>
         <th>Info</th>
+        <th>Patch</th>
         <th>Considereations</th>
     </tr>
     {% for patch in outcome.outflankPatches %}
@@ -54,6 +71,10 @@ File is not detected by AV.
         <td>{{patch.matchIdx}}</td>
         <td>{{patch.offset}}</td>
         <td>{{patch.info}}</td>
+        <td>
+<pre>{{patch.asmOne.offset|hexint}}: {{patch.asmOne.disasm}}
+{{patch.asmTwo.offset|hexint}}: {{patch.asmTwo.disasm}}</pre>
+        </td>
         <td>{{patch.considerations}}</td>
     </tr>
     {% endfor %}
