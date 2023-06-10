@@ -13,6 +13,8 @@ def outflankPe(
         filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
 ) -> List[OutflankPatch]:
     results: List[OutflankPatch] = []
+    useTypes = [ 'mov', 'lea', 'xor', 'and', 'inc', 'cmp' ]
+    blacklist = [ 'clc' ]
 
     for idx, match in enumerate(matches):
         #if matchConclusion.verifyStatus[idx] != VerifyStatus.GOOD:
@@ -25,7 +27,7 @@ def outflankPe(
             nextAsm = match.asmInstructions[n+1]
             #print(asm)
 
-            if (asm.type == "nop" and nextAsm.type == "nop") or (asm.type=="int3" and nextAsm.type == "int3"):
+            if (asm.disasm == "nop" and nextAsm.disasm == "nop") or (asm.disasm == "int3" and nextAsm.disasm == "int3"):
                 if not asm.registersTouch(nextAsm):
                     toPatch = nextAsm.rawBytes + asm.rawBytes
                     outflankPatch = OutflankPatch(
@@ -40,7 +42,12 @@ def outflankPe(
                     results.append(outflankPatch)
                     n += 1  # skip nextAsm
 
-            if (asm.type == "mov" or asm.type == "lea" or asm.type == "xor") and (nextAsm.type=="mov" or nextAsm.type == "lea"  or nextAsm.type == "xor"):
+            if asm.type in useTypes and nextAsm.type in useTypes:
+                # some commands with inappropriate types should not be used
+                if asm.disasm in blacklist or nextAsm.disasm in blacklist:
+                    n += 1
+                    continue
+
                 if not asm.registersTouch(nextAsm):
                     toPatch = nextAsm.rawBytes + asm.rawBytes
                     outflankPatch = OutflankPatch(
@@ -63,8 +70,8 @@ def outflankPe(
     ret = []
     data: Data = filePe.DataCopy()
     for patch in results:
-        print("Match {} patch location {} with: {}  -> {}".format(
-            patch.matchIdx,  hex(patch.offset), patch.replaceBytes, patch.info))
+        print("Match {} offset {}: {} <-> {}   ({})".format(
+            patch.matchIdx,  hex(patch.offset), patch.asmOne.disasm, patch.asmTwo.disasm, patch.info))
         data.patchData(patch.offset, patch.replaceBytes)
         ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
