@@ -141,6 +141,9 @@ class SectionsBag:
 
 gpRegisters = [ 
     'eax','ebx','ecx','edx','esi','edi',  # make sure we also check 32 bit
+    'al','bl','cl','dl',  # and these.. argh
+    'ah','bh','ch','dh', # and these.. argh
+
     'rax','rbx','rcx','rdx','rsi','rdi',
     'r8','r9','r10','r11','r12','r13','r14','r15' ]
 class AsmInstruction():
