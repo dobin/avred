@@ -31,7 +31,7 @@ class PluginFileFormat():
     def Data(self) -> Data:
         return self.data
     
-    
+
     def DataCopy(self) -> Data:
         return copy.deepcopy(self.data)
 
@@ -52,6 +52,10 @@ class PluginFileFormat():
             self.fileData = Data(f.read())
 
         return self.parseFile()
+    
+    def saveToFile(self, filepath: str):
+        with open(filepath, "wb") as f:
+            f.write(self.fileData.getBytes())
 
 
     def loadFromMem(self, data: bytes, filename: str) -> bool:
