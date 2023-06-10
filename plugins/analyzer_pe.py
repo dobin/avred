@@ -70,35 +70,21 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
 
 conv = Ansi2HTMLConverter()
-def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
-    baseAddr = filePe.baseAddr
-    matchSection = filePe.sectionsBag.getSectionByAddr(fileOffset)
+def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLines=16):
+    virtAddrDisasm = filePe.offsetToRva(fileOffset)
 
-    # Decompiling
-    # offset: of fileOffset from .text segment file offset
-    offset = fileOffset - matchSection.addr
-
-    # base=0x400000 + .text=0x1000 + offset=0x123
-    addrDisasm = baseAddr + matchSection.virtaddr + offset
-    sizeDisasm = size
     matchDisasmLines: List[UiDisasmLine] = []
     matchAsmInstructions: List[AsmInstruction] = []
 
-    MORE = 0
-    if moreUiLines:
-        MORE = 16
+    r2.cmd("e scr.color=2")
 
     # r2: Disassemble by bytes, no color escape codes, more data (like esil, type)
-    #r2.cmd("e scr.color=0")
-    asm = cmdcmd(r2, "pdj {} @{}".format(sizeDisasm, addrDisasm))
+    asm = cmdcmd(r2, "pdj {} @{}".format(sizeDisasm, virtAddrDisasm))
     asm = json.loads(asm)
     for a in asm:
-        offset = a['offset']
-        relOffset = offset - baseAddr - matchSection.virtaddr
-        isPart = False
-        if relOffset >= offset and relOffset < offset+size:
-            isPart = True
-        
+        asmVirtAddr = int(a['offset'])
+        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+
         esil = a.get('esil', '')
         type = a.get('type', '')
         disasm = a.get('disasm', '')
@@ -106,8 +92,8 @@ def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
         bytes = a.get('bytes', b'')
     
         asmInstruction = AsmInstruction(
-            relOffset + matchSection.addr,
-            int(a['offset']),
+            asmFileOffset,
+            asmVirtAddr,
             esil,
             type,
             disasm,
@@ -115,33 +101,34 @@ def disassemble(r2, filePe, fileOffset: int, size: int, moreUiLines=True):
             bytes)
         matchAsmInstructions.append(asmInstruction)
 
-    addrDisasm -= MORE
-    sizeDisasm += MORE
-
+    virtAddrDisasm -= moreUiLines
+    sizeDisasm += moreUiLines
     # r2: Disassemble by bytes, color
-    #r2.cmd("e scr.color=2")
-    asmColor = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, addrDisasm))
+    asmColor = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, virtAddrDisasm))
     asmColor = json.loads(asmColor)
     # ui disassemly lines
     for a in asmColor:
-        offset = a['offset']
-        relOffset = offset - baseAddr - matchSection.virtaddr
-        isPart = False
-        if relOffset >= offset and relOffset < offset+size:
+        asmVirtAddr = int(a['offset'])
+        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+
+        if asmFileOffset >= fileOffset and asmFileOffset <= asmFileOffset + sizeDisasm:
             isPart = True
+        else: 
+            isPart = False
         
-        # get disassembly with color
+        # get disassembly with ANSI color
         text = a['text']
         textHtml = conv.convert(text, full=False)
 
         disasmLine = UiDisasmLine(
-            relOffset + matchSection.addr, 
-            int(a['offset']),
+            asmFileOffset, 
+            asmVirtAddr,
             isPart,
             text, 
             textHtml, 
         )
         matchDisasmLines.append(disasmLine)
+        
     return matchAsmInstructions, matchDisasmLines
 
 
