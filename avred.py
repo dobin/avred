@@ -14,7 +14,7 @@ from verifier import verify
 from model.model import Outcome, Appraisal, Data
 from filehelper import FileType, FileInfo
 from utils import convertMatchesIt
-from scanner import ScannerRest
+from scanner import ScannerRest, ScannerYara
 from model.testverify import VerifyStatus
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
@@ -58,7 +58,15 @@ def main():
         logging.error(f"Could not find server with name '{args.server}' in config.json")
         exit(1)
     url = config.get("server")[args.server]
-    scanner = ScannerRest(url, args.server)
+
+    if url.startswith("http"):
+        scanner = ScannerRest(url, args.server)
+    elif url.startswith("yara"):
+        scanner = ScannerYara(url.replace("yara://", ""), args.server)
+    else:
+        logging.error("Not a valid URL, should start with http or yara: " + url)
+        return
+
     if args.uploads:
         scanUploads(args, scanner)
     else:

@@ -1,5 +1,6 @@
 import requests as req
 import logging
+import yara
 
 from model.extensions import Scanner
 
@@ -31,5 +32,30 @@ class ScannerRest(Scanner):
         except:
             logging.error("Scanner {} is not online at: {}".format(
                 self.scanner_name, self.scanner_path
+            ))
+            exit(1)
+
+
+class ScannerYara(Scanner):
+    def __init__(self, url, name):
+        self.scanner_path = url
+        self.scanner_name = name
+        
+
+    def scannerDetectsBytes(self, data: bytes, filename: str):
+        """Returns true if file is detected"""
+        rule = yara.compile(filepath=self.scanner_path)
+        matches = rule.match(data=data)
+        if len(matches) > 0:
+            return True
+        return False
+
+
+    def checkOnlineOrExit(self):
+        try:
+            rule = yara.compile(filepath=self.scanner_path)
+        except Exception as e:
+            logging.error("Scanner Yara failed for file {} error: {}".format(
+                self.scanner_path, e,
             ))
             exit(1)
