@@ -77,18 +77,19 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
     matchAsmInstructions: List[AsmInstruction] = []
 
     r2.cmd("e scr.color=2")
+    MORE = 32
 
     # r2: Disassemble by bytes, no color escape codes, more data (like esil, type)
-    asm = cmdcmd(r2, "pdj {} @{}".format(sizeDisasm, virtAddrDisasm))
+    asm = cmdcmd(r2, "pDj {} @{}".format(sizeDisasm+MORE, virtAddrDisasm-MORE))
     asm = json.loads(asm)
     for a in asm:
         asmVirtAddr = int(a['offset'])
         asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
 
-        if asmFileOffset > fileOffset + sizeDisasm:
+        if (asmFileOffset < fileOffset) or (asmFileOffset > fileOffset + sizeDisasm):
             # we print number of assembly instructions, not bytes,
             # as bytes will possibly garble last decoded asm instruction
-            break
+            continue
 
         esil = a.get('esil', '')
         type = a.get('type', '')
@@ -106,17 +107,23 @@ def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLine
             rawBytes)
         matchAsmInstructions.append(asmInstruction)
 
-    virtAddrDisasm -= moreUiLines
-    sizeDisasm += moreUiLines
+    # surrounding
     # r2: Disassemble by bytes, color
-    asmColor = cmdcmd(r2, "pDJ {} @{}".format(sizeDisasm, virtAddrDisasm))
+    asmColor = cmdcmd(r2, "pDJ {} @{}".format(
+        sizeDisasm+MORE+2*moreUiLines, 
+        virtAddrDisasm-MORE-moreUiLines))
     asmColor = json.loads(asmColor)
     # ui disassemly lines
     for a in asmColor:
         asmVirtAddr = int(a['offset'])
         asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
 
-        if asmFileOffset >= fileOffset and asmFileOffset <= asmFileOffset + sizeDisasm:
+        if (asmVirtAddr < (virtAddrDisasm-moreUiLines)) or (asmVirtAddr > (virtAddrDisasm + sizeDisasm + moreUiLines)):
+            # we print number of assembly instructions, not bytes,
+            # as bytes will possibly garble last decoded asm instruction
+            continue
+
+        if asmFileOffset >= fileOffset and asmFileOffset <= fileOffset + sizeDisasm:
             isPart = True
         else: 
             isPart = False

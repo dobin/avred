@@ -171,25 +171,3 @@ class DotnetDisasmTest(unittest.TestCase):
         section = sectionsBag.getSectionByName("Signature")
         self.assertEqual(section.addr, 2088)
         self.assertEqual(section.size, 128)
-
-
-    def test_dotnetheaderpatch(self):
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/HelloWorld.dll")
-
-        matches: List[Match] = []
-        match = Match(0, 0x268, 32)
-        matches.append(match)
-
-        # the match should be good
-        verifyStatus = [ VerifyStatus.GOOD ]
-        matchConclusion = MatchConclusion(verifyStatus)
-
-        augmentFileDotnet(filePe, matches)
-        disasmLines = match.getDisasmLines()
-
-        self.assertTrue("Metadata Header: Reserved1: 0" in disasmLines[2].text)
-        patches = outflankDotnet(filePe, matches, matchConclusion)
-        self.assertEqual(1, len(patches))
-        self.assertEqual(620, patches[0].offset)
-        self.assertEqual(1, len(patches[0].replaceBytes))

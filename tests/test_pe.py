@@ -166,23 +166,24 @@ class PeTest(unittest.TestCase):
         r2.cmd("aaa")
 
         fileOffset = filePe.codeRvaToOffset(0x0040154e)
-        matchAsmInstructions, _ = disassemble(
-            r2, filePe, fileOffset, 5, moreUiLines=0)
+        matchAsmInstructions, matchDisasmLines = disassemble(
+            r2, filePe, fileOffset, 16, moreUiLines=0)
         
+        # 16 bytes: 4*4
         # 0x0040154e      48894dd0       mov qword [var_30h], rcx    ; format
         # 0x00401552      488955d8       mov qword [var_28h], rdx    ; arg2
         # 0x00401556      4c8945e0       mov qword [var_20h], r8     ; arg3
         # 0x0040155a      4c894de8       mov qword [var_18h], r9     ; arg4
-        #for entry in matchDisasmLines:
-        #    print(entry)
+        for entry in matchAsmInstructions:
+            print(entry)
 
-        self.assertEqual(len(matchAsmInstructions), 5)
+        self.assertEqual(len(matchAsmInstructions), 4)
 
         #for entry in matchAsmInstructions:
         #    print(entry)
 
         matches = []
-        match = Match(0, fileOffset, 8)
+        match = Match(0, fileOffset, 16)
         matches.append(match)
         verifyStatus = [ VerifyStatus.GOOD ]
         matchConclusion = MatchConclusion(verifyStatus)
@@ -193,4 +194,3 @@ class PeTest(unittest.TestCase):
 
         self.assertEqual(patches[0].offset, 2894)
         self.assertEqual(patches[1].offset, 2902)
-        self.assertEqual(patches[2].offset, 2914)

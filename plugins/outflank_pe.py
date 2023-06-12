@@ -22,10 +22,9 @@ def outflankPe(
 
         asm: AsmInstruction
         n = 0
-        while n < len(match.asmInstructions) - 1:
+        while n < len(match.asmInstructions)-1:
             asm = match.asmInstructions[n]
             nextAsm = match.asmInstructions[n+1]
-            #print(asm)
 
             if (asm.disasm == "nop" and nextAsm.disasm == "nop") or (asm.disasm == "int3" and nextAsm.disasm == "int3"):
                 if not asm.registersTouch(nextAsm):
@@ -36,7 +35,7 @@ def outflankPe(
                         b"\x89\xc0", # mov eax, eax
                         asm,
                         nextAsm,
-                        "Replace NOP".format(),
+                        "Replace with 'mov eax, eax'".format(),
                         "."
                     )
                     results.append(outflankPatch)
@@ -56,8 +55,8 @@ def outflankPe(
                         toPatch,
                         asm,
                         nextAsm,
-                        "Swap {}".format(asm.type),
-                        "."
+                        "Swap",
+                        ""
                     )
                     results.append(outflankPatch)
                     n += 1  # skip nextAsm
