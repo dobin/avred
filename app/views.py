@@ -15,13 +15,17 @@ EXT_LOG = ".log"
 views = Blueprint('views', __name__)
 
 
-@views.route("/")
-def index():
+@views.before_request
+def before_request():
     # if no password is set, just login the user so he has access to his 
-    # /files (for @login_required api's)
+    # /files (for @login_required api's).
+    # thanks chatgpt
     if current_app.config["PASSWORD"] == "":
         login_user(user = load_user('1'))
 
+
+@views.route("/")
+def index():
     examples = os.listdir("app/examples/")
     return render_template('index.html', examples=examples)
 
