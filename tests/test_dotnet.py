@@ -1,6 +1,6 @@
 import unittest
 from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
-from plugins.dncilparser import IlMethod
+from plugins.dncilparser import IlMethod, DncilParser
 from model.model import Match
 from model.testverify import MatchConclusion, VerifyStatus
 from plugins.file_pe import FilePe
@@ -19,7 +19,7 @@ class DotnetDisasmTest(unittest.TestCase):
         codeSize = 24
         rva = 0x209c
 
-        ilMethods = dncilParser.query(offset, offset+16)
+        ilMethods = dncilParser.getMethods(offset, offset+16)
         self.assertEqual(len(ilMethods), 1)
         ilMethod = ilMethods[0]
 
@@ -159,6 +159,17 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertTrue("Stream Header: Offset: 108" in uiDisasmLines[0].text)
         self.assertTrue("Stream Header: Size: 424" in uiDisasmLines[1].text)
 
+
+    def test_dotnet_method_headers(self):
+        dncilParser = DncilParser("testing/sharp/Seatbelt.exe")
+        #for idx, m in enumerate(dncilParser.methods):
+        #    print(str(idx) + ": " + str(m.ilMethodHeaderFat))
+        # 4: Fat Header: size:3 flags:4 maxStack:3 codeSize:89 localVarSigTok:285212673
+        self.assertGreater(len(dncilParser.methods), 4)
+        fat = dncilParser.methods[4].ilMethodHeaderFat
+        self.assertIsNotNone(fat)
+        self.assertTrue(fat.maxStack, 3)
+        self.assertTrue(fat.codeSize, 89)
 
 
     def test_dotnetsections_signed(self):

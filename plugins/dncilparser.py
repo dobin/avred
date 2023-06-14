@@ -11,6 +11,9 @@ import struct
 from intervaltree import Interval, IntervalTree
 from typing import List
 import logging
+import struct
+from bitstring import Bits, BitArray, BitStream, pack
+
 
 # key token indexes to dotnet meta tables
 DOTNET_META_TABLES_BY_INDEX = {table.value: table.name for table in MetadataTables}
@@ -115,6 +118,77 @@ class IlInstruction():
         return s
 
 
+class IlMethodHeaderFat():
+    def __init__(self, headerBytes: bytes, methodOffset: int):
+        self.headerBytes = headerBytes
+        self.offset = methodOffset
+
+        self.hdrOther = None
+        self.size = None
+        self.flags = None
+        self.type = None
+        self.maxStack = None
+        self.codeSize = None
+        self.localVarSigTok = None
+
+        self.parse(headerBytes)
+
+
+    def parse(self, headerBytes: bytes):
+        # swap first two bytes
+        #c = struct.unpack('<H', a[0:2])[0]
+        c = headerBytes[1:2] + headerBytes[0:1]
+        cc = BitStream(c)
+        self.size = cc.read('uint4')
+        self.flags = cc.read('uint10')
+        self.type = cc.read('uint2')
+        self.maxStack = struct.unpack('<H', headerBytes[2:4])[0]
+        self.codeSize = struct.unpack('<I', headerBytes[4:8])[0]
+        self.localVarSigTok = struct.unpack('<I', headerBytes[8:12])[0]
+
+
+    def toIlMethod(self):
+        ret = []
+
+        # first two bytes
+        ilText = '  '
+        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[:2]) : <20}"
+        ilText += f"MethodHeader: Size:{self.size}  Flags:{self.flags}  Type:{self.type}"
+        ilInstruction = IlInstruction(self.offset, 0, 0, ilText)
+        ret.append(ilInstruction)
+
+        # maxStack
+        ilText = '  '
+        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[2:4]) : <20}"
+        ilText += f"MethodHeader: maxStack: {self.maxStack}"
+        ilInstruction = IlInstruction(self.offset+2, 2, 0, ilText)
+        ret.append(ilInstruction)
+        
+        # codesize
+        ilText = '  '
+        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[4:8]) : <20}"
+        ilText += f"MethodHeader: codeSize: {self.codeSize}"
+        ilInstruction = IlInstruction(self.offset+4, 4, 0, ilText)
+        ret.append(ilInstruction)
+
+        # localvar
+        ilText = '  '
+        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[8:12]) : <20}"
+        ilText += f"MethodHeader: localVarSigTok: {self.localVarSigTok}"
+        ilInstruction = IlInstruction(self.offset+8, 8, 0, ilText)
+        ret.append(ilInstruction)
+
+        return ret
+
+
+    def __str__(self):
+        s = ''
+        s += "Fat Header: size:{} flags:{} maxStack:{} codeSize:{} localVarSigTok:{}".format(
+            self.size, self.flags, self.maxStack, self.codeSize, self.localVarSigTok
+        )
+        return s
+
+
 class IlMethod():
     def __init__(self, offset, rva, codeSize, name):
         self.name = name
@@ -124,6 +198,7 @@ class IlMethod():
         self.headerSize = None
         self.className = ''
         self.instructions = []
+        self.ilMethodHeaderFat = None  # None if MethodHeader is not fat
 
     def setName(self, name, className=''):
         self.name = name
@@ -162,6 +237,9 @@ class IlMethod():
     def addInstruction(self, ilInstruction: IlInstruction):
         self.instructions.append(ilInstruction)
 
+    def setIlMethodHeaderFat(self, ilMethodHeaderFat: IlMethodHeaderFat):
+        self.ilMethodHeaderFat = ilMethodHeaderFat
+
     def __str__(self):
         s = ''
         s += "Func {}::{} at offset {} with size {}\n".format(
@@ -178,7 +256,7 @@ class IlMethod():
 
 class DncilParser():
     def __init__(self, path):
-        self.methods = []
+        self.methods: List[IlMethod] = []
         self.methodsIt = IntervalTree()
 
         pe: dnPE = dnfile.dnPE(path)
@@ -205,19 +283,21 @@ class DncilParser():
             logging.debug("  RVA: _{:X}_  Offset: {:X}".format(row.Rva, methodOffset))
             logging.debug("   codeSize: {}".format(ilMethod.getCodeSize))
 
-            flag = False
+            # method header parsing
+            headerIlMethodFat = self.parseDotNetHeader(body.raw_bytes[:12], methodOffset)
+            ilMethod.setIlMethodHeaderFat(headerIlMethodFat)
+            if ilMethod.ilMethodHeaderFat is None:
+                ilMethod.setHeaderSize(1)
+            if ilMethod.ilMethodHeaderFat is not None:
+                ilMethod.setHeaderSize(12)
+                headerIlMethods = ilMethod.ilMethodHeaderFat.toIlMethod()
+                for m in headerIlMethods:
+                    ilMethod.addInstruction(m)
+
             for insn in body.instructions:
                 offset = pe.get_rva_from_offset(insn.offset) - row.Rva
                 rva = row.Rva + insn.offset
 
-                # headerSize is offset of first instruction
-                if flag is False:
-                    headerSize = offset
-                    ilMethod.setHeaderSize(headerSize)
-                    flag = True
-
-                #ilText = "{:04X}".format(offset)
-                #ilText += "    "
                 ilText = '  '
                 ilText += f"{' '.join('{:02x}'.format(b) for b in insn.get_bytes()) : <20}"
                 ilText += f"{str(insn.opcode) : <15}"
@@ -241,12 +321,25 @@ class DncilParser():
                 self.methodsIt.add(methodIt)
 
 
-    def query(self, begin, end) -> List[IlMethod]:
-
-        # methods
+    def getMethods(self, begin, end) -> List[IlMethod]:
         res = self.methodsIt.overlap(begin, end)
         if len(res) == 0:
             return None
         res = [r[2] for r in res]
-
         return res
+
+
+    def parseDotNetHeader(self, headerBytes: bytes, methodOffset:int):
+        b = BitStream(headerBytes)
+        hdrOther = b.read('uint6')
+        hdrType = b.read('uint2')
+
+        if hdrType == 0x2:
+            #print("Tiny header, size: {} bytes".format(hdrOther))
+            self.ilMethodHeaderFat = None
+            return None
+
+        if hdrType == 0x3:
+            return IlMethodHeaderFat(headerBytes, methodOffset)
+                
+

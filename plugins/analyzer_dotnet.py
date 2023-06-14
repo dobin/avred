@@ -11,6 +11,7 @@ from dotnetfile import DotNetPE
 from dotnetfile.structures import DOTNET_CLR_HEADER
 from dotnetfile.parser import DOTNET_STREAM_HEADER
 from dotnetfile.util import BinaryStructureField, FileLocation
+from plugins.dncilparser import IlMethod
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
@@ -130,7 +131,7 @@ def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser
     uiDisasmLines: List[UiDisasmLine] = []  # all diasassmbled IL
     methodNames: Set[str] = set()  # a set with unique function names
 
-    ilMethods = dncilParser.query(offset, offset+size)
+    ilMethods = dncilParser.getMethods(offset, offset+size)
     if ilMethods is None or len(ilMethods) == 0:
         #logging.debug("No disassembly found for {:X}", offset)
         return [], ''
@@ -147,6 +148,7 @@ def getDotNetDisassemblyMethods(offset: int, size: int, dncilParser: DncilParser
 
     intervalMatch = Interval(offset, offset+size)
     # check each disassembled function if it contains instructions for our offset
+    ilMethod: IlMethod
     for ilMethod in sorted(ilMethods):
         intervalMethod = Interval(ilMethod.getOffset(), ilMethod.getOffset() + ilMethod.getSize())
         # check if this method contains part of the data
