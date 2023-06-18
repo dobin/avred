@@ -6,6 +6,9 @@ from typing import List
 from model.model import *
 from model.extensions import PluginFileFormat
 
+# Middle: 8
+# Thirds: 4 * 2
+MATCH_SIZE_CUTOFF = 16
 
 def toTestEntry(scanIndex, result):
     scanResult = ScanResult.NOT_SCANNED
@@ -43,30 +46,24 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     matchCount = len(verifications[0].matchTests)
     idx = 0
     while idx < matchCount:
-        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult
-        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
-            middle8 = True
-        else:
-            middle8 = False
-        
-        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.THIRDS8)[idx].scanResult
-        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
-            thirds8 = True
-        else:
-            thirds8 = False
+        middleRes = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult
+        thirdsRes = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.THIRDS4)[idx].scanResult
+        fullRes = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult
 
-        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult
-        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
-            full = True
-        else:
-            full = False
-
-        if middle8 or thirds8:
+        # very weak signature
+        if middleRes == ScanResult.NOT_DETECTED and thirdsRes == ScanResult.NOT_DETECTED:
             res = VerifyStatus.GOOD
-        elif full:
-            res = VerifyStatus.OK
-        else:
+
+        # for small signatures, ignore MIDDLE/THIRDS and just make result depend on FULL
+        elif middleRes == ScanResult.NOT_SCANNED and thirdsRes == ScanResult.NOT_SCANNED and fullRes == ScanResult.NOT_DETECTED:
+            res = VerifyStatus.GOOD
+
+        elif fullRes == ScanResult.DETECTED:
             res = VerifyStatus.BAD
+
+        else:
+            res = VerifyStatus.OK
+
 
         verifyResults.append(res)
         idx += 1
@@ -89,7 +86,7 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
         matchOrder=TestMatchOrder.ISOLATED,
         matchModify=TestMatchModify.MIDDLE8)
     for match in matches:
-        if match.size < (2*8):
+        if match.size < MATCH_SIZE_CUTOFF:
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         fileCopy = deepcopy(file)
@@ -104,16 +101,16 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
     verificationRun = VerificationEntry(
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ISOLATED,
-        matchModify=TestMatchModify.THIRDS8)
+        matchModify=TestMatchModify.THIRDS4)
     for match in matches:
-        if match.size < (3*8):
+        if match.size < MATCH_SIZE_CUTOFF:
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         fileCopy = deepcopy(file)
-        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 4
-        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 4
-        fileCopy.Data().hidePart(offset1, 8, fillType=FillType.lowentropy)
-        fileCopy.Data().hidePart(offset2, 8, fillType=FillType.lowentropy)
+        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 2
+        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 2
+        fileCopy.Data().hidePart(offset1, 4, fillType=FillType.lowentropy)
+        fileCopy.Data().hidePart(offset2, 4, fillType=FillType.lowentropy)
         result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
         verificationRun.matchTests.append(toTestEntry('', result))
     verificationRuns.append(verificationRun)
@@ -158,7 +155,7 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
     )
     fileCopy = deepcopy(file)
     for match in matches:
-        if match.size < (2*8):
+        if match.size < MATCH_SIZE_CUTOFF:
             verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
             continue
         offset = match.fileOffset + int((match.size) // 2) - 4
@@ -204,11 +201,17 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
         matchModify=TestMatchModify.MIDDLE8)
     fileCopy = deepcopy(file)
     for match in matches:
+        if match.size < MATCH_SIZE_CUTOFF:
+            # no need to a matchTest, as it is done later
+            continue
         offset = match.fileOffset + int((match.size) // 2) - 4
         fileCopy.Data().hidePart(offset, 8, fillType=FillType.lowentropy)
     result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
     for match in matches:
-        verificationRun.matchTests.append(toTestEntry(0, result))
+        if match.size < MATCH_SIZE_CUTOFF:
+            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
+        else:
+            verificationRun.matchTests.append(toTestEntry(0, result))
     verificationRun.matchTests = list(reversed(verificationRun.matchTests))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
@@ -217,16 +220,22 @@ def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> L
     verificationRun = VerificationEntry(
         index=len(verificationRuns), 
         matchOrder=TestMatchOrder.ALL,
-        matchModify=TestMatchModify.THIRDS8)
+        matchModify=TestMatchModify.THIRDS4)
     fileCopy = deepcopy(file)
     for match in matches:
-        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 4
-        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 4
-        fileCopy.Data().hidePart(offset1, 8, fillType=FillType.lowentropy)
-        fileCopy.Data().hidePart(offset2, 8, fillType=FillType.lowentropy)
+        if match.size < MATCH_SIZE_CUTOFF:
+            # no need to a matchTest, as it is done in the end
+            continue
+        offset1 = match.fileOffset + int( (match.size // 3) * 1) - 2
+        offset2 = match.fileOffset + int( (match.size // 3) * 2) - 2
+        fileCopy.Data().hidePart(offset1, 4, fillType=FillType.lowentropy)
+        fileCopy.Data().hidePart(offset2, 4, fillType=FillType.lowentropy)
     result = scanner.scannerDetectsBytes(fileCopy.DataAsBytes(), file.filename)
     for match in matches:
-        verificationRun.matchTests.append(toTestEntry(0, result))
+        if match.size < MATCH_SIZE_CUTOFF:
+            verificationRun.matchTests.append(MatchTest('', ScanResult.NOT_SCANNED))
+        else:
+            verificationRun.matchTests.append(toTestEntry(0, result))
     verificationRun.matchTests = list(reversed(verificationRun.matchTests))
     verificationRuns.append(verificationRun)
     logging.info("Verification run: {}".format(verificationRun))
