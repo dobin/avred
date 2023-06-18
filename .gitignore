@@ -7,6 +7,6 @@ files/
 bak/
 testing/
 stuff/
-app/upload/*.*
-app/examples/*.*
+app/upload/**
+app/examples/**
 doc/todo.txt
