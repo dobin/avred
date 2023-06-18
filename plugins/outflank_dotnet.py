@@ -14,6 +14,9 @@ def outflankDotnet(
 ) -> List[OutflankPatch]:
     results: List[OutflankPatch] = []
 
+    if len(matches) == 0:
+        return []
+
     # Metadata header patch
     # 0x25fa4: 00 00 00 00         Metadata Header: Reserved1: 0
     metadataPatch = False
@@ -47,7 +50,9 @@ def outflankDotnet(
             outflankPatch = OutflankPatch(
                 matchIdx,
                 addr, 
-                b"\x01", 
+                b"\x01",
+                "",
+                "",
                 "Modify Metadata Header: Reserved1 field", 
                 "Very reliable, no side effects, but may be sigged in the future")
             results.append(outflankPatch)
