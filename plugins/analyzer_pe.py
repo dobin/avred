@@ -156,11 +156,11 @@ def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText
     detected_sections = []
     if isolate:
         logging.info("Section Detection: Isolating sections (zero all others)")
-        scannerInfos.append('isolate-sections')
+        scannerInfos.append('zero-nontarget-sections')
         detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
         logging.info("Section Detection: Zero section (leave all others intact)")
-        scannerInfos.append('zero-sections')
+        scannerInfos.append('zero-target-section')
         detected_sections = findDetectedSections(filePe, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
@@ -182,7 +182,7 @@ def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText
             if ignoreText and section.name == '.text':
                 continue
 
-            logging.info(f"Launching bytes analysis on section {section.name}")
+            logging.info(f"Launching bytes analysis on section: {section.name}")
             match = reducer.scan(
                 offsetStart=section.addr, 
                 offsetEnd=section.addr+section.size)
