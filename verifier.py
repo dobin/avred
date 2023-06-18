@@ -43,9 +43,23 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     matchCount = len(verifications[0].matchTests)
     idx = 0
     while idx < matchCount:
-        middle8 = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult is ScanResult.NOT_DETECTED
-        thirds8 = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.THIRDS8)[idx].scanResult is ScanResult.NOT_DETECTED
-        full = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult is ScanResult.NOT_DETECTED
+        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)[idx].scanResult
+        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
+            middle8 = True
+        else:
+            middle8 = False
+        
+        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.THIRDS8)[idx].scanResult
+        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
+            thirds8 = True
+        else:
+            thirds8 = False
+
+        result = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)[idx].scanResult
+        if result is ScanResult.NOT_DETECTED or result is ScanResult.NOT_SCANNED:
+            full = True
+        else:
+            full = False
 
         if middle8 or thirds8:
             res = VerifyStatus.GOOD
