@@ -8,7 +8,7 @@ from copy import deepcopy
 
 from utils import *
 
-SIG_SIZE = 128
+SIG_SIZE = 8 # minimum size of a match
 PRINT_DELAY_SECONDS = 1
 
 
@@ -45,7 +45,7 @@ class Reducer():
         #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
 
         if chunkSize < 2:
-            logging.debug(f"Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
+            logging.warn(f"--> Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
             return
 
         dataChunkTopNull = deepcopy(data)
@@ -61,34 +61,24 @@ class Reducer():
             # Both halves are detected
             # Continue scanning both halves independantly, but with each other halve
             # zeroed out (instead of the complete file)
-            #logging.debug("--> Both halves are detected!")
-            
             self._scanSection(dataChunkBotNull, sectionStart, sectionStart+chunkSize, it)
             self._scanSection(dataChunkTopNull, sectionStart+chunkSize, sectionEnd, it)
 
         elif not detectTopNull and not detectBotNull:
             # both parts arent detected anymore
 
-            if chunkSize < SIG_SIZE:
-                # Small enough, no more detections
-                #logging.debug("No more detection")
+            if chunkSize <= SIG_SIZE:
+                # Small enough, no more detections.
+                # The "previous" section is our match
                 dataBytes = data.getBytesRange(sectionStart, sectionStart+size)
                 logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" 
                              + "\n" + hexdmp(dataBytes, offset=sectionStart))
                 it.add ( Interval(sectionStart, sectionStart+size) )
             else: 
-                # make it smaller still. Take complete data (not nulled)
-                #logging.debug("--> No detections anymore, but too big. Continue anyway...")
+                # make it smaller still. 
+                # Take complete data (not nulled)
                 self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
                 self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
-
-            #print("TopNull:")
-            #data = chunkBotNull[sectionStart:sectionStart+chunkSize]
-            #print(hexdump.hexdump(data, result='return'))
-
-            #print("BotNull:")
-            #data = chunkTopNull[sectionStart+chunkSize:sectionStart+chunkSize+chunkSize]
-            #print(hexdump.hexdump(data, result='return'))
 
         elif not detectTopNull:
             # Detection in the top half
