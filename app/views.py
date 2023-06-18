@@ -46,7 +46,7 @@ def files():
 def files_results():
     filepaths = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
     outcomes = []
-    for filepath in filepaths:
+    for filepath in sorted(filepaths):
         filepath = filepath[:-len(EXT_INFO)]
         outcome, _, errStr = getFileData(filepath)
         if errStr is not None:
