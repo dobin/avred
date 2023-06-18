@@ -32,6 +32,11 @@ class Data():
 
     def getLength(self) -> int:
         return len(self._data)
+    
+
+    def hideMatches(self, matches: List[Match]):
+        for match in matches:
+            self.hidePart(match.fileOffset, match.size)
 
 
     def hidePart(self, offset: int, size: int, fillType: FillType=FillType.null):
@@ -275,7 +280,7 @@ class Outcome():
         self.fileInfo: FileInfo = fileInfo
         self.matches: List[Match] = []
         self.verification: Verification = None
-        self.matchesIt: IntervalTree = IntervalTree()
+        self.matchesIt: List[Interval] = []
         self.outflankPatches: List[OutflankPatch] = []
 
         self.isDetected: bool = False

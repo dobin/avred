@@ -40,12 +40,17 @@ class Reducer():
         chunkSize = int(size // 2)
         self._printStatus()
         
-        #logging.debug(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
-        #logging.debug(f"Testing Top: {sectionStart}-{sectionStart+chunkSize} (chunkSize {chunkSize} bytes)")
-        #logging.debug(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize} (chunkSize {chunkSize} bytes)")
+        #logging.info(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
+        #logging.info(f"Testing Top: {sectionStart}-{sectionStart+chunkSize}")
+        #logging.info(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize}")
 
         if chunkSize < 2:
-            logging.warn(f"--> Very small chunksize for a signature, weird. Ignoring. {sectionStart}-{sectionEnd}")
+            #logging.warn(f"--> Very small chunksize for a signature, weird {sectionStart}-{sectionEnd}")
+            if False:
+                dataBytes = data.getBytesRange(sectionStart, sectionEnd)
+                logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" 
+                                + "\n" + hexdmp(dataBytes, offset=sectionStart))
+                it.add ( Interval(sectionStart, sectionEnd) )
             return
 
         dataChunkTopNull = deepcopy(data)
@@ -58,6 +63,7 @@ class Reducer():
         detectBotNull = self._scanData(dataChunkBotNull)
 
         if detectTopNull and detectBotNull:
+            #logging.info("--> Both Detected")
             # Both halves are detected
             # Continue scanning both halves independantly, but with each other halve
             # zeroed out (instead of the complete file)
@@ -65,6 +71,7 @@ class Reducer():
             self._scanSection(dataChunkTopNull, sectionStart+chunkSize, sectionEnd, it)
 
         elif not detectTopNull and not detectBotNull:
+            #logging.info("--> Both UNdetected")
             # both parts arent detected anymore
 
             if chunkSize <= SIG_SIZE:
@@ -82,11 +89,11 @@ class Reducer():
 
         elif not detectTopNull:
             # Detection in the top half
-            logging.debug("--> Do Top")
+            #logging.info("--> Do Top")
             self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
         elif not detectBotNull:
             # Detection in the bottom half
-            logging.debug("--> Do Bot")
+            #logging.info("--> Do Bot")
             self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
 
         return

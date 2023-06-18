@@ -3,6 +3,7 @@ import json
 import os
 import base64
 import re
+from typing import List
 
 from model.model import Match
 from model.testverify import FillType
@@ -22,7 +23,7 @@ def saveMatchesToFile(filename, matches):
         json.dump(results, outfile)
 
 
-def printMatches(data, matches):
+def printMatches(data, matches: List[Match]):
     for i in matches:
         size = i.end - i.begin
         dataDump = data[i.begin:i.end]
@@ -33,8 +34,8 @@ def printMatches(data, matches):
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
 
 
-def convertMatchesIt(matchesIt):
-    matches = []
+def convertMatchesIt(matchesIt) -> List[Match]:
+    matches: List[Match] = []
     idx = 0
     for m in matchesIt:
         match = Match(idx, m.begin, m.end-m.begin)

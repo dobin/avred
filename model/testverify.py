@@ -28,7 +28,7 @@ class TestMatchModify(Enum):
     MIDDLE_32 = 3
     BEGIN = 4
     END = 5
-    THIRDS8 = 6
+    THIRDS4 = 6
 
     FULLB = 7
 

@@ -27,6 +27,7 @@ from plugins.file_plain import FilePlain
 from plugins.outflank_dotnet import outflankDotnet
 from plugins.outflank_pe import outflankPe
 from filehelper import *
+from copy import deepcopy
 
 
 def main():
@@ -159,17 +160,48 @@ def handleFile(filename, args, scanner):
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
 
+    # scan
     if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
-        outcome = scanFile(outcome, file, scanner, analyzer, analyzerOptions)
-        outcome.saveToFile(file.filepath)
 
-    if not outcome.isDetected or outcome.appraisal == Appraisal.Hash:
-        # no need to verify or augment if it is not detected
-        print("isDetected: {}".format(outcome.isDetected))
-        print("Appraisal: {}".format(outcome.appraisal))
-        return
-    
+        outcome.scanTime = datetime.datetime.now()
+        outcome.scannerName = scanner.scanner_name
+        outcome.isDetected = True
+        outcome.isScanned = True
+
+        # unmodified file detected?
+        if not scanIsDetected(file, scanner):
+            outcome.isDetected = False
+            outcome.appraisal = Appraisal.Undetected
+            print("isDetected: {}".format(outcome.isDetected))
+            outcome.saveToFile()
+            return
+        
+        # quick check hash
+        if scanIsHash(file, scanner):
+            print("Appraisal: {}".format(outcome.appraisal))
+            outcome.appraisal = Appraisal.Hash
+            outcome.saveToFile()
+            return
+        
+        logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
+        
+        # ready to go
+        isDetected = True
+        filePlay = deepcopy(file)  # leave original unmodified
+        while isDetected:
+            print("Scan:")
+            scanFile(outcome, filePlay, scanner, analyzer, analyzerOptions)
+            outcome.saveToFile(filePlay.filepath)
+
+            # apply matches
+            # TODO: will overwrite previously identified matches too, not just new ones
+            filePlay.Data().hideMatches(outcome.matches)
+
+            # try to identify matches until it is not detected anymore
+            if not scanIsDetected(filePlay, scanner):
+               break
+
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
@@ -189,45 +221,23 @@ def handleFile(filename, args, scanner):
     #print(outcome)
 
 
-def scanFile(outcome: Outcome, file: PluginFileFormat, scanner, analyzer, analyzerOptions):
-    matchesIt: List[Interval]
-
-    outcome.scanTime = datetime.datetime.now()
-    outcome.scannerName = scanner.scanner_name
-
-    # check if its really being detected first as a quick check
+def scanIsDetected(file: PluginFileFormat, scanner):
     detected = scanner.scannerDetectsBytes(file.DataAsBytes(), file.filename)
-    if not detected:
-        logging.error(f"QuickCheck: {file.filename} is not detected by {scanner.scanner_name}")
-        outcome.isDetected = False
-        outcome.isScanned = True
-        outcome.matchesIt = []
-        outcome.appraisal = Appraisal.Undetected
-        return outcome
-    
-    # pre check: defeat hash of binary (or scan would take very long for nothing)
-    if scanIsHash(file, scanner):
-        logging.info("QuickCheck: Signature is hash based")
-        outcome.isDetected = True
-        outcome.isScanned = True
-        outcome.matchesIt = [ ]
-        outcome.appraisal = Appraisal.Hash
-        return outcome
-    
-    logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
+    return detected
+
+
+def scanFile(outcome: Outcome, file: PluginFileFormat, scanner, analyzer, analyzerOptions):
+    #matchesIt: List[Interval]
+
     logging.info("Scanning for matches...")
-    outcome.isDetected = True
     matchesIt, scannerInfo = analyzer(file, scanner, analyzerOptions)
-    outcome.matchesIt = matchesIt
+    logging.info("Result: {} matches".format(len(matchesIt)))
+    outcome.matchesIt += matchesIt
     outcome.scannerInfo = scannerInfo
 
     # convert IntervalTree Matches
-    logging.info("Result: {} matches".format(len(matchesIt)))
     matches = convertMatchesIt(matchesIt)
-    outcome.matches = matches
-    outcome.isScanned = True
-
-    return outcome
+    outcome.matches += matches
 
 
 def verifyFile(outcome, file, scanner):
