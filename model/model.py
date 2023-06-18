@@ -58,7 +58,7 @@ class Data():
 
         self.patchData(offset, fill)
         if len(self._data) != origLen:
-            raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(data)))
+            raise Exception("patchData cant patch, different size: {} {}".format(origLen, len(self._data)))
     
 
     def patchData(self, offset: int, replace: bytes) -> bytes:
