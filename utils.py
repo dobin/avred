@@ -34,11 +34,11 @@ def printMatches(data, matches: List[Match]):
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
 
 
-def convertMatchesIt(matchesIt) -> List[Match]:
+def convertMatchesIt(matchesIt, iteration: int, baseIdx: int) -> List[Match]:
     matches: List[Match] = []
-    idx = 0
+    idx = 0 + baseIdx
     for m in matchesIt:
-        match = Match(idx, m.begin, m.end-m.begin)
+        match = Match(idx, m.begin, m.end-m.begin, iteration)
         matches.append(match)
         idx += 1
     return matches

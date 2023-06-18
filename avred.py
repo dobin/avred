@@ -189,9 +189,19 @@ def handleFile(filename, args, scanner):
         # ready to go
         isDetected = True
         filePlay = deepcopy(file)  # leave original unmodified
+        iteration = 0
+        MAX_ITERATIONS = 6
         while isDetected:
-            print("Scan:")
-            scanFile(outcome, filePlay, scanner, analyzer, analyzerOptions)
+            if iteration > MAX_ITERATIONS:
+                logging.error("{} iterations deep and still no end.. bailing out".format(MAX_ITERATIONS))
+                return
+
+            logging.info("Scanning for matches...")
+            matchesIt, scannerInfo = analyzer(filePlay, scanner, analyzerOptions)
+            logging.info("Result: {} matches".format(len(matchesIt)))
+            outcome.matchesIt += matchesIt
+            outcome.scannerInfo = scannerInfo
+            outcome.matches += convertMatchesIt(matchesIt, iteration, len(outcome.matches))
             outcome.saveToFile(filePlay.filepath)
 
             # apply matches
@@ -201,6 +211,8 @@ def handleFile(filename, args, scanner):
             # try to identify matches until it is not detected anymore
             if not scanIsDetected(filePlay, scanner):
                break
+
+            iteration += 1
 
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
@@ -224,20 +236,6 @@ def handleFile(filename, args, scanner):
 def scanIsDetected(file: PluginFileFormat, scanner):
     detected = scanner.scannerDetectsBytes(file.DataAsBytes(), file.filename)
     return detected
-
-
-def scanFile(outcome: Outcome, file: PluginFileFormat, scanner, analyzer, analyzerOptions):
-    #matchesIt: List[Interval]
-
-    logging.info("Scanning for matches...")
-    matchesIt, scannerInfo = analyzer(file, scanner, analyzerOptions)
-    logging.info("Result: {} matches".format(len(matchesIt)))
-    outcome.matchesIt += matchesIt
-    outcome.scannerInfo = scannerInfo
-
-    # convert IntervalTree Matches
-    matches = convertMatchesIt(matchesIt)
-    outcome.matches += matches
 
 
 def verifyFile(outcome, file, scanner):

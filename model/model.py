@@ -207,10 +207,11 @@ class UiDisasmLine():
     
 
 class Match():
-    def __init__(self, idx: int, fileOffset:int , size: int):
+    def __init__(self, idx: int, fileOffset:int , size: int, iteration: int):
         self.idx: int = idx
         self.fileOffset: int = fileOffset
         self.size: int = size
+        self.iteration = iteration
         
         self.data: bytes = b''
         self.dataHexdump: str = ''
