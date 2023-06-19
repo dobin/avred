@@ -40,7 +40,7 @@ def dumpLine(moduleData, modulename, lineStart, lineLength, endian, vbaVer, is64
         translatedOpcode = translateOpcode(opcode, vbaVer, is64bit)
         if not translatedOpcode in opcodes:
             disasmEntry += myPrint('Unrecognized opcode 0x{:04X} at offset 0x{:08X}.'.format(opcode, offset), file=output_file)
-            print(disasmEntry)
+            # print(disasmEntry)
             return
         instruction = opcodes[translatedOpcode]
         mnemonic = instruction['mnem']

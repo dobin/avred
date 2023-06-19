@@ -19,8 +19,8 @@ class ScannerRest(Scanner):
         jsonRes = res.json()
 
         if res.status_code != 200:
-            print("Err: " + str(res.status_code))
-            print("Err: " + str(res.text))
+            logging.error("Err: " + str(res.status_code))
+            logging.error("Err: " + str(res.text))
         
         ret_value = jsonRes['detected']
         return ret_value

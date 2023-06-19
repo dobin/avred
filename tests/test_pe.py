@@ -95,7 +95,7 @@ class PeTest(unittest.TestCase):
 
         matches, _ = analyzeFileExe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
-        self.assertTrue(len(matches) == 4)
+        self.assertEqual(len(matches), 4)
 
 
     def test_disasm(self):

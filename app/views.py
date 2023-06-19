@@ -102,7 +102,7 @@ def examples_list():
 
         outcome, fileInfo, errStr = getFileData(filepath)
         if errStr is not None:
-            print("Err: {} {}".format(example, errStr))
+            logging.error("Err: {} {}".format(example, errStr))
             continue
 
         outcomes.append(outcome)
@@ -154,7 +154,7 @@ def getFileData(filepath):
 
     # Main file (exe, docx etc.)
     if not os.path.isfile(filepath):
-        print("File does not exist: " + filepath)
+        logging.error("File does not exist: " + filepath)
         return None, None, 'File not found: ' + filepath
 
     # log file
