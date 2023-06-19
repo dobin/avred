@@ -14,6 +14,16 @@ It is mainly used to make it easier for RedTeamers to obfuscate their tools.
 
 Check it out: [avred.r00ted.ch](https://avred.r00ted.ch)
 
+
+## Comparison to ThreatCheck
+
+Compared to ThreatCheck, avred has multiple features:
+
+* Shows all matches, not just one. This 
+* Shows disassembly of matches
+* Shows relevance of match, so you can target the weakest one
+
+ 
 ## Background
 
 Most antivirus engines rely on strings or other bytes sequences to recognize malware.
