@@ -40,8 +40,25 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     """Do some analysis on the verifications, and return the result"""
     verifyResults = []
     if len(verifications) == 0:
-        matchConclusions = MatchConclusion(verifyResults)
-        return matchConclusions
+        matchConclusion = MatchConclusion(verifyResults)
+        return matchConclusion
+    
+    # check if robust:
+    #   no ISOLATED.FULL not detected
+    hasDominant = False
+    matchTests = getMatchTestsFor(verifications, TestMatchOrder.ISOLATED, TestMatchModify.FULL)
+    for matchTest in matchTests:
+        if matchTest.scanResult == ScanResult.NOT_DETECTED:
+            hasDominant = True
+            break
+    if not hasDominant:
+        # set all to ROBUST
+        for _ in verifications[0].matchTests:  # just iterate through it
+            res = VerifyStatus.ROBUST
+            verifyResults.append(res)
+        matchConclusion = MatchConclusion(verifyResults)
+        return matchConclusion
+
 
     matchCount = len(verifications[0].matchTests)
     idx = 0
@@ -58,9 +75,6 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
         elif middleRes == ScanResult.NOT_SCANNED and thirdsRes == ScanResult.NOT_SCANNED and fullRes == ScanResult.NOT_DETECTED:
             res = VerifyStatus.DOMINANT
 
-        elif fullRes != ScanResult.DETECTED:
-            res = VerifyStatus.ROBUST
-
         # incremental and stuff, just everything in between
         else:
             res = VerifyStatus.IRRELEVANT
@@ -69,8 +83,8 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
         verifyResults.append(res)
         idx += 1
 
-    matchConclusions = MatchConclusion(verifyResults)
-    return matchConclusions
+    matchConclusion = MatchConclusion(verifyResults)
+    return matchConclusion
 
 
 def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> List[VerificationEntry]: 
