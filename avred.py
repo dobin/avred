@@ -173,14 +173,14 @@ def handleFile(filename, args, scanner):
         if not scanIsDetected(file, scanner):
             outcome.isDetected = False
             outcome.appraisal = Appraisal.Undetected
-            print("isDetected: {}".format(outcome.isDetected))
+            logging.info("isDetected: {}".format(outcome.isDetected))
             outcome.saveToFile()
             return
         
         # quick check hash
         if scanIsHash(file, scanner):
             outcome.appraisal = Appraisal.Hash
-            print("Appraisal: {}".format(outcome.appraisal))
+            logging.info("Appraisal: {}".format(outcome.appraisal))
             outcome.saveToFile()
             return
         
@@ -251,11 +251,11 @@ def verifyFile(outcome, file, scanner):
     okCount = verification.matchConclusions.getCount(VerifyStatus.IRRELEVANT)
 
     if badCount == allCount:
-        outcome.appraisal = Appraisal.OrSig
+        outcome.appraisal = Appraisal.Robust
     elif (goodCount + okCount) == 1:
         outcome.appraisal = Appraisal.One
     elif (goodCount + okCount) > 1:
-        outcome.appraisal = Appraisal.AndSig
+        outcome.appraisal = Appraisal.Fragile
 
     return outcome
 
@@ -272,8 +272,8 @@ def outflankFile(outflank, outcome: Outcome, file, scanner):
     logging.info("Attempt to outflank the file")
     outflankPatches = outflank(file, outcome.matches, outcome.verification.matchConclusions, scanner)
 
-    for p in outflankPatches:
-        print("patch: " + str(p))
+    #for p in outflankPatches:
+    #    print("patch: " + str(p))
 
     outcome.outflankPatches = outflankPatches
     outcome.isOutflanked = True

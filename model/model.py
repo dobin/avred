@@ -83,8 +83,10 @@ class Appraisal(Enum):
     Undetected = "Undetected"
     Hash = "Hash"
     One = "One"
-    OrSig = "Or-Signature"
-    AndSig = "And-Signature"
+    OrSig = "Or-Signature" # TODO: delete
+    AndSig = "And-Signature" # TODO: delete
+    Robust = "Robust (OR)"
+    Fragile = "Fragile (AND)"
 
 
 @dataclass
