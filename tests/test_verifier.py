@@ -38,8 +38,8 @@ class VerifierTest(unittest.TestCase):
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
         self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
 
-        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.GOOD)
-        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.GOOD)
+        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.DOMINANT)
+        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.DOMINANT)
 
 
     def test_verifyresults_or(self):
@@ -74,5 +74,5 @@ class VerifierTest(unittest.TestCase):
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
         self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)
 
-        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.BAD)
-        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.BAD)
+        self.assertEqual(verification.matchConclusions.verifyStatus[0], VerifyStatus.ROBUST)
+        self.assertEqual(verification.matchConclusions.verifyStatus[1], VerifyStatus.ROBUST)

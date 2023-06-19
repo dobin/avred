@@ -22,7 +22,7 @@ def outflankDotnet(
     metadataPatch = False
     matchIdx = -1
     for idx, match in enumerate(matches):
-        if matchConclusion.verifyStatus[idx] != VerifyStatus.GOOD:
+        if matchConclusion.verifyStatus[idx] != VerifyStatus.DOMINANT:
             continue
 
         for line in match.disasmLines:
@@ -32,7 +32,7 @@ def outflankDotnet(
                 break
 
     # should be a good match
-    if matchConclusion.verifyStatus[matchIdx] != VerifyStatus.GOOD:
+    if matchConclusion.verifyStatus[matchIdx] != VerifyStatus.DOMINANT:
         return []
 
     # nothing found

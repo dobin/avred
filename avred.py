@@ -246,9 +246,9 @@ def verifyFile(outcome, file, scanner):
     outcome.isVerified = True
 
     allCount = len(verification.matchConclusions.verifyStatus)
-    badCount = verification.matchConclusions.getCount(VerifyStatus.BAD)
-    goodCount = verification.matchConclusions.getCount(VerifyStatus.GOOD)
-    okCount = verification.matchConclusions.getCount(VerifyStatus.OK)
+    badCount = verification.matchConclusions.getCount(VerifyStatus.ROBUST)
+    goodCount = verification.matchConclusions.getCount(VerifyStatus.DOMINANT)
+    okCount = verification.matchConclusions.getCount(VerifyStatus.IRRELEVANT)
 
     if badCount == allCount:
         outcome.appraisal = Appraisal.OrSig

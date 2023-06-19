@@ -36,9 +36,9 @@ class TestMatchModify(Enum):
 class VerifyStatus(Enum):
     """Conclusion of verification scans for VerifyConclusion"""
     UNKNOWN = 0
-    GOOD = 1
-    OK = 2
-    BAD = 3
+    DOMINANT = 1
+    IRRELEVANT = 2
+    ROBUST = 3
 
 
 class ScanResult(Enum):

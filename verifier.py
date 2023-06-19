@@ -52,18 +52,18 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
 
         # very weak signature
         if middleRes == ScanResult.NOT_DETECTED and thirdsRes == ScanResult.NOT_DETECTED:
-            res = VerifyStatus.GOOD
+            res = VerifyStatus.DOMINANT
 
         # for small signatures, ignore MIDDLE/THIRDS and just make result depend on FULL
         elif middleRes == ScanResult.NOT_SCANNED and thirdsRes == ScanResult.NOT_SCANNED and fullRes == ScanResult.NOT_DETECTED:
-            res = VerifyStatus.GOOD
+            res = VerifyStatus.DOMINANT
 
         elif fullRes != ScanResult.DETECTED:
-            res = VerifyStatus.BAD
+            res = VerifyStatus.ROBUST
 
         # incremental and stuff, just everything in between
         else:
-            res = VerifyStatus.OK
+            res = VerifyStatus.IRRELEVANT
 
 
         verifyResults.append(res)

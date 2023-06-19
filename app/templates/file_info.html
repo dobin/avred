@@ -86,6 +86,7 @@ File is not detected by AV.
 <table class="table">
     <tr>
         <th>#</th>
+        <th>Iteration</th>
         <th>Offset</th>
         <th>Size</th>
         <th>Section</th>
@@ -94,6 +95,7 @@ File is not detected by AV.
     {% for match in outcome.matches %}
     <tr>
         <td>{{match.idx}}</td>
+        <td>{{match.iteration}}</td>
         <td>{{match.fileOffset}}</td>
         <td>{{match.size}}</td>
         <td>{{match.sectionInfo}}</td>

@@ -1,12 +1,12 @@
 
 {% if outcome.isVerified and verifications != None %}
     {% for verifyStatus in outcome.verification.matchConclusions.verifyStatus %}
-        {% if verifyStatus|string == "VerifyStatus.BAD" %}
-        <td style="background-color:red">
-        {% elif verifyStatus|string == "VerifyStatus.OK" %}
-        <td style="background-color:orange">
-        {% elif verifyStatus|string == "VerifyStatus.GOOD" %}
-        <td style="background-color:green">
+        {% if verifyStatus|string == "VerifyStatus.IRRELEVANT" %}
+        <td style="background-color:rgb(157, 143, 143)">
+        {% elif verifyStatus|string == "VerifyStatus.DOMINANT" %}
+        <td style="background-color:rgb(63, 179, 63)">
+        {% elif verifyStatus|string == "VerifyStatus.ROBUST" %}
+        <td style="background-color:rgb(255, 105, 105)">
         {% else %}
         <td>
         {% endif %}

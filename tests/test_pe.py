@@ -185,7 +185,7 @@ class PeTest(unittest.TestCase):
         matches = []
         match = Match(0, fileOffset, 16)
         matches.append(match)
-        verifyStatus = [ VerifyStatus.GOOD ]
+        verifyStatus = [ VerifyStatus.DOMINANT ]
         matchConclusion = MatchConclusion(verifyStatus)
         augmentFilePe(filePe, matches)
         patches = outflankPe(filePe, matches, matchConclusion)
