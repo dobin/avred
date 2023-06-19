@@ -11,6 +11,9 @@
                 <td>Name: </td>
                 <td>
                     {{outcome.fileInfo.name}}
+                    {% if current_user.is_authenticated %}
+                    <a href="{{request.path}}/download">(Download)</a>
+                    {% endif %}
                 </td>
             </tr><tr>
                 <td>Size: </td>
