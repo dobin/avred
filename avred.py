@@ -166,10 +166,10 @@ def handleFile(filename, args, scanner):
 
         outcome.scanTime = datetime.datetime.now()
         outcome.scannerName = scanner.scanner_name
+        
+        # unmodified file detected?
         outcome.isDetected = True
         outcome.isScanned = True
-
-        # unmodified file detected?
         if not scanIsDetected(file, scanner):
             outcome.isDetected = False
             outcome.appraisal = Appraisal.Undetected
@@ -179,16 +179,16 @@ def handleFile(filename, args, scanner):
         
         # quick check hash
         if scanIsHash(file, scanner):
-            print("Appraisal: {}".format(outcome.appraisal))
             outcome.appraisal = Appraisal.Hash
+            print("Appraisal: {}".format(outcome.appraisal))
             outcome.saveToFile()
             return
         
-        logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name}")
+        logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name} and not hash based")
         
         # ready to go
-        isDetected = True
-        filePlay = deepcopy(file)  # leave original unmodified
+        isDetected = True  # we now know that the file is being detected
+        filePlay = deepcopy(file)  # leave original unmodified, apply matches for iterative scanning here
         iteration = 0
         MAX_ITERATIONS = 6
         while isDetected:
