@@ -45,12 +45,11 @@ class Reducer():
         #logging.info(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize}")
 
         if chunkSize < 2:
-            #logging.warn(f"--> Very small chunksize for a signature, weird {sectionStart}-{sectionEnd}")
-            if False:
-                dataBytes = data.getBytesRange(sectionStart, sectionEnd)
-                logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" 
-                                + "\n" + hexdmp(dataBytes, offset=sectionStart))
-                it.add ( Interval(sectionStart, sectionEnd) )
+            # dangling bytes
+            dataBytes = data.getBytesRange(sectionStart, sectionEnd)
+            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" 
+                            + "\n" + hexdmp(dataBytes, offset=sectionStart))
+            it.add ( Interval(sectionStart, sectionEnd) )
             return
 
         dataChunkTopNull = deepcopy(data)

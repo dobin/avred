@@ -182,7 +182,7 @@ def investigate(filePe: FilePe, scanner, isolate=False, remove=False, ignoreText
             if ignoreText and section.name == '.text':
                 continue
 
-            logging.info(f"Launching bytes analysis on section: {section.name}")
+            logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
             match = reducer.scan(
                 offsetStart=section.addr, 
                 offsetEnd=section.addr+section.size)

@@ -34,7 +34,7 @@ def printMatches(data, matches: List[Match]):
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
 
 
-def convertMatchesIt(matchesIt, iteration: int, baseIdx: int) -> List[Match]:
+def convertMatchesIt(matchesIt, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
     matches: List[Match] = []
     idx = 0 + baseIdx
     for m in matchesIt:

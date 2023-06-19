@@ -16,8 +16,8 @@ class VerifierTest(unittest.TestCase):
         detections = []
 
         # one string in .rodata
-        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-        detections.append( TestDetection(29824, b"Unknown error") )
+        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff\xff\x68\xb1\xff\xff\x10\xb1\xff") )
+        detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )
         scanner = ScannerTest(detections)
         
         matchesIt, _ = analyzeFileExe(filePe, scanner)
@@ -49,8 +49,8 @@ class VerifierTest(unittest.TestCase):
         detections = []
 
         # one string in .rodata
-        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-        detections.append( TestDetection(29824, b"Unknown error") )
+        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff\xff\x68\xb1\xff\xff\x10\xb1\xff") )
+        detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )
         scanner = ScannerTestOr(detections)
         
         matchesIt, _ = analyzeFileExe(filePe, scanner)
@@ -61,6 +61,7 @@ class VerifierTest(unittest.TestCase):
             print(str(match))
 
         verification = verify(filePe, matches, scanner)
+        print(verification)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)
         self.assertTrue(matchTests[0].scanResult == ScanResult.DETECTED)

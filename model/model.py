@@ -207,7 +207,7 @@ class UiDisasmLine():
     
 
 class Match():
-    def __init__(self, idx: int, fileOffset:int , size: int, iteration: int):
+    def __init__(self, idx: int, fileOffset:int , size: int, iteration: int = 0):
         self.idx: int = idx
         self.fileOffset: int = fileOffset
         self.size: int = size
