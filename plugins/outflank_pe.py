@@ -17,8 +17,8 @@ def outflankPe(
     blacklist = [ 'clc' ]
 
     for idx, match in enumerate(matches):
-        #if matchConclusion.verifyStatus[idx] != VerifyStatus.GOOD:
-        #    continue
+        if matchConclusion.verifyStatus[idx] != VerifyStatus.DOMINANT:
+            continue
 
         asm: AsmInstruction
         n = 0
@@ -69,8 +69,8 @@ def outflankPe(
     ret = []
     data: Data = filePe.DataCopy()
     for patch in results:
-        #print("Match {} offset {}: {} <-> {}   ({})".format(
-        #    patch.matchIdx,  hex(patch.offset), patch.asmOne.disasm, patch.asmTwo.disasm, patch.info))
+        print("Match {} offset {}: {} <-> {}   ({})".format(
+            patch.matchIdx,  hex(patch.offset), patch.asmOne.disasm, patch.asmTwo.disasm, patch.info))
         data.patchData(patch.offset, patch.replaceBytes)
         ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
