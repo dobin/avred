@@ -1,11 +1,11 @@
 {% if outcome.verification %}
 
 {% if outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.ROBUST" %}
-<td style="background-color:rgb(255, 105, 105)">Robust signature, check verifier</td>
+<td style="background-color:rgb(255, 105, 105)">Robust signature. Check verifier</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.IRRELEVANT" %}
-<td style="background-color:rgb(157, 143, 143)">Appears not very relevant, check verifier</td>
+<td style="background-color:rgb(157, 143, 143)">Probably not relevant. Check verifier</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.DOMINANT" %}
-<td style="background-color:rgb(63, 179, 63)">Dominant match, modify this match to make file undetected</td>
+<td style="background-color:rgb(63, 179, 63)">Dominant. Modify this to make file undetected</td>
 {% else %}
 <td></td>
 {% endif %}
