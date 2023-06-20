@@ -93,6 +93,7 @@ File is not detected by AV.
         <th>Offset</th>
         <th>Size</th>
         <th>Section</th>
+        <th>SectionType</th>
         <th>Conclusion</th>
     </tr>
     {% for match in outcome.matches %}
@@ -102,6 +103,7 @@ File is not detected by AV.
         <td>{{match.fileOffset}}</td>
         <td>{{match.size}}</td>
         <td>{{match.sectionInfo}}</td>
+        <td>{{match.sectionType.name}}</td>
 
         {% with index = loop.index0 %}
         {% include 'includes/file_conclusion.html' %}

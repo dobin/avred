@@ -6,7 +6,7 @@ import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
-from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction
+from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction, SectionType
 from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
@@ -54,6 +54,9 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         elif matchSection.name == ".text":
             matchAsmInstructions, matchDisasmLines = disassemble(
                 r2, filePe, match.start(), match.size)
+            match.sectionType = SectionType.CODE
+        else:
+            match.sectionType = SectionType.DATA
 
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)

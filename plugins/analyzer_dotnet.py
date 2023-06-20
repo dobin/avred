@@ -1,7 +1,7 @@
 from intervaltree import Interval, IntervalTree
 import logging
 from typing import List, Tuple, Set
-from model.model import Match, FileInfo, UiDisasmLine, Section, SectionsBag
+from model.model import Match, FileInfo, UiDisasmLine, Section, SectionsBag, SectionType
 from model.extensions import Scanner
 from plugins.file_pe import FilePe, Section, getDotNetSections
 from utils import *
@@ -40,8 +40,15 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             matchDisasmLines, methodNames = getDotNetDisassemblyMethods(match.start(), match.size, dncilParser)
             more1 = getDotNetDisassemblyHeader(filePe, match.start(), match.size)
             matchDisasmLines += more1
-
             info += " " + " ".join(methodNames)
+
+            # .text has most of DotNet, check if its methods
+            if dotnetSectionsBag.getSectionNameByAddr(match.start()) is "methods":
+                match.sectionType = SectionType.CODE
+            else:
+                match.sectionType = SectionType.DATA
+        else:
+            match.sectionType = SectionType.DATA
 
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)

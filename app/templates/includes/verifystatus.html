@@ -11,18 +11,8 @@
         <td>
         {% endif %}
 
-        <!-- Check assumption about data -->
-        {% if 'EXE PE32' in outcome.fileInfo.ident or 'EXE PE64' in outcome.fileInfo.ident %}
-            {% if '.text' in outcome.matches[loop.index0].sectionInfo %}
-            c
-            {% elif '.data' in outcome.matches[loop.index0].sectionInfo %}
-            d
-            {% else %}
-            &nbsp;
-            {% endif %}
-        {% else %}
-            &nbsp;
-        {% endif %}
+        {{ outcome.matches[loop.index0].sectionType.value }}
+
         </td>
     {% endfor %}
 {% endif %}

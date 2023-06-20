@@ -207,6 +207,11 @@ class UiDisasmLine():
         )
         return s
     
+class SectionType(Enum):
+    UNKNOWN = 'u'
+    CODE = 'c'
+    DATA = 'd'
+
 
 class Match():
     def __init__(self, idx: int, fileOffset:int , size: int, iteration: int = 0):
@@ -218,6 +223,7 @@ class Match():
         self.data: bytes = b''
         self.dataHexdump: str = ''
         self.sectionInfo: str = ''
+        self.sectionType: SectionType = SectionType.UNKNOWN
         self.disasmLines: List[UiDisasmLine] = []
         self.asmInstructions: List[AsmInstruction] = []
 
