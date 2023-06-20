@@ -17,6 +17,9 @@ def outflankPe(
     blacklist = [ 'clc' ]
 
     for idx, match in enumerate(matches):
+        if idx > len(matchConclusion.verifyStatus)+1:
+            logging.error("Could not find verifyStatus with index: {}. Delete outcome and scan again.".format(idx))
+            break
         if matchConclusion.verifyStatus[idx] != VerifyStatus.DOMINANT:
             continue
 
