@@ -82,7 +82,11 @@ File is not detected by AV.
     </tr>
     {% endfor %}
 </table>
+<a href="{{request.path}}/outflank">Download</a> patched file (undetected)
+<br>
+<br>
 {% endif %}
+
 
 {% if outcome.matches|length > 0 %}
 <h2>Matches</h2>

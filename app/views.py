@@ -4,7 +4,7 @@ import os
 import pickle
 import logging
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
-
+import io
 from model.model import *
 from app.views_auth import load_user
 #from waitress import serve
@@ -77,6 +77,34 @@ def fileDownload(filename):
     filename = secure_filename(filename)
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     return send_file(filepath, as_attachment=True)
+
+
+@views.route("/file/<filename>/outflank")
+@login_required
+def fileDownloadOutflank(filename):
+    if filename != secure_filename(filename):
+        flash('Invalid filename')
+        return redirect('index.html')
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+    outcome, logData, errStr = getFileData(filepath)
+    if errStr is not None or outcome is None or logData is None: 
+        return "Error: " + errStr
+    
+    if not os.path.isfile(filepath):
+        return "Error: File not found: " + filepath
+    with open(filepath, 'rb') as file:
+        fileData: bytearray = bytearray(file.read())
+
+    for patch in outcome.outflankPatches:
+        fileData[patch.offset:len(patch.replaceBytes)] = patch.replaceBytes
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
 
 
 ### Examples related
