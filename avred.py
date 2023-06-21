@@ -246,15 +246,15 @@ def verifyFile(outcome, file, scanner):
     outcome.isVerified = True
 
     allCount = len(verification.matchConclusions.verifyStatus)
-    badCount = verification.matchConclusions.getCount(VerifyStatus.ROBUST)
-    goodCount = verification.matchConclusions.getCount(VerifyStatus.DOMINANT)
-    okCount = verification.matchConclusions.getCount(VerifyStatus.IRRELEVANT)
+    robustCount = verification.matchConclusions.getCount(VerifyStatus.ROBUST)
+    dominantCount = verification.matchConclusions.getCount(VerifyStatus.DOMINANT)
+    irrelevantCount = verification.matchConclusions.getCount(VerifyStatus.IRRELEVANT)
 
-    if badCount == allCount:
+    if robustCount == allCount:
         outcome.appraisal = Appraisal.Robust
-    elif (goodCount + okCount) == 1:
+    elif dominantCount == 1:
         outcome.appraisal = Appraisal.One
-    elif (goodCount + okCount) > 1:
+    elif dominantCount > 1:
         outcome.appraisal = Appraisal.Fragile
 
     return outcome
