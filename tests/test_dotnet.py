@@ -30,7 +30,7 @@ class DotnetDisasmTest(unittest.TestCase):
         self.assertEqual(ilMethod.getSize(), headerSize + codeSize)
         self.assertEqual(ilMethod.getCodeSize(), codeSize)
         self.assertEqual(ilMethod.getHeaderSize(), headerSize)
-        self.assertTrue("ldarg.1" in ilMethod.instructions[0].text)
+        self.assertTrue("ldarg.1" in ilMethod.instructions[0].disasm)
 
 
     def test_augmentFileDotnet(self):

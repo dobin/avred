@@ -13,6 +13,7 @@ from typing import List
 import logging
 import struct
 from bitstring import Bits, BitArray, BitStream, pack
+from model.model import AsmInstruction
 
 
 # key token indexes to dotnet meta tables
@@ -101,23 +102,6 @@ def format_operand(pe: dnPE, operand: Any) -> str:
     return str(operand)
 
 
-class IlInstruction():
-    def __init__(self, fileOffset, methodOffset, rva, text):
-        self.fileOffset = fileOffset
-        self.methodOffset = methodOffset
-        self.rva = rva
-        self.text = text
-
-    def __str__(self):
-        s = "FileOffset: {}  methodOffset: {}  rva: {}  text: {}".format(
-            self.fileOffset,
-            self.methodOffset,
-            self.rva,
-            self.text
-        )
-        return s
-
-
 class IlMethodHeaderFat():
     def __init__(self, headerBytes: bytes, methodOffset: int):
         self.headerBytes = headerBytes
@@ -152,31 +136,27 @@ class IlMethodHeaderFat():
 
         # first two bytes
         ilText = '  '
-        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[:2]) : <20}"
         ilText += f"MethodHeader: Size:{self.size}  Flags:{self.flags}  Type:{self.type}"
-        ilInstruction = IlInstruction(self.offset, 0, 0, ilText)
-        ret.append(ilInstruction)
+        asmInstruction = AsmInstruction(self.offset, 0, "esil", "type", ilText, 2, self.headerBytes[:2])
+        ret.append(asmInstruction)
 
         # maxStack
         ilText = '  '
-        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[2:4]) : <20}"
         ilText += f"MethodHeader: maxStack: {self.maxStack}"
-        ilInstruction = IlInstruction(self.offset+2, 2, 0, ilText)
-        ret.append(ilInstruction)
+        asmInstruction = AsmInstruction(self.offset+2, 0, "esil", "type", ilText, 2, self.headerBytes[2:4])
+        ret.append(asmInstruction)
         
         # codesize
         ilText = '  '
-        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[4:8]) : <20}"
         ilText += f"MethodHeader: codeSize: {self.codeSize}"
-        ilInstruction = IlInstruction(self.offset+4, 4, 0, ilText)
-        ret.append(ilInstruction)
+        asmInstruction = AsmInstruction(self.offset+4, 0, "esil", "type", ilText, 4, self.headerBytes[4:8])
+        ret.append(asmInstruction)
 
         # localvar
         ilText = '  '
-        ilText += f"{' '.join('{:02x}'.format(b) for b in self.headerBytes[8:12]) : <20}"
         ilText += f"MethodHeader: localVarSigTok: {self.localVarSigTok}"
-        ilInstruction = IlInstruction(self.offset+8, 8, 0, ilText)
-        ret.append(ilInstruction)
+        asmInstruction = AsmInstruction(self.offset+8, 0, "esil", "type", ilText, 4, self.headerBytes[8:12])
+        ret.append(asmInstruction)
 
         return ret
 
@@ -197,7 +177,7 @@ class IlMethod():
         self.codeSize = codeSize
         self.headerSize = None
         self.className = ''
-        self.instructions = []
+        self.instructions: List[AsmInstruction] = []
         self.ilMethodHeaderFat = None  # None if MethodHeader is not fat
 
     def setName(self, name, className=''):
@@ -234,8 +214,8 @@ class IlMethod():
     def getSize(self):
         return self.codeSize + self.headerSize
 
-    def addInstruction(self, ilInstruction: IlInstruction):
-        self.instructions.append(ilInstruction)
+    def addInstruction(self, asmInstruction: AsmInstruction):
+        self.instructions.append(asmInstruction)
 
     def setIlMethodHeaderFat(self, ilMethodHeaderFat: IlMethodHeaderFat):
         self.ilMethodHeaderFat = ilMethodHeaderFat
@@ -299,12 +279,18 @@ class DncilParser():
                 rva = row.Rva + insn.offset
 
                 ilText = '  '
-                ilText += f"{' '.join('{:02x}'.format(b) for b in insn.get_bytes()) : <20}"
                 ilText += f"{str(insn.opcode) : <15}"
                 ilText += format_operand(pe, insn.operand)
-                ilInstruction = IlInstruction(insn.offset, offset, rva, ilText)
-
-                ilMethod.addInstruction(ilInstruction)
+                asmInstruction = AsmInstruction(
+                    insn.offset,
+                    rva,
+                    "",
+                    "",
+                    ilText,
+                    insn.get_size(),
+                    insn.get_bytes()
+                )
+                ilMethod.addInstruction(asmInstruction)
             
             self.methods.append(ilMethod)
                 

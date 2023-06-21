@@ -1,8 +1,9 @@
 from typing import List, Set, Dict, Tuple, Optional
 import logging
+import pprint
 
 from model.testverify import VerifyStatus
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data
+from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction
 from model.extensions import Scanner
 from plugins.file_pe import FilePe
 from dotnetfile import DotNetPE
@@ -16,58 +17,69 @@ def outflankDotnet(
 
     if len(matches) == 0:
         return []
-
-    # Metadata header patch
-    # 0x25fa4: 00 00 00 00         Metadata Header: Reserved1: 0
-    metadataPatch = False
-    matchIdx = -1
+    
     for idx, match in enumerate(matches):
+        if idx > len(matchConclusion.verifyStatus)+1:
+            logging.error("Could not find verifyStatus with index: {}. Delete outcome and scan again.".format(idx))
+            break
         if matchConclusion.verifyStatus[idx] != VerifyStatus.DOMINANT:
             continue
 
-        for line in match.disasmLines:
-            if 'Metadata Header: Reserved1' in line.text:
-                metadataPatch = True
-                matchIdx = idx
-                break
-
-    # should be a good match
-    if matchConclusion.verifyStatus[matchIdx] != VerifyStatus.DOMINANT:
-        return []
-
-    # nothing found
-    if not metadataPatch:
-        return []
+        asm: AsmInstruction
+        n = 0
+        while n < len(match.asmInstructions):
+            asm = match.asmInstructions[n]
     
-    dotnet_file = DotNetPE(filePe.filepath)
-    textSection = filePe.sectionsBag.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.addr
+            if 'MethodHeader: maxStack:' in asm.disasm:
+                outflankPatch = OutflankPatch(
+                    idx,
+                    asm.offset,
+                    b"0909",
+                    asm,
+                    asm,
+                    "Replace maxStack in Method header",
+                    ""
+                )
+                results.append(outflankPatch)
+            
+            if False:
+                if asm.type in useTypes and nextAsm.type in useTypes:
+                    # some commands with inappropriate types should not be used
+                    if asm.disasm in blacklist or nextAsm.disasm in blacklist:
+                        n += 1
+                        continue
 
-    entry: BinaryStructureField
-    for entry in dotnet_file.dotnet_metadata_header.structure_fields:
-        if entry.display_name == "Reserved1":
-            addr = entry.address - addrOffset
-            outflankPatch = OutflankPatch(
-                matchIdx,
-                addr, 
-                b"\x01",
-                "",
-                "",
-                "Modify Metadata Header: Reserved1 field", 
-                "Very reliable, no side effects, but may be sigged in the future")
-            results.append(outflankPatch)
+                    if not asm.registersTouch(nextAsm):
+                        toPatch = nextAsm.rawBytes + asm.rawBytes
+                        outflankPatch = OutflankPatch(
+                            idx,
+                            asm.offset,
+                            toPatch,
+                            asm,
+                            nextAsm,
+                            "Swap",
+                            ""
+                        )
+                        results.append(outflankPatch)
+                        n += 1  # skip nextAsm
+            n += 1
 
     # scan results, remove one's which gets detected
     if scanner is None:
         return results
     ret = []
+    data: Data = filePe.DataCopy()
     for patch in results:
-        data: Data = filePe.DataCopy()
+        print("Patch: Match {} offset {}: {} <-> {}   ({})".format(
+            patch.matchIdx,  hex(patch.offset), patch.asmOne.disasm, patch.asmTwo.disasm, patch.info))
         data.patchData(patch.offset, patch.replaceBytes)
+        ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
-            logging.info("outflank ok")
-            ret.append(patch)
-        else:
-            logging.warn("Outflank failed: " + str(patch))
-
-    return ret
+            logging.warn("Outflank possible")
+            return ret
+        #else:
+        #    logging.warn("Outflank failed: " + str(patch))
+    
+    # fail
+    logging.info("Outflank failed with attempted {} patches".format(len(results)))
+    return []
