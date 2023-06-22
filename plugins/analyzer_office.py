@@ -13,12 +13,12 @@ from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
 
 
-def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[IntervalTree, str]:
+def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[List[Match], str]:
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
     reducer = Reducer(fileOffice, scanner)
-    matchesIntervalTree = reducer.scan(0, fileOffice.Data().getLength())
-    return matchesIntervalTree, ''
+    matches = reducer.scan(0, fileOffice.Data().getLength())
+    return matches, ''
 
 
 def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:

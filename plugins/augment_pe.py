@@ -1,0 +1,135 @@
+import logging
+from copy import deepcopy
+from utils import *
+import r2pipe
+from ansi2html import Ansi2HTMLConverter
+import json
+from reducer import Reducer
+from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction, SectionType, Data, Section
+from model.extensions import Scanner, PluginFileFormat
+from plugins.file_pe import FilePe
+from intervaltree import Interval, IntervalTree
+from typing import List, Tuple
+
+
+# Fix for https://github.com/radareorg/radare2-r2pipe/issues/146
+def cmdcmd(r, cmd):
+    first = r.cmd(cmd)
+    return first if len(first) > 0 else r.cmd("")
+
+
+def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
+    """Augments all matches with additional information from filePe"""
+
+    # Augment the matches with R2 decompilation and section information.
+    # Returns a FileInfo object with detailed file information too.
+    r2 = r2pipe.open(filePe.filepath)
+    r2.cmd("aaa")
+
+    for match in matches:
+        matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
+        matchHexdump: str = hexdmp(matchBytes, offset=match.start())
+        matchDisasmLines: List[UiDisasmLine] = []
+        matchAsmInstructions: List[AsmInstruction] = []
+
+        matchSection = filePe.sectionsBag.getSectionByAddr(match.start())
+        matchSectionName = '<unknown>'
+        if matchSection is not None:
+            matchSectionName = matchSection.name
+
+        if matchSection is None: 
+            logging.warn("No section found for offset {}".format(match.fileOffset))
+        elif matchSection.name == ".text":
+            matchAsmInstructions, matchDisasmLines = disassemble(
+                r2, filePe, match.start(), match.size)
+            match.sectionType = SectionType.CODE
+        else:
+            match.sectionType = SectionType.DATA
+
+        match.setData(matchBytes)
+        match.setDataHexdump(matchHexdump)
+        match.setSectionInfo(matchSectionName)
+        match.setDisasmLines(matchDisasmLines)
+        match.setAsmInstructions(matchAsmInstructions)
+
+    # file structure
+    s = ''
+    for matchSection in filePe.sectionsBag.sections:
+        s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
+            matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
+    return s
+
+
+conv = Ansi2HTMLConverter()
+def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLines=16):
+    virtAddrDisasm = filePe.offsetToRva(fileOffset)
+
+    matchDisasmLines: List[UiDisasmLine] = []
+    matchAsmInstructions: List[AsmInstruction] = []
+
+    r2.cmd("e scr.color=2")
+    MORE = 32
+
+    # r2: Disassemble by bytes, no color escape codes, more data (like esil, type)
+    asm = cmdcmd(r2, "pDj {} @{}".format(sizeDisasm+MORE, virtAddrDisasm-MORE))
+    asm = json.loads(asm)
+    for a in asm:
+        asmVirtAddr = int(a['offset'])
+        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+
+        if (asmFileOffset < fileOffset) or (asmFileOffset > fileOffset + sizeDisasm):
+            # we print number of assembly instructions, not bytes,
+            # as bytes will possibly garble last decoded asm instruction
+            continue
+
+        esil = a.get('esil', '')
+        type = a.get('type', '')
+        disasm = a.get('disasm', '')
+        size = a.get('size', 0)
+        rawBytes = bytes.fromhex(a.get('bytes', ''))
+    
+        asmInstruction = AsmInstruction(
+            asmFileOffset,
+            asmVirtAddr,
+            esil,
+            type,
+            disasm,
+            size,
+            rawBytes)
+        matchAsmInstructions.append(asmInstruction)
+
+    # surrounding
+    # r2: Disassemble by bytes, color
+    asmColor = cmdcmd(r2, "pDJ {} @{}".format(
+        sizeDisasm+MORE+2*moreUiLines, 
+        virtAddrDisasm-MORE-moreUiLines))
+    asmColor = json.loads(asmColor)
+    # ui disassemly lines
+    for a in asmColor:
+        asmVirtAddr = int(a['offset'])
+        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+
+        if (asmVirtAddr < (virtAddrDisasm-moreUiLines)) or (asmVirtAddr > (virtAddrDisasm + sizeDisasm + moreUiLines)):
+            # we print number of assembly instructions, not bytes,
+            # as bytes will possibly garble last decoded asm instruction
+            continue
+
+        if asmFileOffset >= fileOffset and asmFileOffset <= fileOffset + sizeDisasm:
+            isPart = True
+        else: 
+            isPart = False
+        
+        # get disassembly with ANSI color
+        text = a['text']
+        textHtml = conv.convert(text, full=False)
+
+        disasmLine = UiDisasmLine(
+            asmFileOffset, 
+            asmVirtAddr,
+            isPart,
+            text, 
+            textHtml, 
+        )
+        matchDisasmLines.append(disasmLine)
+
+    return matchAsmInstructions, matchDisasmLines

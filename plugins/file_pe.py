@@ -63,30 +63,6 @@ class FilePe(PluginFileFormat):
             self.sectionsBag.sections.append(section)
         self.sectionsBag.getSectionByName(".text").scan = False
 
-        if False:
-            # (not necessary?) version information
-            if hasattr(pepe, "VS_VERSIONINFO"):
-                vi = pepe.VS_VERSIONINFO
-                if len(vi) != 0:
-                    vim = vi[0] # TODO what if more?
-                    base = vim.get_file_offset()
-                    size = vim.Length
-                    self.sections.append(
-                        Section("VersionInfo", base, size, virtaddr)
-                    )
-
-            # (not necessary?) resources
-            d = None
-            for directory in pepe.OPTIONAL_HEADER.DATA_DIRECTORY:
-                if (directory.name == "IMAGE_DIRECTORY_ENTRY_RESOURCE"):
-                    d = directory
-            if d is not None:
-                base = d.VirtualAddress
-                size = d.Size
-                self.sections.append(
-                    Section("Ressources", base, size, virtaddr)
-                )
-
 
     def codeRvaToOffset(self, rva: int) -> int: 
         baseAddr = self.baseAddr
@@ -108,20 +84,14 @@ class FilePe(PluginFileFormat):
         return addrDisasm
 
 
-    def hideSection(self, sectionName: str):
-        section = self.sectionsBag.getSectionByName(sectionName)
-        if section is None:
-            logging.warn(f"Section {sectionName} does not exist. Cant hide.")
-            return
-
-        logging.debug(f"Hide section: {section.name} at {hex(section.addr)} {section.size}")
-        self.Data().hidePart(offset=section.addr, size=section.size)
-
-
     def hideAllSectionsExcept(self, sectionName: str):
         for section in self.sectionsBag.sections:
             if section.name != sectionName:
                 self.Data().hidePart(offset=section.addr, size=section.size)
+
+
+    def hideSection(self, section: Section):
+        self.Data().hidePart(offset=section.addr, size=section.size)
 
 
 def getDotNetSections(filePe) -> SectionsBag:

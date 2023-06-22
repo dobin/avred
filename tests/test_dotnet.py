@@ -1,5 +1,5 @@
 import unittest
-from plugins.analyzer_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
+from plugins.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
 from plugins.dncilparser import IlMethod, DncilParser
 from model.model import Match
 from model.testverify import MatchConclusion, VerifyStatus

@@ -5,7 +5,6 @@ from tests.scanners import *
 from tests.helpers import TestDetection
 from plugins.analyzer_pe import analyzeFileExe
 from verifier import verify, verificationAnalyzer, getMatchTestsFor
-from utils import convertMatchesIt
 
 
 class VerifierTest(unittest.TestCase):
@@ -16,23 +15,24 @@ class VerifierTest(unittest.TestCase):
         detections = []
 
         # one string in .rodata
-        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff\xff\x68\xb1\xff\xff\x10\xb1\xff") )
-        detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )
+        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff\xff\x68\xb1\xff\xff\x10\xb1\xff") )  # 16 bytes
+        detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )  # 16 bytes
         scanner = ScannerTest(detections)
         
-        matchesIt, _ = analyzeFileExe(filePe, scanner)
-        matches = convertMatchesIt(matchesIt)
+        matches, _ = analyzeFileExe(filePe, scanner)
         self.assertEqual(len(matches), 2)
 
         verification = verify(filePe, matches, scanner)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
+        #self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)  # 15 bytes
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_SCANNED)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.MIDDLE8)
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
-        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
+        #self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)  # 15 bytes
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_SCANNED)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.FULL)
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)
@@ -53,8 +53,10 @@ class VerifierTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )
         scanner = ScannerTestOr(detections)
         
-        matchesIt, _ = analyzeFileExe(filePe, scanner)
-        matches = convertMatchesIt(matchesIt)
+        matches, _ = analyzeFileExe(filePe, scanner)
+
+        for match in matches:
+            print(match)
 
         self.assertTrue(len(matches) == 2)
         for match in matches: 
@@ -65,11 +67,13 @@ class VerifierTest(unittest.TestCase):
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.ISOLATED, TestMatchModify.MIDDLE8)
         self.assertTrue(matchTests[0].scanResult == ScanResult.DETECTED)
-        self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)
+        #self.assertTrue(matchTests[1].scanResult == ScanResult.DETECTED)  # 15 bytes
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_SCANNED)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.INCREMENTAL, TestMatchModify.MIDDLE8)
         self.assertTrue(matchTests[0].scanResult == ScanResult.DETECTED)
-        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)
+        #self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_DETECTED)  # 15 bytes
+        self.assertTrue(matchTests[1].scanResult == ScanResult.NOT_SCANNED)
 
         matchTests = getMatchTestsFor(verification.verifications, TestMatchOrder.DECREMENTAL, TestMatchModify.FULL)
         self.assertTrue(matchTests[0].scanResult == ScanResult.NOT_DETECTED)

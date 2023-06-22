@@ -3,7 +3,7 @@ import time
 from intervaltree import Interval, IntervalTree
 from typing import List
 from model.extensions import Scanner, PluginFileFormat
-from model.model import Data
+from model.model import Data, Match
 from copy import deepcopy
 
 from utils import *
@@ -13,20 +13,30 @@ PRINT_DELAY_SECONDS = 1
 
 
 class Reducer():
+    """Reducer will scan data in file with scanner, and return matches"""
+
     def __init__(self, file: PluginFileFormat, scanner: Scanner):
         self.file: PluginFileFormat = file
         self.scanner = scanner
 
         self.lastPrintTime: int = 0
         self.chunks_tested: int = 0
+        self.iterations: int = 0
+        self.matchIdx: int = 0
 
 
-    def scan(self, offsetStart, offsetEnd) -> List[Interval]:
+    def scan(self, offsetStart, offsetEnd) -> List[Match]:
         it = IntervalTree()
-        data = self.file.Data()
-        self._scanSection(data, offsetStart, offsetEnd, it)
+        data = self.file.Data()  # get the data of the file to work on
+        self._scanDataPart(data, offsetStart, offsetEnd, it)
         it.merge_overlaps(strict=False)
-        return sorted(it)
+        it = sorted(it)
+
+        matches = convertMatchesIt(it, self.iterations, self.matchIdx)
+        self.matchIdx += len(matches)
+        self.iterations += 1
+
+        return matches
 
 
     def _scanData(self, data: Data):
@@ -35,7 +45,7 @@ class Reducer():
 
 
     # recursive
-    def _scanSection(self, data: Data, sectionStart, sectionEnd, it):
+    def _scanDataPart(self, data: Data, sectionStart, sectionEnd, it):
         size = sectionEnd - sectionStart
         chunkSize = int(size // 2)
         self._printStatus()
@@ -66,8 +76,8 @@ class Reducer():
             # Both halves are detected
             # Continue scanning both halves independantly, but with each other halve
             # zeroed out (instead of the complete file)
-            self._scanSection(dataChunkBotNull, sectionStart, sectionStart+chunkSize, it)
-            self._scanSection(dataChunkTopNull, sectionStart+chunkSize, sectionEnd, it)
+            self._scanDataPart(dataChunkBotNull, sectionStart, sectionStart+chunkSize, it)
+            self._scanDataPart(dataChunkTopNull, sectionStart+chunkSize, sectionEnd, it)
 
         elif not detectTopNull and not detectBotNull:
             #logging.info("--> Both UNdetected")
@@ -83,17 +93,17 @@ class Reducer():
             else: 
                 # make it smaller still. 
                 # Take complete data (not nulled)
-                self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
-                self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
+                self._scanDataPart(data, sectionStart, sectionStart+chunkSize, it)
+                self._scanDataPart(data, sectionStart+chunkSize, sectionEnd, it)
 
         elif not detectTopNull:
             # Detection in the top half
             #logging.info("--> Do Top")
-            self._scanSection(data, sectionStart, sectionStart+chunkSize, it)
+            self._scanDataPart(data, sectionStart, sectionStart+chunkSize, it)
         elif not detectBotNull:
             # Detection in the bottom half
             #logging.info("--> Do Bot")
-            self._scanSection(data, sectionStart+chunkSize, sectionEnd, it)
+            self._scanDataPart(data, sectionStart+chunkSize, sectionEnd, it)
 
         return
 

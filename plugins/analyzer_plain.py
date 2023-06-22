@@ -8,10 +8,10 @@ from intervaltree import Interval, IntervalTree
 
 
 # no PE file, just check its content
-def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[IntervalTree, str]:
+def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[Match, str]:
     reducer = Reducer(filePlain, scanner)
-    matchesIntervalTree = reducer.scan(0, len(filePlain.data))
-    return matchesIntervalTree, ''
+    matches = reducer.scan(0, len(filePlain.data))
+    return matches, ''
 
 
 def augmentFilePlain(filePlain: FilePlain, matches: List[Match]) -> str:

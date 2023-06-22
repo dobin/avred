@@ -4,8 +4,6 @@ import argparse
 import pickle
 import os
 import logging
-from intervaltree import Interval
-from typing import List
 
 import datetime
 
@@ -13,13 +11,13 @@ from config import Config
 from verifier import verify
 from model.model import Outcome, Appraisal, Data
 from filehelper import FileType, FileInfo
-from utils import convertMatchesIt
 from scanner import ScannerRest, ScannerYara
 from model.testverify import VerifyStatus
 
 from plugins.analyzer_office import analyzeFileWord, augmentFileWord
-from plugins.analyzer_pe import analyzeFileExe, augmentFilePe
-from plugins.analyzer_dotnet import augmentFileDotnet
+from plugins.analyzer_pe import analyzeFileExe
+from plugins.augment_pe import augmentFilePe
+from plugins.augment_dotnet import augmentFileDotnet
 from plugins.analyzer_plain import analyzeFilePlain, augmentFilePlain
 from plugins.file_pe import FilePe
 from plugins.file_office import FileOffice
@@ -41,15 +39,12 @@ def main():
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
     parser.add_argument("--reinfo", help="Debug: Re-do the file info", default=False, action='store_true')
     parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
-    parser.add_argument("--reappraisal", help="Debug: Re-do the file appraisal", default=False, action='store_true')
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
     parser.add_argument("--reoutflank", help="Debug: Re-do the Outflanking", default=False, action='store_true')
 
     # analyzer options
-    #parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
-    #parser.add_argument("--pe_remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
-    #parser.add_argument("--pe_ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
+    parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
 
     args = parser.parse_args()
 
@@ -197,35 +192,26 @@ def handleFile(filename, args, scanner):
                 logging.error("{} iterations deep and still no end.. bailing out".format(MAX_ITERATIONS))
                 return
 
+            # get matches
             logging.info("Scanning for matches...")
-            matchesIt, scannerInfo = analyzer(filePlay, scanner, analyzerOptions)
-            logging.info("Result: {} matches".format(len(matchesIt)))
-            outcome.matchesIt += matchesIt
+            matches, scannerInfo = analyzer(filePlay, scanner, analyzerOptions)
+            outcome.matches += matches
+            logging.info("Result: {} matches".format(len(matches)))
             outcome.scannerInfo = scannerInfo
-            outcome.matches += convertMatchesIt(matchesIt, iteration, len(outcome.matches))
             outcome.saveToFile(filePlay.filepath)
 
-            # apply matches
+            # apply matches and verify if it is not detected
             # TODO: will overwrite previously identified matches too, not just new ones
             filePlay.Data().hideMatches(outcome.matches)
-
             # try to identify matches until it is not detected anymore
-            if not scanIsDetected(filePlay, scanner):
+            if scanIsDetected(filePlay, scanner):
+                logging.info("Still detected on iteration {}, apply {} matches and do again".format(
+                    iteration, len(matches)
+                ))
+            else:
                break
 
             iteration += 1
-
-    # Debugging: re-appraisal only (temp)
-    if args.reappraisal:
-        if not outcome.isScanned:
-            outcome.appraisal = Appraisal.Unknown
-        elif not outcome.isDetected:
-            outcome.appraisal = Appraisal.Undetected
-        elif scanIsHash(file, scanner):
-            outcome.appraisal = Appraisal.Hash
-
-        outcome.saveToFile(file.filepath)
-        return
 
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
@@ -308,13 +294,15 @@ def checkFile(filepath, scanner):
         print(f"File is not detected")
 
 
-def scanIsHash(file: PluginFileFormat, scanner) -> bool:
+def scanIsHash(file: PluginFileFormat, scanner, start=0, size=0) -> bool:
     """check if the detection is hash based (complete file)"""
 
-    size = file.Data().getLength()
+    # default is everything
+    if start == 0 and size == 0:
+        size = file.Data().getLength()
 
     firstData: Data = file.DataCopy()
-    firstOff = int(size//3)
+    firstOff = int(size//3 * 1)
     firstData.patchDataFill(firstOff, 1)
     firstFileData: Data = file.getFileDataWith(firstData)
     firstRes = scanner.scannerDetectsBytes(firstFileData.getBytes(), file.filename)

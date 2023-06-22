@@ -101,16 +101,16 @@ class Section:
 class SectionsBag:
 
     def __init__(self):
-        self.sections = []
+        self.sections: List[Section] = []
         self.sectionsIntervalTree = IntervalTree()
 
 
-    def addSection(self, section):
+    def addSection(self, section: Section):
         self.sections.append(section)
-        interval = Interval(section.addr, section.addr + section.size, section)
+        interval: Interval = Interval(section.addr, section.addr + section.size, section)
         self.sectionsIntervalTree.add(interval)
 
-    def removeSectionByName(self, sectionName):
+    def removeSectionByName(self, sectionName: str):
         new = []
         for section in self.sections:
             if section.name != sectionName:
@@ -272,6 +272,13 @@ class Match():
             s += "  Hexdump: \n{}\n".format(self.dataHexdump)
         s += '\n'
         return s
+    
+    def __eq__(self, other: Match):
+        # TODO: Size too?
+        return self.fileOffset == other.fileOffset
+    
+    def __lt__(self, other: Match):
+        return self.fileOffset > other.fileOffset
 
 
 class FileInfo():
@@ -293,7 +300,6 @@ class Outcome():
         self.fileInfo: FileInfo = fileInfo
         self.matches: List[Match] = []
         self.verification: Verification = None
-        self.matchesIt: List[Interval] = []
         self.outflankPatches: List[OutflankPatch] = []
 
         self.isDetected: bool = False
