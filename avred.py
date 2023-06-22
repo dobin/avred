@@ -141,9 +141,9 @@ def handleFile(filename, args, scanner):
         else:
             augmenter = augmentFilePe
             outflanker = outflankPe
-        analyzerOptions["isolate"] = args.pe_isolate
-        analyzerOptions["remove"] = args.pe_remove
-        analyzerOptions["ignoreText"] = args.pe_ignoreText
+        #analyzerOptions["isolate"] = args.pe_isolate
+        #analyzerOptions["remove"] = args.pe_remove
+        #analyzerOptions["ignoreText"] = args.pe_ignoreText
     else:
         logging.error("Unknown filetype, aborting")
         exit(1)
