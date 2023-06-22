@@ -139,6 +139,6 @@ class Match():
         return self.fileOffset == other.fileOffset
     
     def __lt__(self, other: Match):
-        return self.fileOffset > other.fileOffset
+        return self.fileOffset < other.fileOffset
 
 
