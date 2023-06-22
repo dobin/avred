@@ -14,16 +14,12 @@ from filehelper import FileType, FileInfo
 from scanner import ScannerRest, ScannerYara
 from model.testverify import VerifyStatus
 
-from plugins.analyzer_office import analyzeFileWord, augmentFileWord
-from plugins.analyzer_pe import analyzeFileExe
-from plugins.augment_pe import augmentFilePe
-from plugins.augment_dotnet import augmentFileDotnet
-from plugins.analyzer_plain import analyzeFilePlain, augmentFilePlain
-from plugins.file_pe import FilePe
-from plugins.file_office import FileOffice
-from plugins.file_plain import FilePlain
-from plugins.outflank_dotnet import outflankDotnet
-from plugins.outflank_pe import outflankPe
+from plugins.plain.plugin_plain import PluginPlain
+from plugins.dotnet.plugin_dotnet import PluginDotNet
+from plugins.pe.plugin_pe import PluginPe
+from plugins.office.plugin_office import PluginOffice
+
+from plugins.model import Plugin
 from filehelper import *
 from copy import deepcopy
 
@@ -107,38 +103,26 @@ def scanUploads(args, scanner):
 
 def handleFile(filename, args, scanner):
     file = None
-    analyzer = None
     analyzerOptions = {}
-    augmenter = None
-    outflanker = None
+    plugin: Plugin = None
+
     filenameOutcome = filename + ".outcome"
     logging.info("Handle file: " + filename)
 
     fileScannerType = getFileScannerTypeFor(filename)
     logging.info("Using parser for file type {}".format(fileScannerType.name))
     if fileScannerType is FileType.PLAIN:
-        file = FilePlain()
-        file.loadFromFile(filename)
-        analyzer = analyzeFilePlain
-        augmenter = augmentFilePlain
+        plugin = PluginPlain()
+        file = plugin.makeFile(filename)
     elif fileScannerType is FileType.OFFICE:
-        file = FileOffice()
-        file.loadFromFile(filename)
-        analyzer = analyzeFileWord
-        augmenter = augmentFileWord
+        plugin = PluginOffice()
+        file = plugin.makeFile(filename)
     elif fileScannerType is FileType.EXE:
-        file = FilePe()
-        file.loadFromFile(filename)
-        analyzer = analyzeFileExe
-        if file.isDotNet:
-            augmenter = augmentFileDotnet
-            outflanker = outflankDotnet
-        else:
-            augmenter = augmentFilePe
-            outflanker = outflankPe
-        #analyzerOptions["isolate"] = args.pe_isolate
-        #analyzerOptions["remove"] = args.pe_remove
-        #analyzerOptions["ignoreText"] = args.pe_ignoreText
+        plugin = PluginPe()
+        file = plugin.makeFile(filename)
+    elif fileScannerType is FileType.DOTNET:
+        plugin = PluginDotNet()
+        file = plugin.makeFile(filename)
     else:
         logging.error("Unknown filetype, aborting")
         exit(1)
@@ -194,7 +178,7 @@ def handleFile(filename, args, scanner):
 
             # get matches
             logging.info("Scanning for matches...")
-            matches, scannerInfo = analyzer(filePlay, scanner, analyzerOptions)
+            matches, scannerInfo = plugin.analyzeFile(filePlay, scanner, analyzerOptions)
             outcome.matches += matches
             logging.info("Result: {} matches".format(len(matches)))
             outcome.scannerInfo = scannerInfo
@@ -219,20 +203,20 @@ def handleFile(filename, args, scanner):
         outcome.saveToFile(file.filepath)
 
     if not outcome.isAugmented or args.reaugment:
-        outcome = augmentFile(outcome, file, augmenter)
+        outcome = augmentFile(outcome, file, plugin.augmentFile)
         outcome.saveToFile(file.filepath)
 
     #if outflank is not None and (not outcome.isOutflanked or args.reoutflank):
-    if outflanker is not None:
-        outcome = outflankFile(outflanker, outcome, file, scanner)
-        outcome.saveToFile(file.filepath)
+    #if outflanker is not None:
+    outcome = outflankFile(plugin.outflankFile, outcome, file, scanner)
+    outcome.saveToFile(file.filepath)
 
     # output for cmdline users
     #print("Result:")
     #print(outcome)
 
 
-def scanIsDetected(file: PluginFileFormat, scanner):
+def scanIsDetected(file: BaseFile, scanner):
     detected = scanner.scannerDetectsBytes(file.DataAsBytes(), file.filename)
     return detected
 
@@ -294,7 +278,7 @@ def checkFile(filepath, scanner):
         print(f"File is not detected")
 
 
-def scanIsHash(file: PluginFileFormat, scanner, start=0, size=0) -> bool:
+def scanIsHash(file: BaseFile, scanner, start=0, size=0) -> bool:
     """check if the detection is hash based (complete file)"""
 
     # default is everything

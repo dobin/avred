@@ -2,11 +2,11 @@
 
 import unittest
 from webbrowser import get
-from plugins.analyzer_pe import analyzeFileExe
 from tests.helpers import TestDetection
-from plugins.file_pe import FilePe
-from plugins.analyzer_pe import augmentFilePe, disassemble
-from plugins.outflank_pe import outflankPe
+from plugins.pe.file_pe import FilePe
+from plugins.pe.analyzer_pe import analyzeFilePe
+from plugins.pe.augment_pe import augmentFilePe, disassemblePe
+from plugins.pe.outflank_pe import outflankPe
 from tests.scanners import *
 from model.model import Match, OutflankPatch
 from model.testverify import MatchConclusion, VerifyStatus
@@ -25,7 +25,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error") )
         scanner = ScannerTest(detections)
         
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         # A: [Interval(29808, 29864)]
         self.assertTrue(len(matches) == 1)
 
@@ -42,7 +42,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
         scanner = ScannerTest(detections)
         
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         # A: [Interval(30809, 30844)]
         self.assertTrue(len(matches) == 1)
 
@@ -58,7 +58,7 @@ class PeTest(unittest.TestCase):
         detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
         scanner = ScannerTest(detections)
 
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         # A: [Interval(1644, 1698), Interval(29808, 29864)]
         self.assertTrue(len(matches) == 2)
 
@@ -75,7 +75,7 @@ class PeTest(unittest.TestCase):
         #detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
         scanner = ScannerTest(detections)
 
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(31824, 31880)]
         self.assertTrue(len(matches) == 2)
 
@@ -93,7 +93,7 @@ class PeTest(unittest.TestCase):
 
         scanner = ScannerTestWeighted(detections)
 
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
         self.assertEqual(len(matches), 4)
 
@@ -107,7 +107,7 @@ class PeTest(unittest.TestCase):
         # 0x004014e0
         start = 2807  # AF7
         size = 8
-        matchAsmInstructions, matchDisasmLines = disassemble(
+        matchAsmInstructions, matchDisasmLines = disassemblePe(
             r2, filePe, start, size, moreUiLines=0)
 
         #for a in matchDisasmLines:
@@ -138,7 +138,7 @@ class PeTest(unittest.TestCase):
         # 0x004014e0
         start = 2807  # AF7
         size = 8
-        matchAsmInstructions, matchDisasmLines = disassemble(
+        matchAsmInstructions, matchDisasmLines = disassemblePe(
             r2, filePe, start, size, moreUiLines=0)
         
         # 0x004014f7      90             nop
@@ -152,7 +152,7 @@ class PeTest(unittest.TestCase):
 
         self.assertEqual(filePe.data.getBytesRange(2807, 2807+4), b"\x48\x83\xc4\x28")
         self.assertEqual(filePe.data.getBytesRange(2807+4, 2807+4+1), b"\x90")
-        #matchAsmInstructions, matchDisasmLines = disassemble(
+        #matchAsmInstructions, matchDisasmLines = disassemblePe(
         #    r2, filePe, start, size, moreUiLines=0)
         #self.assertEqual('nop', matchAsmInstructions[1].disasm)
         #self.assertEqual('add rsp, 0x28', matchAsmInstructions[0].disasm)
@@ -166,7 +166,7 @@ class PeTest(unittest.TestCase):
         r2.cmd("aaa")
 
         fileOffset = filePe.codeRvaToOffset(0x0040154e)
-        matchAsmInstructions, matchDisasmLines = disassemble(
+        matchAsmInstructions, matchDisasmLines = disassemblePe(
             r2, filePe, fileOffset, 16, moreUiLines=0)
         
         # 16 bytes: 4*4

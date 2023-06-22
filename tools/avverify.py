@@ -4,7 +4,7 @@ import argparse
 import pprint
 from config import Config
 from scanner import ScannerRest
-from plugins.file_pe import FilePe
+from plugins.pe.file_pe import FilePe
 import pickle
 
 from verifier import verify

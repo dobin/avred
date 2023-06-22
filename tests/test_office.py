@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import unittest
-from plugins.analyzer_office import analyzeFileWord
-from model.extensions import Scanner
+from plugins.office.analyzer_office import analyzeFileWord
+from model.model import Scanner
 from tests.helpers import TestDetection
 from pprint import pprint
-from plugins.file_office import FileOffice
+from plugins.office.file_office import FileOffice
 from scanner import ScannerRest
 
 

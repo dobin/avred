@@ -1,11 +1,9 @@
 from typing import List, Set, Dict, Tuple, Optional
 import logging
-import pprint
 
 from model.testverify import VerifyStatus
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction
-from model.extensions import Scanner
-from plugins.file_pe import FilePe
+from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction, Scanner
+from plugins.pe.file_pe import FilePe
 from dotnetfile import DotNetPE
 from dotnetfile.util import BinaryStructureField, FileLocation
 

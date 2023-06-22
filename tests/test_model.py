@@ -1,17 +1,17 @@
 import unittest
-from plugins.analyzer_office import analyzeFileWord
-from model.extensions import Scanner
+from plugins.office.analyzer_office import analyzeFileWord
+from model.model import Scanner
 from tests.helpers import TestDetection
 from pprint import pprint
-from plugins.file_office import FileOffice
+from plugins.office.file_office import FileOffice
 from scanner import ScannerRest
 from model.model import Data
-from model.extensions import PluginFileFormat
+from plugins.model import BaseFile
 
 
 class ModelTest(unittest.TestCase):
     def testFile(self):
-        file = PluginFileFormat()
+        file = BaseFile()
         orig = b'AAAABBBBCCCCDDDD'
         new = b'AA\x00\x00\x00\x00BBCCCCDDDD'
 

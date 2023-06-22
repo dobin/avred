@@ -6,8 +6,7 @@ from ansi2html import Ansi2HTMLConverter
 import json
 from reducer import Reducer
 from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction, SectionType, Data, Section
-from model.extensions import Scanner, PluginFileFormat
-from plugins.file_pe import FilePe
+from plugins.pe.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
 from typing import List, Tuple
 
@@ -40,7 +39,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         if matchSection is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
         elif matchSection.name == ".text":
-            matchAsmInstructions, matchDisasmLines = disassemble(
+            matchAsmInstructions, matchDisasmLines = disassemblePe(
                 r2, filePe, match.start(), match.size)
             match.sectionType = SectionType.CODE
         else:
@@ -61,7 +60,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
 
 conv = Ansi2HTMLConverter()
-def disassemble(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLines=16):
+def disassemblePe(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLines=16):
     virtAddrDisasm = filePe.offsetToRva(fileOffset)
 
     matchDisasmLines: List[UiDisasmLine] = []

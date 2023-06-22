@@ -4,8 +4,8 @@ import logging
 
 from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction
 from model.testverify import VerifyStatus
-from model.extensions import Scanner
-from plugins.file_pe import FilePe
+from model.model import Scanner
+from plugins.pe.file_pe import FilePe
 from utils import removeAnsi
 
 

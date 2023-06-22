@@ -3,8 +3,8 @@ import os
 import pefile
 import inspect
 
-from model.extensions import PluginFileFormat
 from model.model import Section, SectionsBag
+from plugins.model import BaseFile
 
 from dotnetfile import DotNetPE
 from dotnetfile.structures import DOTNET_CLR_HEADER
@@ -12,7 +12,7 @@ from dotnetfile.parser import DOTNET_STREAM_HEADER
 from dotnetfile.util import BinaryStructureField, FileLocation
 
 
-class FilePe(PluginFileFormat):
+class FilePe(BaseFile):
     def __init__(self):
         super().__init__()
         self.sectionsBag: SectionsBag = SectionsBag()

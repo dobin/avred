@@ -13,6 +13,17 @@ import base64
 from model.testverify import *
 
 
+@dataclass
+class Scanner:
+    """Interface to the AV scanner"""
+    scanner_path: str = ""
+    scanner_name: str = ""
+
+    def scannerDetectsBytes(self, data: bytes, filename: str):
+        pass
+
+
+
 # All Input:    bytes
 # All Output:   bytes
 # All Internal: bytearray

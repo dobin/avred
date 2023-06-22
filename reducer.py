@@ -2,8 +2,8 @@ import logging
 import time
 from intervaltree import Interval, IntervalTree
 from typing import List
-from model.extensions import Scanner, PluginFileFormat
-from model.model import Data, Match
+from model.model import Data, Match, Scanner
+from plugins.model import Plugin, BaseFile
 from copy import deepcopy
 
 from utils import *
@@ -15,8 +15,8 @@ PRINT_DELAY_SECONDS = 1
 class Reducer():
     """Reducer will scan data in file with scanner, and return matches"""
 
-    def __init__(self, file: PluginFileFormat, scanner: Scanner):
-        self.file: PluginFileFormat = file
+    def __init__(self, file: BaseFile, scanner: Scanner):
+        self.file: BaseFile = file
         self.scanner = scanner
 
         self.lastPrintTime: int = 0

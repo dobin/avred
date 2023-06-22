@@ -5,12 +5,12 @@ from math import floor
 from typing import List
 
 from model.model import Data
-from model.extensions import PluginFileFormat
+from plugins.model import BaseFile
 
 MAKRO_PATH = 'word/vbaProject.bin'
 
 
-class FileOffice(PluginFileFormat):
+class FileOffice(BaseFile):
     # Represents an office file.
     #   - fileData: the complete file content
     #   - data: vbaProject.bin file content 

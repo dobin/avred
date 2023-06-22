@@ -6,19 +6,10 @@ import os
 
 from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo, UiDisasmLine
-from model.extensions import Scanner
+from model.model import Match, FileInfo, UiDisasmLine, Scanner
 import pcodedmp.pcodedmp as pcodedmp
-from plugins.file_office import FileOffice, VbaAddressConverter, OleStructurizer
+from plugins.office.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry
-
-
-def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[List[Match], str]:
-    # Scans a office file given with fileOffice with Scanner scanner. 
-    # Returns all matches.
-    reducer = Reducer(fileOffice, scanner)
-    matches = reducer.scan(0, fileOffice.Data().getLength())
-    return matches, ''
 
 
 def augmentFileWord(fileOffice: FileOffice, matches: List[Match]) -> str:

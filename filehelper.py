@@ -4,17 +4,18 @@ import hashlib
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 
-from model.extensions import PluginFileFormat
+from plugins.model import BaseFile
 from model.model import FileInfo
 
 
 class FileType(Enum):
     EXE = 1
+    DOTNET = 2
     OFFICE = 3
     PLAIN = 4
 
 
-def getFileInfo(file: PluginFileFormat):
+def getFileInfo(file: BaseFile):
     size = pathlib.Path(file.filepath).stat().st_size
     hash = hashlib.md5(file.fileData.getBytes()).digest()
     time = pathlib.Path(file.filepath).stat().st_ctime
@@ -55,7 +56,9 @@ def getFileScannerTypeFor(filename):
     else:
         # unknown file extension, try to identify it based on type (mostly for .bin files)
         ident = magic.from_file(filename)
-        if 'PE32 ' in ident or 'PE32+ ' in ident:
+        if 'Mono/.Net assembly' in ident:
+            fileScannerType = FileType.DOTNET
+        elif 'PE32 ' in ident or 'PE32+ ' in ident:
             fileScannerType = FileType.EXE
         elif 'Microsoft Word' in ident:
             fileScannerType = FileType.OFFICE

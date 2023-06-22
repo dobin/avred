@@ -10,14 +10,14 @@ Ident based on extension, set `FileType`.
 
 ## File
 
-The `PluginFileFormat` defines an object which is the view to a file, 
+The `BaseFile` defines an object which is the view to a file, 
 with some helper functions. For example, it does unzipping/zipping for 
 Office files. 
 
-Inherit from `PluginFileFormat`, like so: 
+Inherit from `BaseFile`, like so: 
 
 ```python
-class FileXXX(PluginFileFormat):
+class FileXXX(BaseFile):
     def __init__(self):
         super().__init__()
 ```
@@ -25,7 +25,7 @@ class FileXXX(PluginFileFormat):
 
 ## Analyzer
 
-Ananlyzer function will scan a file by getting its content from `PluginFileFormat::getData()`
+Ananlyzer function will scan a file by getting its content from `BaseFile::getData()`
 and send it to the avred-server via HTTP:
 
 ```python

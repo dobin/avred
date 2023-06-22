@@ -1,21 +1,13 @@
 from dataclasses import dataclass
 import os
 import copy
+from abc import abstractmethod
+from typing import List, Tuple, Set
 
-from model.model import Data
-
-
-@dataclass
-class Scanner:
-    """Interface to the AV scanner"""
-    scanner_path: str = ""
-    scanner_name: str = ""
-
-    def scannerDetectsBytes(self, data: bytes, filename: str):
-        pass
+from model.model import Data, Scanner, Match, OutflankPatch, MatchConclusion
 
 
-class PluginFileFormat():
+class BaseFile():
     """Interface for file format plugins"""
     def __init__(self):
         self.filepath: str = None
@@ -63,3 +55,26 @@ class PluginFileFormat():
         self.filename = filename
         self.fileData = Data(data)
         return self.parseFile()
+
+
+class Plugin():
+    def __init__(self):
+        pass
+    
+    @abstractmethod
+    def makeFile(self, filepath: str):
+        pass
+
+    @abstractmethod
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}):
+        pass
+
+    @abstractmethod
+    def augmentMatches(self, file: BaseFile, matches: List[Match]) -> str:
+        pass
+
+    @abstractmethod
+    def outflankFile(
+        self, filePe: BaseFile, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
+    ) -> List[OutflankPatch]:
+        pass

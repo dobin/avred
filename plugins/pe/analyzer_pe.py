@@ -5,12 +5,11 @@ from reducer import Reducer
 from intervaltree import Interval, IntervalTree
 from typing import List, Tuple
 
-from model.model import Match, SectionType, Data, Section
-from model.extensions import Scanner, PluginFileFormat
-from plugins.file_pe import FilePe
+from model.model import Match, SectionType, Data, Section, Scanner
+from plugins.pe.file_pe import FilePe
 
 
-def analyzeFileExe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, str]:
+def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, str]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches."""
     isolate = analyzerOptions.get("isolate", False)
 

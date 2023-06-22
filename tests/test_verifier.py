@@ -1,9 +1,9 @@
 import unittest
 from model.testverify import *
-from plugins.file_pe import FilePe
+from plugins.pe.file_pe import FilePe
 from tests.scanners import *
 from tests.helpers import TestDetection
-from plugins.analyzer_pe import analyzeFileExe
+from plugins.pe.analyzer_pe import analyzeFilePe
 from verifier import verify, verificationAnalyzer, getMatchTestsFor
 
 
@@ -19,7 +19,7 @@ class VerifierTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )  # 16 bytes
         scanner = ScannerTest(detections)
         
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
         self.assertEqual(len(matches), 2)
 
         verification = verify(filePe, matches, scanner)
@@ -53,7 +53,7 @@ class VerifierTest(unittest.TestCase):
         detections.append( TestDetection(29824, b"Unknown error\x00\x00\x00") )
         scanner = ScannerTestOr(detections)
         
-        matches, _ = analyzeFileExe(filePe, scanner)
+        matches, _ = analyzeFilePe(filePe, scanner)
 
         for match in matches:
             print(match)

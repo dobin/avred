@@ -4,7 +4,8 @@ import logging
 from typing import List
 
 from model.model import *
-from model.extensions import PluginFileFormat
+from plugins.model import BaseFile
+
 
 # Middle: 8
 # Thirds: 4 * 2
@@ -28,7 +29,7 @@ def getMatchTestsFor(verifications: List[VerificationEntry], matchOrder: TestMat
         return None
 
 
-def verify(file: PluginFileFormat, matches: List[Match], scanner) -> Verification:
+def verify(file: BaseFile, matches: List[Match], scanner) -> Verification:
     """Verify matches in file with scanner, and return the result"""
     verifications = runVerifications(file, matches, scanner)
     matchConclusions = verificationAnalyzer(verifications)
@@ -87,7 +88,7 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
     return matchConclusion
 
 
-def runVerifications(file: PluginFileFormat, matches: List[Match], scanner) -> List[VerificationEntry]: 
+def runVerifications(file: BaseFile, matches: List[Match], scanner) -> List[VerificationEntry]: 
     """Perform modifications on file from matches, scan with scanner and return those results"""
     verificationRuns: List[VerificationEntry] = []
     if len(matches) == 0:

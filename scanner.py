@@ -2,7 +2,7 @@ import requests as req
 import logging
 import yara
 
-from model.extensions import Scanner
+from model.model import Scanner
 
 
 class ScannerRest(Scanner):

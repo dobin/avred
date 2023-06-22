@@ -2,10 +2,11 @@
 
 import unittest
 import pcodedmp.pcodedmp as pcodedmp
-from plugins.analyzer_office import augmentFileWord
-from plugins.file_office import FileOffice, OleStructurizer, VbaAddressConverter
+from plugins.office.augment_office import augmentFileWord
+from plugins.office.file_office import FileOffice, OleStructurizer, VbaAddressConverter
 import olefile
 from model.model import Match
+
 
 class DisasmMakroTest(unittest.TestCase):
     def test_VbaAddressConverterMiniStream(self):

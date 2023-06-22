@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from plugins.file_pe import FilePe
+from plugins.pe.file_pe import FilePe
 from filehelper import getFileScannerTypeFor, FileType, getFileInfo
 
 

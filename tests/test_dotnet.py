@@ -1,10 +1,10 @@
 import unittest
-from plugins.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
-from plugins.dncilparser import IlMethod, DncilParser
+from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
+from plugins.dotnet.dncilparser import IlMethod, DncilParser
 from model.model import Match
 from model.testverify import MatchConclusion, VerifyStatus
-from plugins.file_pe import FilePe
-from plugins.outflank_dotnet import outflankDotnet
+from plugins.pe.file_pe import FilePe
+from plugins.dotnet.outflank_dotnet import outflankDotnet
 from typing import List
 
 

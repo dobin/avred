@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-from plugins.analyzer_office import FileOffice
+from plugins.office.analyzer_office import FileOffice
 
 # args
 fname = sys.argv[1]
