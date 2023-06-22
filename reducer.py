@@ -2,9 +2,11 @@ import logging
 import time
 from intervaltree import Interval, IntervalTree
 from typing import List
-from model.model import Data, Match, Scanner
-from plugins.model import Plugin, BaseFile
 from copy import deepcopy
+
+from model.model_base import Scanner
+from model.model_data import Data, Match
+from plugins.model import BaseFile
 
 from utils import *
 

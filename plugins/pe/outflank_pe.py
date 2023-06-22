@@ -1,12 +1,13 @@
 from typing import List, Set, Dict, Tuple, Optional
-
 import logging
 
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction
-from model.testverify import VerifyStatus
-from model.model import Scanner
+from model.model_verification import VerifyStatus
+from model.model_base import Scanner, OutflankPatch
+from model.model_data import Data, Match
+from model.model_code import AsmInstruction
+from model.model_verification import MatchConclusion
+from model.model_verification import VerifyStatus
 from plugins.pe.file_pe import FilePe
-from utils import removeAnsi
 
 
 def outflankPe(

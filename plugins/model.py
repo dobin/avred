@@ -4,7 +4,9 @@ import copy
 from abc import abstractmethod
 from typing import List, Tuple, Set
 
-from model.model import Data, Scanner, Match, OutflankPatch, MatchConclusion
+from model.model_data import Match, Data
+from model.model_verification import MatchConclusion
+from model.model_base import Scanner, OutflankPatch
 
 
 class BaseFile():

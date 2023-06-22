@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from model.model import Scanner
+from model.model_base import Scanner
 
 
 class ScannerTest(Scanner):

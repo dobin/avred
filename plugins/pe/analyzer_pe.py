@@ -2,10 +2,11 @@ import logging
 from copy import deepcopy
 from utils import *
 from reducer import Reducer
-from intervaltree import Interval, IntervalTree
 from typing import List, Tuple
 
-from model.model import Match, SectionType, Data, Section, Scanner
+from model.model_base import Scanner
+from model.model_data import Match
+from model.model_code import Section
 from plugins.pe.file_pe import FilePe
 
 

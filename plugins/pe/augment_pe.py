@@ -4,11 +4,12 @@ from utils import *
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json
-from reducer import Reducer
-from model.model import Match, FileInfo, UiDisasmLine, AsmInstruction, SectionType, Data, Section
-from plugins.pe.file_pe import FilePe
 from intervaltree import Interval, IntervalTree
 from typing import List, Tuple
+
+from model.model_data import Match
+from model.model_code import AsmInstruction, UiDisasmLine, SectionType
+from plugins.pe.file_pe import FilePe
 
 
 # Fix for https://github.com/radareorg/radare2-r2pipe/issues/146

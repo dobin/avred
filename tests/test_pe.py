@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
 import unittest
-from webbrowser import get
-from tests.helpers import TestDetection
+import r2pipe
+
 from plugins.pe.file_pe import FilePe
 from plugins.pe.analyzer_pe import analyzeFilePe
 from plugins.pe.augment_pe import augmentFilePe, disassemblePe
 from plugins.pe.outflank_pe import outflankPe
+from tests.helpers import TestDetection
 from tests.scanners import *
-from model.model import Match, OutflankPatch
-from model.testverify import MatchConclusion, VerifyStatus
+from model.model_data import Match
+from model.model_verification import MatchConclusion, VerifyStatus
 from utils import hexdmp, hexstr, removeAnsi
-import r2pipe
+
 
 
 class PeTest(unittest.TestCase):

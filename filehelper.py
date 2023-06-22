@@ -5,7 +5,7 @@ from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 
 from plugins.model import BaseFile
-from model.model import FileInfo
+from model.model_base import FileInfo
 
 
 class FileType(Enum):

@@ -5,8 +5,12 @@ import pickle
 import logging
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
 import io
-from model.model import *
+
 from app.views_auth import load_user
+
+from model.model_base import Outcome
+from model.model_data import Match
+
 #from waitress import serve
 
 EXT_INFO = ".outcome"

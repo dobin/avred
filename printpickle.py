@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from model.model import *
 import pickle
 import sys
 

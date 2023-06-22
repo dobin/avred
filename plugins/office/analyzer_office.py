@@ -3,7 +3,8 @@ from typing import List, Tuple
 
 from reducer import Reducer
 from utils import *
-from model.model import Match, Scanner
+from model.model_base import Scanner
+from model.model_data import Match
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.office.file_office import FileOffice
 

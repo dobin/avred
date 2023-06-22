@@ -5,7 +5,7 @@ import pcodedmp.pcodedmp as pcodedmp
 from plugins.office.augment_office import augmentFileWord
 from plugins.office.file_office import FileOffice, OleStructurizer, VbaAddressConverter
 import olefile
-from model.model import Match
+from model.model_data import Match
 
 
 class DisasmMakroTest(unittest.TestCase):

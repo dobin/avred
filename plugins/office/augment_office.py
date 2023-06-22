@@ -4,9 +4,9 @@ from typing import List, Tuple
 from intervaltree import Interval, IntervalTree
 import os
 
-from reducer import Reducer
 from utils import *
-from model.model import Match, FileInfo, UiDisasmLine, Scanner
+from model.model_data import Match
+from model.model_code import UiDisasmLine
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.office.file_office import FileOffice, VbaAddressConverter, OleStructurizer
 from pcodedmp.disasm import DisasmEntry

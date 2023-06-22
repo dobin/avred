@@ -1,11 +1,4 @@
 import unittest
-from plugins.office.analyzer_office import analyzeFileWord
-from model.model import Scanner
-from tests.helpers import TestDetection
-from pprint import pprint
-from plugins.office.file_office import FileOffice
-from scanner import ScannerRest
-from model.model import Data
 from plugins.model import BaseFile
 
 

@@ -1,11 +1,12 @@
 from typing import List, Set, Dict, Tuple, Optional
 import logging
 
-from model.testverify import VerifyStatus
-from model.model import Outcome, OutflankPatch, Match, MatchConclusion, Data, AsmInstruction, Scanner
+from model.model_verification import VerifyStatus
+from model.model_base import Scanner, OutflankPatch
+from model.model_data import Data, Match
+from model.model_code import AsmInstruction
+from model.model_verification import MatchConclusion
 from plugins.pe.file_pe import FilePe
-from dotnetfile import DotNetPE
-from dotnetfile.util import BinaryStructureField, FileLocation
 
 
 def outflankDotnet(

@@ -2,6 +2,17 @@ from enum import Enum
 from typing import List
 
 
+class Appraisal(Enum):
+    Unknown = "Unknown"
+    Undetected = "Undetected"
+    Hash = "Hash"
+    One = "One"
+    OrSig = "Or-Signature" # TODO: delete
+    AndSig = "And-Signature" # TODO: delete
+    Robust = "Robust (OR)"
+    Fragile = "Fragile (AND)"
+
+
 class FillType(Enum):
     """What kind of data to take to overwrite parts of a file/match"""
     null = 1

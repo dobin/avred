@@ -4,7 +4,7 @@ import olefile
 from math import floor
 from typing import List
 
-from model.model import Data
+from model.model_data import Data
 from plugins.model import BaseFile
 
 MAKRO_PATH = 'word/vbaProject.bin'

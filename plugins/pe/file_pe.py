@@ -3,13 +3,11 @@ import os
 import pefile
 import inspect
 
-from model.model import Section, SectionsBag
+from model.model_code import Section, SectionsBag
 from plugins.model import BaseFile
 
 from dotnetfile import DotNetPE
-from dotnetfile.structures import DOTNET_CLR_HEADER
-from dotnetfile.parser import DOTNET_STREAM_HEADER
-from dotnetfile.util import BinaryStructureField, FileLocation
+from dotnetfile.util import FileLocation
 
 
 class FilePe(BaseFile):

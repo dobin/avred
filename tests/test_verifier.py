@@ -1,10 +1,10 @@
 import unittest
-from model.testverify import *
+from model.model_verification import *
 from plugins.pe.file_pe import FilePe
 from tests.scanners import *
 from tests.helpers import TestDetection
 from plugins.pe.analyzer_pe import analyzeFilePe
-from verifier import verify, verificationAnalyzer, getMatchTestsFor
+from verifier import verify, getMatchTestsFor
 
 
 class VerifierTest(unittest.TestCase):

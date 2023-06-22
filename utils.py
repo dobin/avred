@@ -1,12 +1,9 @@
 import logging
 import json
-import os
-import base64
 import re
 from typing import List
 
-from model.model import Match
-from model.testverify import FillType
+from model.model_data import Match
 
 
 def saveMatchesToFile(filename, matches):

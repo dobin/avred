@@ -13,7 +13,8 @@ from typing import List
 import logging
 import struct
 from bitstring import Bits, BitArray, BitStream, pack
-from model.model import AsmInstruction
+
+from model.model_code import AsmInstruction
 
 
 # key token indexes to dotnet meta tables

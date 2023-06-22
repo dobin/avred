@@ -1,7 +1,9 @@
-from plugins.model import Plugin, BaseFile
-from model.model import Scanner, Match, OutflankPatch, MatchConclusion
 from typing import List, Tuple, Set
 
+from model.model_base import Scanner, OutflankPatch
+from model.model_data import Match
+from model.model_verification import MatchConclusion
+from plugins.model import Plugin, BaseFile
 from plugins.pe.analyzer_pe import analyzeFilePe
 from plugins.dotnet.augment_dotnet import augmentFileDotnet
 from plugins.dotnet.outflank_dotnet import outflankDotnet

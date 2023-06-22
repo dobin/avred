@@ -4,24 +4,24 @@ import argparse
 import pickle
 import os
 import logging
-
 import datetime
+from filehelper import *
+from copy import deepcopy
 
 from config import Config
-from verifier import verify
-from model.model import Outcome, Appraisal, Data
-from filehelper import FileType, FileInfo
+from model.model_base import Outcome
+from model.model_data import Data
+from model.model_verification import Appraisal
+from filehelper import FileType
 from scanner import ScannerRest, ScannerYara
-from model.testverify import VerifyStatus
+from model.model_verification import VerifyStatus
 
 from plugins.plain.plugin_plain import PluginPlain
 from plugins.dotnet.plugin_dotnet import PluginDotNet
 from plugins.pe.plugin_pe import PluginPe
 from plugins.office.plugin_office import PluginOffice
-
 from plugins.model import Plugin
-from filehelper import *
-from copy import deepcopy
+from verifier import verify
 
 
 def main():

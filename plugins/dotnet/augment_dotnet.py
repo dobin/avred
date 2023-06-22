@@ -1,16 +1,20 @@
 from intervaltree import Interval, IntervalTree
 import logging
 from typing import List, Tuple, Set
-from model.model import Match, FileInfo, UiDisasmLine, Section, SectionsBag, SectionType, AsmInstruction
-from plugins.pe.file_pe import FilePe, Section, getDotNetSections
+
+from plugins.pe.file_pe import FilePe, getDotNetSections
+from plugins.dotnet.dncilparser import DncilParser
+from plugins.dotnet.dncilparser import IlMethod
+
 from utils import *
 
-from plugins.dotnet.dncilparser import DncilParser
 from dotnetfile import DotNetPE
 from dotnetfile.structures import DOTNET_CLR_HEADER
 from dotnetfile.parser import DOTNET_STREAM_HEADER
 from dotnetfile.util import BinaryStructureField, FileLocation
-from plugins.dotnet.dncilparser import IlMethod
+
+from model.model_data import Match
+from model.model_code import AsmInstruction, UiDisasmLine, SectionType
 
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:

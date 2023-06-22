@@ -1,5 +1,8 @@
 from plugins.model import Plugin, BaseFile
-from model.model import Scanner, Match, OutflankPatch, MatchConclusion
+from model.model_base import Scanner, OutflankPatch
+from model.model_data import Match
+from model.model_verification import MatchConclusion
+from plugins.pe.file_pe import FilePe
 from typing import List, Tuple, Set
 
 from plugins.pe.analyzer_pe import analyzeFilePe
