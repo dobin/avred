@@ -49,8 +49,8 @@ def getFileScannerTypeFor(filename):
         fileScannerType = FileType.PLAIN
     elif filename.endswith('.docm'):  # dotm, xlsm, xltm
         fileScannerType = FileType.OFFICE
-    elif filename.endswith('.exe') or filename.endswith('.dll'):
-        fileScannerType = FileType.EXE
+    #elif filename.endswith('.exe') or filename.endswith('.dll'):
+    #    fileScannerType = FileType.EXE
     elif filename.endswith('.lnk'):
         fileScannerType = FileType.PLAIN
     else:
