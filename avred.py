@@ -174,14 +174,14 @@ def handleFile(filename, args, scanner):
             outcome.isDetected = False
             outcome.appraisal = Appraisal.Undetected
             logging.info("isDetected: {}".format(outcome.isDetected))
-            outcome.saveToFile()
+            outcome.saveToFile(file.filepath)
             return
         
         # quick check hash
         if scanIsHash(file, scanner):
             outcome.appraisal = Appraisal.Hash
             logging.info("Appraisal: {}".format(outcome.appraisal))
-            outcome.saveToFile()
+            outcome.saveToFile(file.filepath)
             return
         
         logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name} and not hash based")
