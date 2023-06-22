@@ -245,6 +245,9 @@ def verifyFile(outcome, file, scanner):
     outcome.verification = verification
     outcome.isVerified = True
 
+    if len(outcome.matches) == 0:
+        return outcome
+
     allCount = len(verification.matchConclusions.verifyStatus)
     robustCount = verification.matchConclusions.getCount(VerifyStatus.ROBUST)
     dominantCount = verification.matchConclusions.getCount(VerifyStatus.DOMINANT)
