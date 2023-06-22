@@ -15,8 +15,13 @@ class ScannerRest(Scanner):
         """Returns true if file is detected"""
         params = { 'filename': filename }
 
-        ###
-        res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
+        try:
+            res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
+        except:
+            # try again
+            logging.warn("Invalid server answer, retrying once")
+            res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
+
         jsonRes = res.json()
 
         if res.status_code != 200:
