@@ -11,7 +11,9 @@
         <td>
         {% endif %}
 
-        <label style="color: grey">{{ outcome.matches[loop.index0].sectionType.value }}</label>
+        <label style="color: grey">
+            {{ outcome.matches[loop.index0].sectionType.value }}
+        </label>
         </td>
     {% endfor %}
 {% endif %}

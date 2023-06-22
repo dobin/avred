@@ -106,6 +106,68 @@ def fileDownloadOutflank(filename):
         attachment_filename=filename
     )
 
+@views.route("/file/<filename>/downloadPatchMatch/<id>")
+@login_required
+def fileDownloadPatchMatch(filename, id):
+    id = int(id)
+    if filename != secure_filename(filename):
+        flash('Invalid filename')
+        return redirect('index.html')
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+    outcome, logData, errStr = getFileData(filepath)
+    if errStr is not None or outcome is None or logData is None: 
+        return "Error: " + errStr
+    
+    if not os.path.isfile(filepath):
+        return "Error: File not found: " + filepath
+    with open(filepath, 'rb') as file:
+        fileData: bytearray = bytearray(file.read())
+
+    match: Match = outcome.matches[id]
+    len = match.size
+    offset = match.fileOffset
+    data = b"\x00" * len
+    fileData[offset:offset+len] = data
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
+
+@views.route("/file/<filename>/downloadPatchMatch/")
+@login_required
+def fileDownloadPatchFull(filename):
+    if filename != secure_filename(filename):
+        flash('Invalid filename')
+        return redirect('index.html')
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+    outcome, logData, errStr = getFileData(filepath)
+    if errStr is not None or outcome is None or logData is None: 
+        return "Error: " + errStr
+    
+    if not os.path.isfile(filepath):
+        return "Error: File not found: " + filepath
+    with open(filepath, 'rb') as file:
+        fileData: bytearray = bytearray(file.read())
+
+    for match in outcome.matches:
+        print("Patch: {} {} {}".format(match.idx, match.fileOffset, match.size))
+        len = match.size
+        offset = match.fileOffset
+        data = b"\x00" * len
+        fileData[offset:offset+len] = data
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
+
 
 ### Examples related
 

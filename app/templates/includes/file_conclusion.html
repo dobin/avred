@@ -5,7 +5,11 @@
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.IRRELEVANT" %}
 <td style="background-color:rgb(157, 143, 143)">Probably not relevant. Check verifier</td>
 {% elif outcome.verification.matchConclusions.verifyStatus[index]|string == "VerifyStatus.DOMINANT" %}
-<td style="background-color:rgb(63, 179, 63)">Dominant. Modify this to make file undetected</td>
+<td style="background-color:rgb(63, 179, 63)">Dominant. Modify this to make file undetected
+    {% if current_user.is_authenticated %}
+    (<a href="{{request.path}}/downloadPatchMatch/{{loop.index0}}">Download</a>)
+    {% endif %}
+</td>
 {% else %}
 <td></td>
 {% endif %}

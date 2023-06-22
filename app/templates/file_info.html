@@ -115,6 +115,13 @@ File is not detected by AV.
     </tr>
     {% endfor %}
 </table>
+
+{% if current_user.is_authenticated %}
+<a href="{{request.path}}/downloadPatchMatch/">Download</a> with all matches overwritten</td>
+<br>
+{% endif %}
+<br>
+
 {% endif %}
 
 {% if outcome.fileStructure != '' %}
