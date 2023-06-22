@@ -41,14 +41,15 @@ def main():
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
     parser.add_argument("--reinfo", help="Debug: Re-do the file info", default=False, action='store_true')
     parser.add_argument("--rescan", help="Debug: Re-do the scanning for matches", default=False, action='store_true')
+    parser.add_argument("--reappraisal", help="Debug: Re-do the file appraisal", default=False, action='store_true')
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
     parser.add_argument("--reoutflank", help="Debug: Re-do the Outflanking", default=False, action='store_true')
 
     # analyzer options
-    parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
-    parser.add_argument("--pe_remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
-    parser.add_argument("--pe_ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
+    #parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
+    #parser.add_argument("--pe_remove", help="PE: Remove some standard sections at the beginning (experimental)", default=False,  action='store_true')
+    #parser.add_argument("--pe_ignoreText", help="PE: Dont analyze .text section", default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -213,6 +214,18 @@ def handleFile(filename, args, scanner):
                break
 
             iteration += 1
+
+    # Debugging: re-appraisal only (temp)
+    if args.reappraisal:
+        if not outcome.isScanned:
+            outcome.appraisal = Appraisal.Unknown
+        elif not outcome.isDetected:
+            outcome.appraisal = Appraisal.Undetected
+        elif scanIsHash(file, scanner):
+            outcome.appraisal = Appraisal.Hash
+
+        outcome.saveToFile(file.filepath)
+        return
 
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
