@@ -148,11 +148,14 @@ class SectionsBag:
 
 gpRegisters = [ 
     'eax','ebx','ecx','edx','esi','edi',  # make sure we also check 32 bit
+    'ebp', 'esp',
     'al','bl','cl','dl',  # and these.. argh
     'ah','bh','ch','dh', # and these.. argh
 
     'rax','rbx','rcx','rdx','rsi','rdi',
-    'r8','r9','r10','r11','r12','r13','r14','r15' ]
+    'r8','r9','r10','r11','r12','r13','r14','r15' 
+    'rbp', 'rsp',
+    ]
 class AsmInstruction():
     def __init__(self, fileOffset, rva, esil, type, disasm, size, rawBytes):
         self.offset = fileOffset  # offset in file
@@ -220,6 +223,7 @@ class Match():
         self.size: int = size
         self.iteration = iteration
         
+        # set by augmentation
         self.data: bytes = b''
         self.dataHexdump: str = ''
         self.sectionInfo: str = ''
