@@ -46,6 +46,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
         moreMatches = reducer.scan(
             offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
             offsetEnd=filePe.Data().getLength())
+        matches += moreMatches
     else:
         # analyze each detected section
         for section in detected_sections:
@@ -53,8 +54,9 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
             moreMatches = reducer.scan(
                 offsetStart=section.addr, 
                 offsetEnd=section.addr+section.size)
+            matches += moreMatches
 
-        if len(matches) > 0:
+        if len(moreMatches) > 0:
             # only append section-scan indicator if it yielded results, see below
             scannerInfos.append('section-scan')
         else:
@@ -65,9 +67,9 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
             moreMatches = reducer.scan(
                 offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
+            matches += moreMatches
 
-    matches += moreMatches
-    return sorted(matches), ",".join(scannerInfos)
+    return sorted(matches), " -> ".join(scannerInfos)
 
 
 def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
