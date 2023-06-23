@@ -9,7 +9,7 @@ class UtilsTest(unittest.TestCase):
     def test_magic(self):
         filename = "tests/data/dotnet-test.dll"
         type = getFileScannerTypeFor(filename) 
-        self.assertEqual(type, FileType.EXE) # DOTNET
+        self.assertEqual(type, FileType.DOTNET)
 
         filename = "tests/data/P5-5h3ll.docm"
         type = getFileScannerTypeFor(filename) 
