@@ -15,7 +15,7 @@ PRINT_DELAY_SECONDS = 1
 
 
 class Reducer():
-    """Reducer will scan data in file with scanner, and return matches"""
+    """Reducer will scan data in file with scanner, and return List of matches"""
 
     def __init__(self, file: BaseFile, scanner: Scanner):
         self.file: BaseFile = file
@@ -28,6 +28,7 @@ class Reducer():
 
 
     def scan(self, offsetStart, offsetEnd) -> List[Match]:
+        """Scan self.file.Data() from offsetStart to offsetEnd, return matches"""
         it = IntervalTree()
         data = self.file.Data()  # get the data of the file to work on
         self._scanDataPart(data, offsetStart, offsetEnd, it)
@@ -42,6 +43,7 @@ class Reducer():
 
 
     def _scanData(self, data: Data):
+        """Use self.file with data, scan it and return true/false"""
         newFileData: Data = self.file.getFileDataWith(data)
         return self.scanner.scannerDetectsBytes(newFileData.getBytes(), self.file.filename)
 

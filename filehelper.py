@@ -16,6 +16,7 @@ class FileType(Enum):
 
 
 def getFileInfo(file: BaseFile):
+    """Returns basic file information FileInfo for file (size, hash, ident)"""
     size = pathlib.Path(file.filepath).stat().st_size
     hash = hashlib.md5(file.fileData.getBytes()).digest()
     time = pathlib.Path(file.filepath).stat().st_ctime
@@ -42,6 +43,7 @@ def getFileInfo(file: BaseFile):
 
 
 def getFileScannerTypeFor(filename):
+    """Identify file type. Used to select the right file scanner."""
     fileScannerType = FileType.PLAIN
 
     # detection based on file ending (excplicitly tested)
@@ -49,8 +51,6 @@ def getFileScannerTypeFor(filename):
         fileScannerType = FileType.PLAIN
     elif filename.endswith('.docm'):  # dotm, xlsm, xltm
         fileScannerType = FileType.OFFICE
-    #elif filename.endswith('.exe') or filename.endswith('.dll'):
-    #    fileScannerType = FileType.EXE
     elif filename.endswith('.lnk'):
         fileScannerType = FileType.PLAIN
     else:
