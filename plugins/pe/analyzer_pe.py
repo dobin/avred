@@ -27,11 +27,11 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
     detected_sections = []
     if isolate:
         logging.info("Section Detection: Isolating sections (zero all others)")
-        scannerInfos.append('zero-nontarget-sections')
+        scannerInfos.append('ident:zero-nontarget-sections')
         detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
         logging.info("Section Detection: Zero section (leave all others intact)")
-        scannerInfos.append('zero-target-section')
+        scannerInfos.append('ident:zero-target-section')
         detected_sections = findDetectedSections(filePe, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
@@ -41,14 +41,18 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
     reducer = Reducer(filePe, scanner)
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:
-        logging.info("Section analysis failed. Fall back to non-section-aware reducer")
-        scannerInfos.append('flat-scan1')
-        moreMatches = reducer.scan(
-            offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
-            offsetEnd=filePe.Data().getLength())
+        logging.info("Section analysis failed. Fall back to non-section-aware reducer (flat-scan)")
+        scannerInfos.append('scan:flat_1')
+        
+        # start at .text section, which is usually the first one. Offset 512
+        # this will skip scanning of PE headers, which gives unecessary false positives
+        offsetStart = filePe.sectionsBag.getSectionByName(".text").addr
+        offsetEnd = filePe.Data().getLength()
+        moreMatches = reducer.scan(offsetStart, offsetEnd)
         matches += moreMatches
     else:
         # analyze each detected section
+        scannerInfos.append('scan:by-section')
         for section in detected_sections:
             logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
             moreMatches = reducer.scan(
@@ -56,14 +60,11 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
                 offsetEnd=section.addr+section.size)
             matches += moreMatches
 
-        if len(moreMatches) > 0:
-            # only append section-scan indicator if it yielded results, see below
-            scannerInfos.append('section-scan')
-        else:
-            # there are instances where the section-based scanning does not yield any result.
-            # do it again without it
-            logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer")
-            scannerInfos.append('flat-scan2')
+        # there are instances where the section-based scanning does not yield any result.
+        if len(moreMatches) == 0:
+            # do it again with a flat-scan
+            logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer (flat-scan)")
+            scannerInfos.append('scan:flat_2')
             moreMatches = reducer.scan(
                 offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
