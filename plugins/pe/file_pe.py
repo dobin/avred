@@ -99,37 +99,40 @@ def getDotNetSections(filePe) -> SectionsBag:
 
     dotnet_file = DotNetPE(filePe.filepath)
 
-    textSection = filePe.sectionsBag.getSectionByName('.text')
+    textSection: Section = filePe.sectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.addr
     logging.info("Offset: {}".format(addrOffset))
 
     # header
     cli_header_addr = textSection.addr
+    cli_header_vaddr = textSection.virtaddr
     cli_header_size = dotnet_file.clr_header.HeaderSize.value
     s = Section('DotNet Header', 
         cli_header_addr,   
         cli_header_size, 
-        0,
+        cli_header_vaddr,
         False)
     sectionsBag.addSection(s)
 
     # metadata header
     metadata_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
+    metadata_header_vaddr = dotnet_file.dotnet_metadata_header.address
     metadata_header_size = dotnet_file.dotnet_metadata_header.size
     s = Section('Metadata Header', 
         metadata_header_addr,
         metadata_header_size, 
-        0,
+        metadata_header_vaddr,
         False)
     sectionsBag.addSection(s)
 
     # methods
     methods_addr = cli_header_addr + cli_header_size
+    methods_vaddr = cli_header_vaddr + cli_header_size
     methods_size = metadata_header_addr - methods_addr
     s = Section('methods', 
         methods_addr,    
         methods_size, 
-        0)
+        methods_vaddr)
     sectionsBag.addSection(s)
     
     # metadata directory
@@ -159,7 +162,7 @@ def getDotNetSections(filePe) -> SectionsBag:
         s = Section(streamHeader.string_representation,
             streamHeader.address - addrOffset, 
             streamHeader.size,
-            0,
+            streamHeader.address,
             False)
         sectionsBag.addSection(s)
 
@@ -169,7 +172,7 @@ def getDotNetSections(filePe) -> SectionsBag:
         s = Section(stream.string_representation,
             stream.address - addrOffset, 
             stream.size, 
-            0)
+            stream.address)
         sectionsBag.addSection(s)
 
     return sectionsBag
