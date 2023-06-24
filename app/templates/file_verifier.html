@@ -9,7 +9,7 @@
             {% for match in outcome.matches %}
             <td>
                 Match#{{loop.index0}}<br>
-                {{match.size}}B
+                {{match.section.name}} {{match.size}}b
             </td>
             {% endfor %}
 

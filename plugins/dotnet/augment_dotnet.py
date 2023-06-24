@@ -27,9 +27,9 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     for match in matches:
         matchDisasmLines: List[UiDisasmLine] = []
         matchAsmInstructions: List[AsmInstruction] = []
-
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump = hexdmp(matchBytes, offset=match.start())
+        matchSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)  # note: we take the PE section, not DotNet
         matchSectionName = filePe.sectionsBag.getSectionNameByAddr(match.fileOffset)
 
         # set info: PE section name first
@@ -53,6 +53,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         else:
             match.sectionType = SectionType.DATA
 
+        match.setSection(matchSection)
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)

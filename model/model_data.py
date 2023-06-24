@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import logging
 
 from model.model_verification import FillType
-from model.model_code import AsmInstruction, SectionType, UiDisasmLine
+from model.model_code import AsmInstruction, SectionType, UiDisasmLine, Section
 
 
 # All Input:    bytes
@@ -88,6 +88,7 @@ class Match():
         self.data: bytes = b''
         self.dataHexdump: str = ''
         self.sectionInfo: str = ''
+        self.section: Section = Section('', 0, 0, 0, False)  # init with empty section
         self.sectionType: SectionType = SectionType.UNKNOWN
         self.disasmLines: List[UiDisasmLine] = []
         self.asmInstructions: List[AsmInstruction] = []
@@ -109,6 +110,12 @@ class Match():
 
     def getSectionInfo(self):
         return self.sectionInfo
+    
+    def setSection(self, section: Section):
+        self.section = section
+
+    def getSection(self):
+        return self.section
 
     def setDisasmLines(self, disasmLines):
         self.disasmLines = disasmLines

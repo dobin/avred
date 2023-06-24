@@ -47,6 +47,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
             match.sectionType = SectionType.DATA
 
         match.setData(matchBytes)
+        match.setSection(matchSection)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(matchSectionName)
         match.setDisasmLines(matchDisasmLines)
