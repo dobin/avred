@@ -1,6 +1,7 @@
 import requests as req
 import logging
 import yara
+import brotli
 
 from model.model_base import Scanner
 
@@ -11,9 +12,12 @@ class ScannerRest(Scanner):
         self.scanner_name = name
         
 
-    def scannerDetectsBytes(self, data: bytes, filename: str):
+    def scannerDetectsBytes(self, data: bytes, filename: str, useBrotli=True):
         """Returns true if file is detected"""
-        params = { 'filename': filename }
+        params = { 'filename': filename, 'brotli': useBrotli }
+
+        if useBrotli:
+            data = brotli.compress(data)
 
         try:
             res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
