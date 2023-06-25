@@ -46,7 +46,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             info += " " + " ".join(methodNames)
             
             # .text has most of DotNet, check if its methods
-            if dotnetSectionsBag.getSectionNameByAddr(match.start()) is "methods":
+            if dotnetSectionsBag.getSectionNameByAddr(match.start()) == "methods":
                 match.sectionType = SectionType.CODE
             else:
                 match.sectionType = SectionType.DATA
