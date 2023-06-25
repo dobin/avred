@@ -30,7 +30,11 @@
                 {% endif %}
             </td>
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
-            <td>{{'y' if outcome.outflankPatches|length > 0}}</td>
+            <td>
+                {% if outcome.outflankPatches|length > 0 %}
+                <a href="{{request.path}}/outflank">(D)</a>
+                {% endif %}
+            </td>
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
             <td>{{outcome.matches|length}}</td>
 
