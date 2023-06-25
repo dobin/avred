@@ -31,7 +31,7 @@
             </td>
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
             <td>
-                {% if outcome.outflankPatches|length > 0 %}
+                {% if current_user.is_authenticated and outcome.outflankPatches|length > 0 %}
                 <a href="{{request.path}}/outflank">(D)</a>
                 {% endif %}
             </td>

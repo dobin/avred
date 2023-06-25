@@ -82,8 +82,10 @@ File is not detected by AV.
     </tr>
     {% endfor %}
 </table>
-<a href="{{request.path}}/outflank">Download</a> patched file (undetected)
-<br>
+
+{% if current_user.is_authenticated %}
+<a href="{{request.path}}/outflank">Download</a> patched file (undetected)<br>
+{% endif %}
 <br>
 {% endif %}
 
