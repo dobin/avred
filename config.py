@@ -7,6 +7,12 @@ class Config(object):
     def __init__(self):
         self.data = {}
 
+    def getConfigPath(self):
+        return CONFIG_FILE
+    
+    def getConfig(self):
+        return self.data
+    
     def load(self):
         with open(CONFIG_FILE) as jsonfile:
             try:

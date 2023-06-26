@@ -7,6 +7,7 @@ import logging
 import datetime
 from filehelper import *
 from copy import deepcopy
+import pprint
 
 from config import Config
 from model.model_base import Outcome
@@ -30,6 +31,7 @@ def main():
     parser.add_argument("-u", "--uploads", help="Scan app/uploads/*", default=False, action='store_true')
     parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")", default="amsi")
     #parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
+    parser.add_argument("-C", "--Config", help="Print config location and content", default=False, action='store_true')
 
     # debug
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
@@ -46,6 +48,11 @@ def main():
 
     config = Config()
     config.load()
+
+    if args.Config:
+        print("Config path: " + config.getConfigPath())
+        pprint.pprint(config.getConfig())
+        return
 
     if args.server not in config.get("server"):
         logging.error(f"Could not find server with name '{args.server}' in config.json")
