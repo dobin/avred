@@ -170,13 +170,8 @@ Based on:
 * https://github.com/scrt/avdebugger
 
 
-## Issues when scanning and options
+## Tests
 
-### EXE PE
-
-*If all sections get detected*, use `--isolate`. Instead of nulling a section and see if
-the AV stops identifying it, the option will do the opposite: null other sections, and see
-if the AV still detects it. 
-
-*If there are a lot of matches in `.text`*, use `--ignoreText` to skip analyzing this section.
-The findings in the other sections are usually good enough. 
+python3 -m coverage run -m unittest  -> .coverage
+python3 -m coverage report  -> stdout 
+python3 -m coverage html  -> ./htmlcov/index.html

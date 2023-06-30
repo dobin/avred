@@ -1,0 +1,6 @@
+[run]
+omit = 
+    tests/*
+    pcodedmp/*
+    dotnetfile/*
+    */dist-packages/*

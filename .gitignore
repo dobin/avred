@@ -12,3 +12,4 @@ app/examples/**
 doc/todo.txt
 doc/notes/**
 *.bak
+.coverage
