@@ -28,7 +28,6 @@
                 <td>Scan date: </td>
                 <td>{{outcome.scanTime|mydate}}</td>
             </tr>
-        
         </table>
         
       </div>
@@ -91,6 +90,7 @@ File is not detected by AV.
 
 
 {% if outcome.matches|length > 0 %}
+<br>
 <h2>Matches</h2>
 <table class="table">
     <tr>
@@ -103,6 +103,7 @@ File is not detected by AV.
         <th>Conclusion</th>
     </tr>
     {% for match in outcome.matches %}
+    {% if session['showDetails'] or outcome.verification.matchConclusions.verifyStatus[loop.index0]|string != "VerifyStatus.IRRELEVANT" %}
     <tr>
         <td>{{match.idx}}</td>
         <td>{{match.iteration}}</td>
@@ -115,6 +116,7 @@ File is not detected by AV.
         {% include 'includes/file_conclusion.html' %}
         {% endwith %}
     </tr>
+    {% endif %}
     {% endfor %}
 </table>
 
@@ -126,7 +128,7 @@ File is not detected by AV.
 
 {% endif %}
 
-{% if outcome.fileStructure != '' %}
+{% if session['showDetails'] and outcome.fileStructure != '' %}
 <h2>File Structure</h2>
 <pre>{{outcome.fileStructure}}</pre>
 {% endif %}

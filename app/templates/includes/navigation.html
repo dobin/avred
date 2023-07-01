@@ -11,18 +11,43 @@
         >
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav mr-auto">
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/' else '' }}" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/upload' else '' }}" href="/upload">Upload</a></li>
                 {% if current_user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files_results' else '' }}" href="/files_results">Files</a></li>
+                <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/files' else '' }}" href="/files">Files</a></li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path.startswith('/examples') else ''}}" href="/examples">Examples</a></li>
                 {% if not current_user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link {{ 'active' if request.path == '/login' else '' }}" href="/login">Login</a></li>
                 {% endif %}
             </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <form method="GET" id="detailsForm" action="/settings">
+                    <div class="form-check form-switch">
+                        <span class="navbar-text">
+                            Details
+                        </span>       
+                        <input name="showDetails" class="form-check-input" type="checkbox" id="toggleSwitch" data-toggle="toggle"
+                            data-on="On" data-off="Off" {% if session["showDetails"] %}checked{% endif %}>
+                    </div>
+                </form>
+            </ul>
         </div>
     </div>
 </nav>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var checkbox = document.getElementById('toggleSwitch');
+        var form = document.getElementById('detailsForm');
+
+        checkbox.addEventListener('click', function() {
+            form.submit();
+        });
+    });
+</script>

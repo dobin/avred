@@ -10,10 +10,14 @@
         <thead>
         <tr>
             <th>Name <span>&uarr;</span</th>
+            {% if session['showDetails'] %}
             <th>Type <span>&uarr;</span</th>
+            {% endif %}
             <th>Outflank</th>
             <th>Appraisal <span>&uarr;</span</th>
+            {% if session['showDetails'] %}
             <th>Cnt <span>&uarr;</span</th>
+            {% endif %}
         </tr>
         </thead>
         {% for outcome in outcomes %}
@@ -29,14 +33,18 @@
                 </a>
                 {% endif %}
             </td>
+            {% if session['showDetails'] %}
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
+            {% endif %}
             <td>
                 {% if current_user.is_authenticated and outcome.outflankPatches|length > 0 %}
                 <a href="{{request.path}}/outflank">(D)</a>
                 {% endif %}
             </td>
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
+            {% if session['showDetails'] %}
             <td>{{outcome.matches|length}}</td>
+            {% endif %}
 
             {% include 'includes/verifystatus.html' %}
         </tr>

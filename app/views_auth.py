@@ -1,9 +1,8 @@
 from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, AnonymousUserMixin
+import random
 
 views_auth = Blueprint('views_auth', __name__)
-
 login_manager = LoginManager()
 
 

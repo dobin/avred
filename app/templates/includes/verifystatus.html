@@ -1,6 +1,8 @@
 
 {% if outcome.isVerified and verifications != None %}
     {% for verifyStatus in outcome.verification.matchConclusions.verifyStatus %}
+        {% if session['showDetails'] or verifyStatus|string != "VerifyStatus.IRRELEVANT" %}
+
         {% if verifyStatus|string == "VerifyStatus.IRRELEVANT" %}
         <td style="background-color:rgb(157, 143, 143)">
         {% elif verifyStatus|string == "VerifyStatus.DOMINANT" %}
@@ -15,5 +17,7 @@
             {{ outcome.matches[loop.index0].sectionType.value }}
         </label>
         </td>
+
+        {% endif %}
     {% endfor %}
 {% endif %}

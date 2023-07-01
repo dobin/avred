@@ -1,9 +1,9 @@
-from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template, send_file
+from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template, send_file, make_response, session
 from werkzeug.utils import secure_filename
 import os
 import pickle
 import logging
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, login_manager
+from flask_login import login_user, login_required, current_user
 import io
 
 from app.views_auth import load_user
@@ -24,30 +24,37 @@ def before_request():
     # if no password is set, just login the user so he has access to his 
     # /files (for @login_required api's).
     # thanks chatgpt
-    if current_app.config["PASSWORD"] == "":
+
+    if not 'showDetails' in session:
+        session['showDetails'] = True
+
+    if current_app.config["PASSWORD"] == "" and not current_user.is_authenticated:
         login_user(user = load_user('1'))
 
 
 @views.route("/")
 def index():
-    examples = os.listdir("app/examples/")
-    return render_template('index.html', examples=examples)
+    return render_template('index.html')
+
+
+@views.route("/settings")
+def settings():
+    showDetails = request.args.get('showDetails', 'No')
+    if showDetails == 'on':
+        session['showDetails'] = True
+    else:
+        session['showDetails'] = False
+
+    referer = request.headers.get('Referer', '/')
+    response = make_response(redirect(referer))
+    return response
+
 
 
 @views.route("/files")
 @login_required
-def files():
-    examples = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
-    res = []
-    for example in examples:
-        name = os.path.basename(example[:-len(EXT_INFO)])
-        res.append(name)
-    return render_template('list_files.html', filenames=res)
+def files_list():
 
-
-@views.route("/files_results")
-@login_required
-def files_results():
     filepaths = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
     outcomes = []
     for filepath in sorted(filepaths):
@@ -58,7 +65,7 @@ def files_results():
             continue
         outcomes.append(outcome)
     
-    return render_template('list_files_results.html', outcomes=outcomes)
+    return render_template('files_list.html', outcomes=outcomes)
 
 
 @views.route("/file/<filename>")
@@ -201,7 +208,7 @@ def examples_list():
 
         outcomes.append(outcome)
     
-    return render_template('list_files_results.html', outcomes=outcomes, examples=True)
+    return render_template('files_list.html', outcomes=outcomes, examples=True)
 
 
 @views.route("/example/<filename>/download")

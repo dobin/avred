@@ -2,9 +2,13 @@
     <aside class="col-md-2">
         <ul class="nav nav-pills flex-column nav-fill" id="matchTab" role="tablist">
             {% for match in outcome.matches %}
+            {% if session['showDetails'] or outcome.verification.matchConclusions.verifyStatus[loop.index0]|string != "VerifyStatus.IRRELEVANT" %}
+
             <li class="nav-item" role="presentation">
                 <a class="nav-link" href="#title{{match.idx}}">{{match.idx}}: {{match.fileOffset|prettynumber}}</a>
             </li>
+
+            {% endif %}
             {% endfor %}
         </ul>
     </aside>
@@ -13,6 +17,8 @@
         <div class="tab-content" id="matchTabContent">
             <div class="tab-pane fade show active " id="match-all" role="tabpanel" aria-labelledby="match-tab-all">
                 {% for match in outcome.matches %}
+                {% if session['showDetails'] or outcome.verification.matchConclusions.verifyStatus[loop.index0]|string != "VerifyStatus.IRRELEVANT" %}
+
                     <h2 id="title{{match.idx}}">Match {{match.idx}}: {{match.fileOffset}} (size: {{match.size}}) </h2>
 
                     <div class="accordion" id="info">
@@ -79,6 +85,8 @@
                     </div>
                     {% endif %}
                 <br>
+
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
