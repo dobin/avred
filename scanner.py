@@ -2,29 +2,77 @@ import requests as req
 import logging
 import yara
 import brotli
+import os
+import pickle
+import hashlib
 
 from model.model_base import Scanner
+
+
+USE_CACHE = True
+
+class HashCacheEntry():
+    def __init__(self, filename, result, scanTime):
+        self.filename = filename
+        self.scanTime = scanTime
+        self.result = result
+
+
+class HashCache():
+    def __init__(self):
+        self.cache = {}
+
+        if os.path.exists("hashcache.pickle"):
+            with open("hashcache.pickle", "rb") as file:
+                logging.info("Loading HashCache")
+                self.cache = pickle.load(file)
+                logging.info("  {} hashes loaded".format(len(self.cache)) )
+
+
+    def save(self):
+        with open("hashcache.pickle", "wb") as file:
+            logging.info("Saving HashCache")
+            pickle.dump(self.cache, file)
+
+
+    def getResult(self, data):
+        hash = hashlib.md5(data).hexdigest()
+        return self.cache.get(hash, None)
+
+
+    def addResult(self, data, filename, result, scanTime):
+        hash = hashlib.md5(data).hexdigest()
+        self.cache[hash] = HashCacheEntry(filename, result, scanTime)
+        
+
+hashCache = HashCache()
 
 
 class ScannerRest(Scanner):
     def __init__(self, url, name):
         self.scanner_path = url
         self.scanner_name = name
-        
+
 
     def scannerDetectsBytes(self, data: bytes, filename: str, useBrotli=True):
         """Returns true if file is detected"""
-        params = { 'filename': filename, 'brotli': useBrotli }
 
+        cacheResult = hashCache.getResult(data)
+        if cacheResult is not None:
+            return cacheResult.result
+
+        params = { 'filename': filename, 'brotli': useBrotli }
         if useBrotli:
-            data = brotli.compress(data)
+            scanData = brotli.compress(data)
+        else:
+            scanData = data
 
         try:
-            res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
+            res = req.post(f"{self.scanner_path}/scan", params=params, data=scanData, timeout=10)
         except:
             # try again
             logging.warn("Invalid server answer, retrying once")
-            res = req.post(f"{self.scanner_path}/scan", params=params, data=data, timeout=10)
+            res = req.post(f"{self.scanner_path}/scan", params=params, data=scanData, timeout=10)
 
         jsonRes = res.json()
 
@@ -33,6 +81,8 @@ class ScannerRest(Scanner):
             logging.error("Err: " + str(res.text))
         
         ret_value = jsonRes['detected']
+
+        hashCache.addResult(data, filename, ret_value, 0)
         return ret_value
 
 

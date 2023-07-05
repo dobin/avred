@@ -14,7 +14,7 @@ from model.model_base import Outcome
 from model.model_data import Data
 from model.model_verification import Appraisal
 from filehelper import FileType
-from scanner import ScannerRest, ScannerYara
+from scanner import ScannerRest, ScannerYara, hashCache
 from model.model_verification import VerifyStatus
 
 from plugins.plain.plugin_plain import PluginPlain
@@ -204,6 +204,7 @@ def handleFile(filename, args, scanner):
 
             iteration += 1
 
+    hashCache.save()
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
