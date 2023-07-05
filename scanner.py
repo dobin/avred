@@ -5,11 +5,10 @@ import brotli
 import os
 import pickle
 import hashlib
+import time
 
 from model.model_base import Scanner
 
-
-USE_CACHE = True
 
 class HashCacheEntry():
     def __init__(self, filename, result, scanTime):
@@ -22,6 +21,7 @@ class HashCache():
     def __init__(self):
         self.cache = {}
 
+    def load(self):
         if os.path.exists("hashcache.pickle"):
             with open("hashcache.pickle", "rb") as file:
                 logging.info("Loading HashCache")
@@ -37,11 +37,16 @@ class HashCache():
 
     def getResult(self, data):
         hash = hashlib.md5(data).hexdigest()
+
+        if not hash in self.cache:
+            logging.debug("Not exist: {}".format(hash))
+
         return self.cache.get(hash, None)
 
 
     def addResult(self, data, filename, result, scanTime):
         hash = hashlib.md5(data).hexdigest()
+        logging.debug("Add result: {}".format(hash))
         self.cache[hash] = HashCacheEntry(filename, result, scanTime)
         
 
@@ -61,20 +66,22 @@ class ScannerRest(Scanner):
         if cacheResult is not None:
             return cacheResult.result
 
+
         params = { 'filename': filename, 'brotli': useBrotli }
         if useBrotli:
             scanData = brotli.compress(data)
         else:
             scanData = data
 
+        timeStart = time.time()
         try:
             res = req.post(f"{self.scanner_path}/scan", params=params, data=scanData, timeout=10)
         except:
             # try again
             logging.warn("Invalid server answer, retrying once")
             res = req.post(f"{self.scanner_path}/scan", params=params, data=scanData, timeout=10)
-
         jsonRes = res.json()
+        scanTime = round(time.time() - timeStart)
 
         if res.status_code != 200:
             logging.error("Err: " + str(res.status_code))
@@ -82,7 +89,7 @@ class ScannerRest(Scanner):
         
         ret_value = jsonRes['detected']
 
-        hashCache.addResult(data, filename, ret_value, 0)
+        hashCache.addResult(data, filename, ret_value, scanTime)
         return ret_value
 
 

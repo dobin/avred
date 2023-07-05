@@ -147,6 +147,8 @@ def handleFile(filename, args, scanner):
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
 
+    hashCache.load()
+
     # scan
     if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
@@ -162,6 +164,7 @@ def handleFile(filename, args, scanner):
             outcome.appraisal = Appraisal.Undetected
             logging.info("isDetected: {}".format(outcome.isDetected))
             outcome.saveToFile(file.filepath)
+            hashCache.save()
             return
         
         # quick check hash
@@ -169,6 +172,7 @@ def handleFile(filename, args, scanner):
             outcome.appraisal = Appraisal.Hash
             logging.info("Appraisal: {}".format(outcome.appraisal))
             outcome.saveToFile(file.filepath)
+            hashCache.save()
             return
         
         logging.info(f"QuickCheck: {file.filename} is detected by {scanner.scanner_name} and not hash based")
@@ -218,6 +222,7 @@ def handleFile(filename, args, scanner):
     #if outflanker is not None:
     outcome = outflankFile(plugin.outflankFile, outcome, file, scanner)
     outcome.saveToFile(file.filepath)
+    hashCache.save()
 
     # output for cmdline users
     #print("Result:")
