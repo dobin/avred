@@ -13,3 +13,4 @@ doc/todo.txt
 doc/notes/**
 *.bak
 .coverage
+hashcache.pickle

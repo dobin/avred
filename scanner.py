@@ -81,7 +81,7 @@ class ScannerRest(Scanner):
             logging.warn("Invalid server answer, retrying once")
             res = req.post(f"{self.scanner_path}/scan", params=params, data=scanData, timeout=10)
         jsonRes = res.json()
-        scanTime = round(time.time() - timeStart)
+        scanTime = round(time.time() - timeStart, 3)
 
         if res.status_code != 200:
             logging.error("Err: " + str(res.status_code))

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import List, Set, Dict, Tuple, Optional
 from dataclasses import dataclass
 import logging
+import random
 
 from model.model_verification import FillType
 from model.model_code import AsmInstruction, SectionType, UiDisasmLine, Section
@@ -51,11 +52,11 @@ class Data():
         elif fillType is FillType.space:
             fill = b" " * size
         elif fillType is FillType.highentropy:
-            #fill = random.randbytes(size) # 3.9..
-            fill = os.urandom(size)
+            random.seed(offset)  # make it deterministic
+            fill = randbytes(size)
         elif fillType is FillType.lowentropy:
-            #temp = random.randbytes(size) # 3.9..
-            temp = os.urandom(size)
+            random.seed(offset)  # make it deterministic
+            temp = randbytes(size)
             temp = base64.b64encode(temp)
             fill = temp[:size]
 
@@ -75,6 +76,12 @@ class Data():
         self._data[offset_a:offset_a + size_b] = data_b
         self._data[offset_a + size_b:offset_a + size_b + size_a] = data_a
 
+
+
+def randbytes(n):
+    #temp = random.randbytes(size) # 3.9..
+    random_bytes = bytes([random.getrandbits(8) for _ in range(0, n)])
+    return random_bytes
 
 
 class Match():
