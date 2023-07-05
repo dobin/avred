@@ -4,7 +4,6 @@ import argparse
 import pickle
 import os
 import logging
-import datetime
 from filehelper import *
 from copy import deepcopy
 import pprint
@@ -153,8 +152,6 @@ def handleFile(filename, args, scanner):
     if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
 
-        outcome.scanTime = datetime.datetime.now()
-        outcome.scannerName = scanner.scanner_name
         
         # unmodified file detected?
         outcome.isDetected = True
@@ -189,10 +186,10 @@ def handleFile(filename, args, scanner):
 
             # get matches
             logging.info("Scanning for matches...")
-            matches, scannerInfo = plugin.analyzeFile(filePlay, scanner, analyzerOptions)
+            matches, scanInfo = plugin.analyzeFile(filePlay, scanner, analyzerOptions)
             outcome.matches += matches
             logging.info("Result: {} matches".format(len(matches)))
-            outcome.scannerInfo = scannerInfo
+            outcome.scanInfo = scanInfo
             outcome.saveToFile(filePlay.filepath)
 
             # apply matches and verify if it is not detected

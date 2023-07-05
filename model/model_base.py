@@ -8,7 +8,32 @@ from dataclasses import dataclass
 
 from model.model_data import Match
 from model.model_verification import Verification, Appraisal
-from model.model_code import AsmInstruction
+from model.model_code import AsmInstruction, Section
+
+
+class SectionScan():
+    def __init__(self):
+        self.section: Section = None
+        self.result: bool = False
+
+
+class ScanInfo():
+    def __init__(self):
+        self.scannerName: str = ''
+        self.scannerPipe: str = ''
+        self.scanDuration: int = 0
+        self.scanTime = None
+        
+        self.sectionScan: SectionScan = []
+        self.chunkCount: int = 0
+        self.matchesAddedCount: int = 0
+
+    def __str__(self):
+        s = ''
+        s += "{} {} {} {} {} {}".format(
+            self.scannerName, self.scannerPipe, self.scanTime,
+            "", self.chunkCount, self.matchesAddedCount
+        )
 
 
 class Outcome():
@@ -24,9 +49,7 @@ class Outcome():
         self.isAugmented: bool = False
         self.isOutflanked: bool = False
 
-        self.scannerInfo: str = ''
-        self.scannerName: str = ''
-        self.scanTime: str = ''
+        self.scanInfo = ScanInfo()
         self.fileStructure: str = ''
 
         self.appraisal: Appraisal = Appraisal.Unknown
@@ -49,7 +72,7 @@ class Outcome():
         if self.fileInfo is not None:
             s += str(self.fileInfo)
         s += '\n'
-        s += "ScannerInfo: {}\n".format(self.scannerInfo)
+        s += "ScanInfo: {}\n".format(self.scanInfo)
         s += "Matches: \n"
         for match in self.matches:
             s += str(match)

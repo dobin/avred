@@ -26,7 +26,7 @@
                 <td>{{outcome.fileInfo.hash|hex}}</td>
             </tr><tr>
                 <td>Scan date: </td>
-                <td>{{outcome.scanTime|mydate}}</td>
+                <td>{{outcome.scanInfo.scanTime|mydate}}</td>
             </tr>
         </table>
         
@@ -36,16 +36,22 @@
         <table class="table">
             <tr>
                 <td>Scanner Name: </td>
-                <td>{{outcome.scannerName}}</td>
+                <td>{{outcome.scanInfo.scannerName}}</td>
             </tr><tr>
                 <td>Scanner Info: </td>
-                <td>{{outcome.scannerInfo}}</td>
+                <td>{{outcome.scanInfo.scannerPipe}}</td>
             </tr><tr>
                 <td>Appraisal: </td>
                 <td>{{outcome.appraisal.value}} based</td>
             </tr><tr>
                 <td>is Detected: </td>
                 <td>{{outcome.isDetected}}</td>
+            </tr><tr>
+                <td>Debug: </td>
+                <td>ScanDuration: {{outcome.scanInfo.scanDuration}}s
+                    <!-- / Chunks: {{outcome.scanInfo.chunkCount}}
+                    / Matches: {{outcome.scanInfo.matchesAddedCount}} -->
+                </td>
             </tr>
         
         </table>

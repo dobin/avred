@@ -1,5 +1,5 @@
 from plugins.model import Plugin, BaseFile
-from model.model_base import Scanner, OutflankPatch
+from model.model_base import Scanner, OutflankPatch, ScanInfo
 from model.model_data import Match
 from model.model_verification import MatchConclusion
 from plugins.pe.file_pe import FilePe
@@ -19,7 +19,7 @@ class PluginPe(Plugin):
         return file
 
     
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}):
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         # We use the simple PE analyzer
         return analyzeFilePe(file, scanner, analyzerOptions)
     

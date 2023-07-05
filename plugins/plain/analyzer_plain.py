@@ -1,15 +1,25 @@
 from typing import List, Tuple
+import time
+import datetime
 
+from model.model_base import ScanInfo
 from reducer import Reducer
 from plugins.plain.file_plain import FilePlain
 from utils import *
 
 
 # no PE file, just check its content
-def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[Match, str]:
+def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[Match, ScanInfo]:
     reducer = Reducer(filePlain, scanner)
+    scanInfo = ScanInfo()
+    scanInfo.scanTime = datetime.datetime.now()
+    scanInfo.scannerName = scanner.scanner_name
+
+    timeStart = time.time()
     matches = reducer.scan(0, len(filePlain.data))
-    return matches, ''
+    scanInfo.scanDuration = round(time.time() - timeStart)
+
+    return matches, scanInfo
 
 
 def augmentFilePlain(filePlain: FilePlain, matches: List[Match]) -> str:

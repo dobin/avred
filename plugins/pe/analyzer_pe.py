@@ -1,25 +1,34 @@
 import logging
 from copy import deepcopy
 from utils import *
-from reducer import Reducer
+import time
+import datetime
 from typing import List, Tuple
 
-from model.model_base import Scanner
+from reducer import Reducer
+from model.model_base import Scanner, ScanInfo
 from model.model_data import Match
 from model.model_code import Section
 from plugins.pe.file_pe import FilePe
 
 
-def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, str]:
+def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches."""
     isolate = analyzerOptions.get("isolate", False)
+    scanInfo = ScanInfo()
+    scanInfo.scannerName = scanner.scanner_name
+    scanInfo.scanTime = datetime.datetime.now()
 
-    matches, scannerInfo = scanForMatchesInPe(filePe, scanner, isolate,)
-    return matches, scannerInfo
+    timeStart = time.time()
+    matches, scanPipe = scanForMatchesInPe(filePe, scanner, isolate)
+    scanInfo.scanDuration = round(time.time() - timeStart)
+    scanInfo.scannerPipe = scanPipe
+
+    return matches, scanInfo
 
 
 def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Match], str]:
-    scannerInfos = []
+    scanStages = []
     matches: List[Match] = []
 
     # identify which sections get detected
@@ -27,11 +36,11 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
     detected_sections = []
     if isolate:
         logging.info("Section Detection: Isolating sections (zero all others)")
-        scannerInfos.append('ident:zero-nontarget-sections')
+        scanStages.append('ident:zero-nontarget-sections')
         detected_sections = findDetectedSectionsIsolate(filePe, scanner)
     else:
         logging.info("Section Detection: Zero section (leave all others intact)")
-        scannerInfos.append('ident:zero-target-section')
+        scanStages.append('ident:zero-target-section')
         detected_sections = findDetectedSections(filePe, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
@@ -42,7 +51,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer (flat-scan)")
-        scannerInfos.append('scan:flat_1')
+        scanStages.append('scan:flat_1')
         
         # start at .text section, which is usually the first one. Offset 512
         # this will skip scanning of PE headers, which gives unecessary false positives
@@ -52,7 +61,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
         matches += moreMatches
     else:
         # analyze each detected section
-        scannerInfos.append('scan:by-section')
+        scanStages.append('scan:by-section')
         for section in detected_sections:
             logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
             moreMatches = reducer.scan(
@@ -64,13 +73,13 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
         if len(moreMatches) == 0:
             # do it again with a flat-scan
             logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer (flat-scan)")
-            scannerInfos.append('scan:flat_2')
+            scanStages.append('scan:flat_2')
             moreMatches = reducer.scan(
                 offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
             matches += moreMatches
 
-    return sorted(matches), " -> ".join(scannerInfos)
+    return sorted(matches), " -> ".join(scanStages)
 
 
 def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:

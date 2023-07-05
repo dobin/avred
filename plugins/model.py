@@ -6,7 +6,7 @@ from typing import List, Tuple, Set
 
 from model.model_data import Match, Data
 from model.model_verification import MatchConclusion
-from model.model_base import Scanner, OutflankPatch
+from model.model_base import Scanner, OutflankPatch, ScanInfo
 
 
 class BaseFile():
@@ -68,7 +68,7 @@ class Plugin():
         pass
 
     @abstractmethod
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}):
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         pass
 
     @abstractmethod
