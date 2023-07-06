@@ -12,8 +12,8 @@
             <th>Name <span>&uarr;</span</th>
             {% if session['showDetails'] %}
             <th>Type <span>&uarr;</span</th>
-            {% endif %}
             <th>Scan Details</th>
+            {% endif %}
             <th>Appraisal <span>&uarr;</span</th>
             {% if session['showDetails'] %}
             <th>Scanner <span>&uarr;</span</th>
@@ -40,12 +40,12 @@
             </td>
             {% if session['showDetails'] %}
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
-            {% endif %}
             <td>
                 D: {{outcome.scanInfo.scanDuration}}s
                 / C: {{outcome.scanInfo.chunksTested}}
                 / M: {{outcome.scanInfo.matchesAdded}}
             </td>
+            {% endif %}
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
             {% if session['showDetails'] %}
             <td>{{outcome.scanInfo.scannerName}}</td>

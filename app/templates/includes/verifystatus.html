@@ -4,11 +4,11 @@
         {% if session['showDetails'] or verifyStatus|string != "VerifyStatus.IRRELEVANT" %}
 
         {% if verifyStatus|string == "VerifyStatus.IRRELEVANT" %}
-        <td style="background-color:rgb(157, 143, 143)">
+        <td class="matchesview" style="background-color:rgb(157, 143, 143)">
         {% elif verifyStatus|string == "VerifyStatus.DOMINANT" %}
-        <td style="background-color:rgb(63, 179, 63)">
+        <td class="matchesview" style="background-color:rgb(63, 179, 63)">
         {% elif verifyStatus|string == "VerifyStatus.ROBUST" %}
-        <td style="background-color:rgb(255, 105, 105)">
+        <td class="matchesview" style="background-color:rgb(255, 105, 105)">
         {% else %}
         <td>
         {% endif %}

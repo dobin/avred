@@ -44,6 +44,12 @@ table.table td {
   margin-left: 1em; 
 }
 
+.matchesview {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+
 /* button to the left 
    https://stackoverflow.com/questions/69833687/how-to-left-align-default-bootstrap-5-accordion-icon
 */
