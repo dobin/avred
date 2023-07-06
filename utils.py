@@ -2,6 +2,7 @@ import logging
 import json
 import re
 from typing import List
+from intervaltree import IntervalTree
 
 from model.model_data import Match
 
@@ -31,10 +32,10 @@ def printMatches(data, matches: List[Match]):
         logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
 
 
-def convertMatchesIt(matchesIt, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
+def convertMatchesIt(matchesIt: IntervalTree, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
     matches: List[Match] = []
     idx = 0 + baseIdx
-    for m in matchesIt:
+    for m in sorted(matchesIt):
         match = Match(idx, m.begin, m.end-m.begin, iteration)
         matches.append(match)
         idx += 1
