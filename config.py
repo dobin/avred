@@ -22,7 +22,6 @@ class Config(object):
                 quit()
 
     def get(self, value):
-        if value in self.data:
-            return self.data[value]
-        else:
-            return ""
+        return self.data.get(value, "")
+
+config = Config()

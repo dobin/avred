@@ -8,6 +8,7 @@ import hashlib
 import time
 
 from model.model_base import Scanner
+from config import config
 
 
 class HashCacheEntry():
@@ -32,7 +33,7 @@ class HashCache():
 
     def save(self):
         with open("hashcache.pickle", "wb") as file:
-            logging.info("Saving HashCache")
+            logging.info("Saving HashCache ({})".format(len(self.cache)))
             pickle.dump(self.cache, file)
 
 
@@ -63,9 +64,10 @@ class ScannerRest(Scanner):
     def scannerDetectsBytes(self, data: bytes, filename: str, useBrotli=True):
         """Returns true if file is detected"""
 
-        cacheResult = hashCache.getResult(data, self.scanner_name)
-        if cacheResult is not None:
-            return cacheResult.result
+        if config.get("hashCache") == True:
+            cacheResult = hashCache.getResult(data, self.scanner_name)
+            if cacheResult is not None:
+                return cacheResult.result
 
         params = { 'filename': filename, 'brotli': useBrotli }
         if useBrotli:
@@ -89,7 +91,8 @@ class ScannerRest(Scanner):
         
         ret_value = jsonRes['detected']
 
-        hashCache.addResult(data, filename, ret_value, scanTime, self.scanner_name)
+        if config.get("hashCache") == True:
+            hashCache.addResult(data, filename, ret_value, scanTime, self.scanner_name)
         return ret_value
 
 

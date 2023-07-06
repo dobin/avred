@@ -8,7 +8,7 @@ from filehelper import *
 from copy import deepcopy
 import pprint
 
-from config import Config
+from config import config
 from model.model_base import Outcome
 from model.model_data import Data
 from model.model_verification import Appraisal
@@ -31,7 +31,6 @@ def main():
     parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")", default="amsi")
     #parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
     parser.add_argument("-C", "--Config", help="Print config location and content", default=False, action='store_true')
-
     # debug
     parser.add_argument("--checkonly", help="Debug: Only check if AV detects the file as malicious", default=False, action='store_true')
     parser.add_argument("--reinfo", help="Debug: Re-do the file info", default=False, action='store_true')
@@ -39,25 +38,22 @@ def main():
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
     parser.add_argument("--reoutflank", help="Debug: Re-do the Outflanking", default=False, action='store_true')
-
     # analyzer options
     parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
-
     args = parser.parse_args()
 
-    config = Config()
+    # Load config
     config.load()
-
     if args.Config:
         print("Config path: " + config.getConfigPath())
         pprint.pprint(config.getConfig())
         return
 
+    # Server load and alive check
     if args.server not in config.get("server"):
         logging.error(f"Could not find server with name '{args.server}' in config.json")
         exit(1)
     url = config.get("server")[args.server]
-
     if url.startswith("http"):
         scanner = ScannerRest(url, args.server)
     elif url.startswith("yara"):
@@ -66,6 +62,7 @@ def main():
         logging.error("Not a valid URL, should start with http or yara: " + url)
         return
 
+    # do the scan
     if args.uploads:
         scanUploads(args, scanner)
     else:
