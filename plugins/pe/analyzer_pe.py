@@ -19,14 +19,12 @@ def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple
     scanInfo.scannerName = scanner.scanner_name
     scanInfo.scanTime = datetime.datetime.now()
 
-    # prepare the reducer with the file, and reduce it
+    # prepare the reducer with the file
     reducer = Reducer(filePe, scanner)
-
     timeStart = time.time()
     matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer, isolate)
     scanInfo.scanDuration = round(time.time() - timeStart)
     scanInfo.scannerPipe = scanPipe
-
     scanInfo.chunksTested = reducer.chunks_tested
     scanInfo.matchesAdded = reducer.matchesAdded
 

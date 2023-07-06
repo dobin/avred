@@ -72,7 +72,6 @@ class Reducer():
         self.it.merge_overlaps(strict=False)
 
 
-
     # recursive
     def _scanDataPart(self, data: Data, sectionStart: int, sectionEnd: int):
         size = sectionEnd - sectionStart

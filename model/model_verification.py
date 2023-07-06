@@ -77,7 +77,7 @@ class MatchTest():
 class MatchConclusion():
     """Object to hold all information about the verification conclusion"""
     def __init__(self, verifyStatus: List[VerifyStatus]):
-        self.verifyStatus = verifyStatus
+        self.verifyStatus: List[VerifyStatus] = verifyStatus
 
     def getCount(self, verifyStatus: VerifyStatus) -> int:
         n = 0
