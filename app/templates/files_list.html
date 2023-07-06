@@ -48,7 +48,11 @@
                 {% endif %}
             </td>
             {% if session['showDetails'] %}
-            <td>{{outcome.scanInfo.scannerName}}</td>
+            <td>{{outcome.scanInfo.scannerName}}
+                {% if not outcome.isOutflanked %}
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                {% endif %}
+            </td>
             <td>{{outcome.matches|length}}</td>
             {% endif %}
 

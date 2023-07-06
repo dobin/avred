@@ -73,6 +73,9 @@ class Outcome():
         if self.fileInfo is not None:
             s += str(self.fileInfo)
         s += '\n'
+        s += "Status: scanned:{} verified:{} augmented:{} outflanked: {}".format(
+            self.isScanned, self.isVerified, self.isAugmented, self.isOutflanked
+        )
         s += "ScanInfo: {}\n".format(self.scanInfo)
         s += "Matches: \n"
         for match in self.matches:
