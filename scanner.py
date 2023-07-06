@@ -11,10 +11,11 @@ from model.model_base import Scanner
 
 
 class HashCacheEntry():
-    def __init__(self, filename, result, scanTime):
+    def __init__(self, filename, result, scanTime, scannerName):
         self.filename = filename
         self.scanTime = scanTime
         self.result = result
+        self.scannerName = scannerName
 
 
 class HashCache():
@@ -35,8 +36,8 @@ class HashCache():
             pickle.dump(self.cache, file)
 
 
-    def getResult(self, data):
-        hash = hashlib.md5(data).hexdigest()
+    def getResult(self, data, scannerName):
+        hash = hashlib.md5(data).hexdigest() + "_" + scannerName
 
         if not hash in self.cache:
             logging.debug("Not exist: {}".format(hash))
@@ -44,10 +45,10 @@ class HashCache():
         return self.cache.get(hash, None)
 
 
-    def addResult(self, data, filename, result, scanTime):
-        hash = hashlib.md5(data).hexdigest()
+    def addResult(self, data, filename, result, scanTime, scannerName):
+        hash = hashlib.md5(data).hexdigest()  + "_" + scannerName
         logging.debug("Add result: {}".format(hash))
-        self.cache[hash] = HashCacheEntry(filename, result, scanTime)
+        self.cache[hash] = HashCacheEntry(filename, result, scanTime, scannerName)
         
 
 hashCache = HashCache()
@@ -62,10 +63,9 @@ class ScannerRest(Scanner):
     def scannerDetectsBytes(self, data: bytes, filename: str, useBrotli=True):
         """Returns true if file is detected"""
 
-        cacheResult = hashCache.getResult(data)
+        cacheResult = hashCache.getResult(data, self.scanner_name)
         if cacheResult is not None:
             return cacheResult.result
-
 
         params = { 'filename': filename, 'brotli': useBrotli }
         if useBrotli:
@@ -89,7 +89,7 @@ class ScannerRest(Scanner):
         
         ret_value = jsonRes['detected']
 
-        hashCache.addResult(data, filename, ret_value, scanTime)
+        hashCache.addResult(data, filename, ret_value, scanTime, self.scanner_name)
         return ret_value
 
 
