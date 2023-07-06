@@ -25,14 +25,14 @@ class ScanInfo():
         self.scanTime = None
         
         self.sectionScan: SectionScan = []
-        self.chunkCount: int = 0
-        self.matchesAddedCount: int = 0
+        self.chunksTested: int = 0
+        self.matchesAdded: int = 0
 
     def __str__(self):
         s = ''
         s += "{} {} {} {} {} {}".format(
             self.scannerName, self.scannerPipe, self.scanTime,
-            "", self.chunkCount, self.matchesAddedCount
+            "", self.chunksTested, self.matchesAdded
         )
 
 

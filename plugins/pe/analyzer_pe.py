@@ -13,21 +13,28 @@ from plugins.pe.file_pe import FilePe
 
 
 def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
-    """Scans a PE file given with filePe with Scanner scanner. Returns all matches."""
+    """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
     isolate = analyzerOptions.get("isolate", False)
     scanInfo = ScanInfo()
     scanInfo.scannerName = scanner.scanner_name
     scanInfo.scanTime = datetime.datetime.now()
 
+    # prepare the reducer with the file, and reduce it
+    reducer = Reducer(filePe, scanner)
+
     timeStart = time.time()
-    matches, scanPipe = scanForMatchesInPe(filePe, scanner, isolate)
+    matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer, isolate)
     scanInfo.scanDuration = round(time.time() - timeStart)
     scanInfo.scannerPipe = scanPipe
+
+    scanInfo.chunksTested = reducer.chunks_tested
+    scanInfo.matchesAdded = reducer.matchesAdded
 
     return matches, scanInfo
 
 
-def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Match], str]:
+def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isolate=False) -> Tuple[List[Match], str]:
+    """Scans a PE file given with filePe with Scanner scanner. Returns all matches"""
     scanStages = []
     matches: List[Match] = []
 
@@ -46,8 +53,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner, isolate=False) -> Tuple[List[Mat
     for section in detected_sections:
         logging.info(f"  section: {section.name}")
 
-    # prepare the reducer with the file, and reduce it
-    reducer = Reducer(filePe, scanner)
+
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer (flat-scan)")
