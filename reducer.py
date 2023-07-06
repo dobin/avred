@@ -4,7 +4,7 @@ from intervaltree import Interval, IntervalTree
 from typing import List
 from copy import deepcopy
 
-from model.model_base import Scanner
+from model.model_base import Scanner, ScanSpeed
 from model.model_data import Data, Match
 from plugins.model import BaseFile
 
@@ -16,10 +16,10 @@ PRINT_DELAY_SECONDS = 2
 class Reducer():
     """Reducer will scan data in file with scanner, and return List of matches"""
 
-    def __init__(self, file: BaseFile, scanner: Scanner, extensiveScan=False):
+    def __init__(self, file: BaseFile, scanner: Scanner, scanSpeed=ScanSpeed.Normal):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
-        self.extensiveScan: bool = extensiveScan
+        self.scanSpeed: bool = scanSpeed
 
         # re-init for every scan
         self.lastPrintTime: int = 0
@@ -49,7 +49,7 @@ class Reducer():
 
         scanTime = round(timeEnd - timeStart)
         #logging.info("Scan time: {}".format(scanTime))
-        logging.info("SCAN RESULT: Time:{} Chunks:{} MatchesAdd:{} -> MatchesFinal:{}".format(
+        logging.info("Scan Result: Time:{} Chunks:{} MatchesAdded:{} MatchesFinal:{}".format(
             scanTime, self.chunks_tested, self.matchesAdded, len(self.it)))
         matches = convertMatchesIt(self.it, self.iterations, self.matchIdx)
         self.matchIdx += len(matches)
@@ -83,10 +83,18 @@ class Reducer():
         # double every x matches, starting from y
         # This should make the algo not go so deep, and cover multiple matches,
         # which means less scans. but also broader matches.
-        if not self.extensiveScan:
-            if self.chunks_tested >= 220 and self.chunks_tested % 110 == 0:
-                self.minMatchSize *= 2
-                logging.warn("Doubling minMatchSize to {}".format(self.minMatchSize))
+        if self.scanSpeed is ScanSpeed.Fast:
+            chunksTestBase = 50
+            chunksTestDiv = 50
+        elif self.scanSpeed is ScanSpeed.Normal:
+            chunksTestBase = 120
+            chunksTestDiv = 60
+        elif self.scanSpeed is ScanSpeed.Slow:
+            chunksTestBase = 200
+            chunksTestDiv = 100
+        if self.chunks_tested >= chunksTestBase and self.chunks_tested % chunksTestDiv == 0:
+            self.minMatchSize *= 2
+            logging.warn("Doubling minMatchSize to {}".format(self.minMatchSize))
 
         #logging.info(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
         #logging.info(f"Testing Top: {sectionStart}-{sectionStart+chunkSize}")

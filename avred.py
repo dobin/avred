@@ -7,9 +7,10 @@ import logging
 from filehelper import *
 from copy import deepcopy
 import pprint
+import signal
 
 from config import config
-from model.model_base import Outcome
+from model.model_base import Outcome, ScanSpeed
 from model.model_data import Data
 from model.model_verification import Appraisal
 from filehelper import FileType
@@ -24,11 +25,19 @@ from plugins.model import Plugin
 from verifier import verify
 
 
+def handler(signum, frame):
+    msg = "Ctrl-c was pressed, quitting"
+    print(msg, end="\r", flush=True)
+    exit(1)
+signal.signal(signal.SIGINT, handler)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="File to scan")
     parser.add_argument("-u", "--uploads", help="Scan app/uploads/*", default=False, action='store_true')
     parser.add_argument('-s', "--server", help="Avred Server to use from config.json (default \"amsi\")", default="amsi")
+    parser.add_argument("-e", "--scanspeed", help="1, 2, 3", default=2, type=int)
     #parser.add_argument("--logtofile", help="Log everything to <file>.log", default=False, action='store_true')
     parser.add_argument("-C", "--Config", help="Print config location and content", default=False, action='store_true')
     # debug
@@ -142,6 +151,7 @@ def handleFile(filename, args, scanner):
     else:
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
+        analyzerOptions['scanSpeed'] = ScanSpeed(args.scanspeed)
 
     hashCache.load()
 

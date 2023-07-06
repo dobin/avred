@@ -6,7 +6,7 @@ import datetime
 from typing import List, Tuple
 
 from reducer import Reducer
-from model.model_base import Scanner, ScanInfo
+from model.model_base import Scanner, ScanInfo, ScanSpeed
 from model.model_data import Match
 from model.model_code import Section
 from plugins.pe.file_pe import FilePe
@@ -15,12 +15,14 @@ from plugins.pe.file_pe import FilePe
 def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
     isolate = analyzerOptions.get("isolate", False)
+    scanSpeed = analyzerOptions.get("scanSpeed", ScanSpeed.Normal)
     scanInfo = ScanInfo()
+    scanInfo.scanSpeed = scanSpeed
     scanInfo.scannerName = scanner.scanner_name
     scanInfo.scanTime = datetime.datetime.now()
 
     # prepare the reducer with the file
-    reducer = Reducer(filePe, scanner)
+    reducer = Reducer(filePe, scanner, scanSpeed)
     timeStart = time.time()
     matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer, isolate)
     scanInfo.scanDuration = round(time.time() - timeStart)

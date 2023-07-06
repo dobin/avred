@@ -5,6 +5,7 @@ from typing import List, Set, Dict, Tuple, Optional
 import logging
 import pickle
 from dataclasses import dataclass
+from enum import Enum
 
 from model.model_data import Match
 from model.model_verification import Verification, Appraisal
@@ -23,6 +24,7 @@ class ScanInfo():
         self.scannerPipe: str = ''
         self.scanDuration: int = 0
         self.scanTime = None
+        self.scanSpeed = ScanSpeed.Unknown
         
         self.sectionScan: SectionScan = []
         self.chunksTested: int = 0
@@ -35,6 +37,13 @@ class ScanInfo():
             "", self.chunksTested, self.matchesAdded
         )
         return s
+
+
+class ScanSpeed(Enum):
+    Unknown = 0
+    Fast = 1
+    Normal = 2
+    Slow = 3
 
 
 class Outcome():
