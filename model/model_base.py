@@ -34,6 +34,7 @@ class ScanInfo():
             self.scannerName, self.scannerPipe, self.scanTime,
             "", self.chunksTested, self.matchesAdded
         )
+        return s
 
 
 class Outcome():
@@ -49,7 +50,7 @@ class Outcome():
         self.isAugmented: bool = False
         self.isOutflanked: bool = False
 
-        self.scanInfo = ScanInfo()
+        self.scanInfo: ScanInfo = ScanInfo()
         self.fileStructure: str = ''
 
         self.appraisal: Appraisal = Appraisal.Unknown
