@@ -13,7 +13,7 @@
             {% if session['showDetails'] %}
             <th>Type <span>&uarr;</span</th>
             {% endif %}
-            <th>Outflank</th>
+            <th>Scan Details</th>
             <th>Appraisal <span>&uarr;</span</th>
             {% if session['showDetails'] %}
             <th>Scanner <span>&uarr;</span</th>
@@ -32,15 +32,19 @@
                 <a href="/file/{{outcome.fileInfo.name}}">
                     {{outcome.fileInfo.name}}
                 </a>
+
+                {% if current_user.is_authenticated and outcome.outflankPatches|length > 0 %}
+                <a href="{{request.path}}/outflank">(Patched)</a>
+                {% endif %}
                 {% endif %}
             </td>
             {% if session['showDetails'] %}
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
             {% endif %}
             <td>
-                {% if current_user.is_authenticated and outcome.outflankPatches|length > 0 %}
-                <a href="{{request.path}}/outflank">(D)</a>
-                {% endif %}
+                D: {{outcome.scanInfo.scanDuration}}s
+                / C: {{outcome.scanInfo.chunksTested}}
+                / M: {{outcome.scanInfo.matchesAdded}}
             </td>
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
             {% if session['showDetails'] %}
