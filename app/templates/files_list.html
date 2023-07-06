@@ -32,10 +32,6 @@
                 <a href="/file/{{outcome.fileInfo.name}}">
                     {{outcome.fileInfo.name}}
                 </a>
-
-                {% if current_user.is_authenticated and outcome.outflankPatches|length > 0 %}
-                <a href="{{request.path}}/outflank">(Patched)</a>
-                {% endif %}
                 {% endif %}
             </td>
             {% if session['showDetails'] %}
@@ -46,7 +42,11 @@
                 / M: {{outcome.scanInfo.matchesAdded}}
             </td>
             {% endif %}
-            <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
+            <td style="white-space:nowrap;">{{outcome.appraisal.value}}
+                {% if outcome.outflankPatches|length > 0 %}
+                [P]
+                {% endif %}
+            </td>
             {% if session['showDetails'] %}
             <td>{{outcome.scanInfo.scannerName}}</td>
             <td>{{outcome.matches|length}}</td>
