@@ -16,6 +16,7 @@
             <th>Outflank</th>
             <th>Appraisal <span>&uarr;</span</th>
             {% if session['showDetails'] %}
+            <th>Scanner <span>&uarr;</span</th>
             <th>Cnt <span>&uarr;</span</th>
             {% endif %}
         </tr>
@@ -43,6 +44,7 @@
             </td>
             <td style="white-space:nowrap;">{{outcome.appraisal.value}}</td>
             {% if session['showDetails'] %}
+            <td>{{outcome.scanInfo.scannerName}}</td>
             <td>{{outcome.matches|length}}</td>
             {% endif %}
 
