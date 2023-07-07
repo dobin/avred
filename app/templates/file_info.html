@@ -27,6 +27,16 @@
             </tr><tr>
                 <td>Scan date: </td>
                 <td>{{outcome.scanInfo.scanTime|mydate}}</td>
+
+            <tr></tr>
+                <td>Other Scans: </td>
+                <td>
+                    {% for server in servers %}
+                        {% if server != outcome.scanInfo.scannerName %}
+                          <a href="/file/{{outcome.fileInfo.name | replace('.exe', '.' + server + '.exe')}}">{{server}}</a>
+                        {% endif %}
+                    {% endfor %}
+                </td>
             </tr>
         </table>
         

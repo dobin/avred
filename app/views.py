@@ -79,7 +79,11 @@ def file(filename):
     if errStr is not None or outcome is None or logData is None: 
         return "Error: " + errStr
     
-    return render_template('file.html', outcome=outcome, logData=logData)
+    return render_template('file.html',
+                           outcome=outcome, 
+                           logData=logData,
+                           servers=current_app.config['AVRED_SERVERS']
+                           )
 
 
 @views.route("/file/<filename>/download")
