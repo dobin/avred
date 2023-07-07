@@ -33,6 +33,10 @@ class Data():
         return len(self._data)
     
 
+    def hideMatch(self, match: Match):
+        self.hidePart(match.fileOffset, match.size)
+
+
     def hideMatches(self, matches: List[Match]):
         for match in matches:
             self.hidePart(match.fileOffset, match.size)
@@ -138,7 +142,7 @@ class Match():
 
     def __str__(self):
         s = ""
-        s += "id:{}  offset:{:X}  len:{}\n".format(self.idx, self.fileOffset, self.size)
+        s += "id:{}  offset:{}  len:{}\n".format(self.idx, self.fileOffset, self.size)
         if self.sectionInfo is not None:
             s += "  Section: {}\n".format(self.sectionInfo)
         #if self.disasmLines is not None:

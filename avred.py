@@ -8,6 +8,7 @@ from filehelper import *
 from copy import deepcopy
 import pprint
 import signal
+import time
 
 from config import config
 from model.model_base import Outcome, ScanSpeed
@@ -23,7 +24,7 @@ from plugins.pe.plugin_pe import PluginPe
 from plugins.office.plugin_office import PluginOffice
 from plugins.model import Plugin
 from verifier import verify
-
+from minimizer import minimizeMatches
 
 def handler(signum, frame):
     msg = "Ctrl-c was pressed, quitting"
@@ -159,7 +160,6 @@ def handleFile(filename, args, scanner):
     if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
 
-        
         # unmodified file detected?
         outcome.isDetected = True
         outcome.isScanned = True
@@ -213,6 +213,18 @@ def handleFile(filename, args, scanner):
             iteration += 1
 
     hashCache.save()
+    #if not outcome.isMinimized:
+    #    scanner.checkOnlineOrExit()
+    #    timeStart = time.time()
+    #    matches = minimizeMatches(file, outcome.matches, scanner)
+    #    outcome.scanInfo.scanDuration += round(time.time() - timeStart)
+    #
+    #    logging.info("Previous matches: {}   After Minimizing: {}".format(
+    #        len(outcome.matches), len(matches)
+    #    ))
+    #    outcome.matches = matches
+    #    outcome.isMinimized = True
+
     if not outcome.isVerified or args.reverify:
         scanner.checkOnlineOrExit()
         outcome = verifyFile(outcome, file, scanner)
@@ -222,10 +234,10 @@ def handleFile(filename, args, scanner):
         outcome = augmentFile(outcome, file, plugin.augmentFile)
         outcome.saveToFile(file.filepath)
 
-    #if outflank is not None and (not outcome.isOutflanked or args.reoutflank):
-    #if outflanker is not None:
-    outcome = outflankFile(plugin.outflankFile, outcome, file, scanner)
-    outcome.saveToFile(file.filepath)
+    if not outcome.isOutflanked or args.reoutflank:
+        outcome = outflankFile(plugin.outflankFile, outcome, file, scanner)
+        outcome.saveToFile(file.filepath)
+
     hashCache.save()
 
     # output for cmdline users

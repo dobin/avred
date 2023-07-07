@@ -21,16 +21,19 @@ class Reducer():
         self.scanner: Scanner = scanner
         self.scanSpeed: bool = scanSpeed
 
-        # re-init for every scan
-        self.lastPrintTime: int = 0
-        self.it = IntervalTree()
         self.matchesAdded: int = 0
-
-        # will stay for subsequent scans (e.g. when scanning one section after another)
-        self.minMatchSize: int = 8
         self.chunks_tested: int = 0
         self.iterations: int = 0
         self.matchIdx: int = 0
+
+        # minMatchSize depends on ScanSpeed configuration        
+        self.minMatchSize: int = 8
+        if scanSpeed is ScanSpeed.Fast:
+            self.minMatchSize: int = 16
+
+        # re-init for every scan
+        self.lastPrintTime: int = 0
+        self.it = IntervalTree()
 
 
     def init(self):
@@ -93,6 +96,10 @@ class Reducer():
         elif self.scanSpeed is ScanSpeed.Slow:
             chunksTestBase = 200
             chunksTestDiv = 100
+        elif self.scanSpeed is ScanSpeed.Complete:
+            chunksTestBase = 10000
+            chunksTestDiv = 10000
+
         if self.chunks_tested >= chunksTestBase and self.chunks_tested % chunksTestDiv == 0:
             self.minMatchSize *= 2
             logging.warn("Doubling minMatchSize to {}".format(self.minMatchSize))

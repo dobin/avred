@@ -44,6 +44,7 @@ class ScanSpeed(Enum):
     Fast = 1
     Normal = 2
     Slow = 3
+    Complete = 4
 
 
 class Outcome():
@@ -55,6 +56,7 @@ class Outcome():
 
         self.isDetected: bool = False
         self.isScanned: bool = False
+        #self.isMinimized: bool = False
         self.isVerified: bool = False
         self.isAugmented: bool = False
         self.isOutflanked: bool = False
