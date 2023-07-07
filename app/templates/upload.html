@@ -19,22 +19,34 @@
 
   Allowed extensions: 
   <ul>
-    {% for ext in extensions|sort %}
-    <li>.{{ext}}</li>
-    {% endfor %}
+    <li>
+      {% for ext in extensions|sort %}
+        .{{ext}}, 
+      {% endfor %}
+    </li>
   </ul>
+
   <p>
     All uploads will be stored. All requests are logged. 
     Defender sample submission is disabled.
     Use at your own risk. Do not misuse this service. 
   </p>
   <p>
-    At the end, bookmark the link of your file analysis. It is random, and not listed.
+    Bookmark the link of your file analysis to access it again. It is random, and not listed.
   </p>
   <br>
 
   <form method="POST" enctype="multipart/form-data" action="/upload">
   <div class="row row-cols-lg-auto g-3">
+    <div class="col">
+      <select class="form-select" name="scanSpeed">
+            <option value="1">Fast</option>
+            <option value="2" selected>Normal</option>
+            <option value="3">Slow</option>
+      </select>
+    </div>
+
+
       <div class="col">
         <select class="form-select" name="server">
           {% for server in servers %}
