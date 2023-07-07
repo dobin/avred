@@ -43,13 +43,14 @@ class Reducer():
         self.init()
         data = self.file.Data()  # get the data of the file to work on
 
+        logging.info("Reducer Start: ScanSpeed:{} Iteration:{}".format(
+            self.scanSpeed, self.iterations))
         timeStart = time.time()
         self._scanDataPart(data, offsetStart, offsetEnd)
         timeEnd = time.time()
 
         scanTime = round(timeEnd - timeStart)
-        #logging.info("Scan time: {}".format(scanTime))
-        logging.info("Scan Result: Time:{} Chunks:{} MatchesAdded:{} MatchesFinal:{}".format(
+        logging.info("Reducer Result: Time:{} Chunks:{} MatchesAdded:{} MatchesFinal:{}".format(
             scanTime, self.chunks_tested, self.matchesAdded, len(self.it)))
         matches = convertMatchesIt(self.it, self.iterations, self.matchIdx)
         self.matchIdx += len(matches)
