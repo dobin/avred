@@ -6,9 +6,13 @@ import os
 import pickle
 import hashlib
 import time
+import shutil
 
 from model.model_base import Scanner
 from config import config
+
+
+HASHCACHE_FILE = "hashcache.pickle"
 
 
 class HashCacheEntry():
@@ -24,17 +28,19 @@ class HashCache():
         self.cache = {}
 
     def load(self):
-        if os.path.exists("hashcache.pickle"):
-            with open("hashcache.pickle", "rb") as file:
+        if os.path.exists(HASHCACHE_FILE):
+            with open(HASHCACHE_FILE, "rb") as file:
                 logging.info("Loading HashCache")
                 self.cache = pickle.load(file)
                 logging.info("  {} hashes loaded".format(len(self.cache)) )
 
 
     def save(self):
-        with open("hashcache.pickle", "wb") as file:
+        new = HASHCACHE_FILE + ".new"
+        with open(new, "wb") as file:
             logging.info("Saving HashCache ({})".format(len(self.cache)))
             pickle.dump(self.cache, file)
+        shutil.move(new, HASHCACHE_FILE)
 
 
     def getResult(self, data, scannerName):
