@@ -232,6 +232,8 @@ def hex_filter(s):
 
 @views.app_template_filter('mydate')
 def date_filter(s):
+    if s is None: 
+        return ''
     return s.strftime('%Y-%m-%d %H:%M:%S')
 
 @views.app_template_filter('prettynumber')

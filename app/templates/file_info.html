@@ -38,7 +38,7 @@
                 <td>Scanner Name: </td>
                 <td>{{outcome.scanInfo.scannerName}}
 
-                    {% if not outcome.isOutflanked %}
+                    {% if outcome.isDetected and not outcome.isOutflanked %}
                     <div class="spinner-border spinner-border-sm" role="status"></div>
                     {% endif %}
                 </td>
@@ -53,9 +53,11 @@
                 <td>{{outcome.isDetected}}</td>
             </tr><tr>
                 <td>Scan Debug: </td>
-                <td>Duration: {{outcome.scanInfo.scanDuration}}s
+                <td>{% if outcome.isDetected and not outcome.isOutflanked %}
+                    Duration: {{outcome.scanInfo.scanDuration}}s
                     / Chunks: {{outcome.scanInfo.chunksTested}}
                     / Matches: {{outcome.scanInfo.matchesAdded}}
+                    {% endif %}
                 </td>
             </tr>
         
