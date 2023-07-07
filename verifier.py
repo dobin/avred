@@ -74,7 +74,7 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
             res = VerifyStatus.DOMINANT
 
         # for small signatures, ignore MIDDLE/THIRDS and just make result depend on FULL
-        elif middleRes == ScanResult.NOT_SCANNED and thirdsRes == ScanResult.NOT_SCANNED and fullRes == ScanResult.NOT_DETECTED:
+        elif fullRes == ScanResult.NOT_DETECTED:
             res = VerifyStatus.DOMINANT
 
         # incremental and stuff, just everything in between
