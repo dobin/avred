@@ -53,7 +53,7 @@
                 <td>{{outcome.isDetected}}</td>
             </tr><tr>
                 <td>Scan Debug: </td>
-                <td>{% if outcome.isDetected and not outcome.isOutflanked %}
+                <td>{% if outcome.isDetected %}
                     Duration: {{outcome.scanInfo.scanDuration}}s
                     / Chunks: {{outcome.scanInfo.chunksTested}}
                     / Matches: {{outcome.scanInfo.matchesAdded}}
