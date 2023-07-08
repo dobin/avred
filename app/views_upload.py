@@ -8,6 +8,8 @@ import sys
 import zipfile
 import logging
 import psutil
+import string
+
 
 EXT_INFO = ".outcome"
 EXT_LOG = ".log"
@@ -127,6 +129,6 @@ def allowed_file(filename):
 def getSecureFilename(filename):
     """Return filename with a random string prepended and securely encoded"""
     filename = secure_filename(filename)
-    rand = ''.join(random.choice('0123456789ABCDEF') for i in range(16))
+    rand = ''.join(random.choice(string.ascii_letters + string.digits) for i in range(6))
     filename = rand + "." + filename
     return filename
