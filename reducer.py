@@ -19,17 +19,15 @@ class Reducer():
     def __init__(self, file: BaseFile, scanner: Scanner, scanSpeed=ScanSpeed.Normal):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
-        self.scanSpeed: bool = scanSpeed
+        self.scanSpeed: ScanSpeed = scanSpeed
 
         self.matchesAdded: int = 0
         self.chunks_tested: int = 0
         self.iterations: int = 0
         self.matchIdx: int = 0
 
-        # minMatchSize depends on ScanSpeed configuration        
-        self.minMatchSize: int = 8
-        if scanSpeed is ScanSpeed.Fast:
-            self.minMatchSize: int = 16
+        self.minMatchSize: int = 4
+        self.minChunkSize: int = 4  # sane default for now. Will be adjusted based on section size on scan()
 
         # re-init for every scan
         self.lastPrintTime: int = 0
@@ -46,8 +44,21 @@ class Reducer():
         self.init()
         data = self.file.Data()  # get the data of the file to work on
 
-        logging.info("Reducer Start: ScanSpeed:{} Iteration:{}".format(
-            self.scanSpeed, self.iterations))
+        size = offsetEnd - offsetStart
+        if size < 50000: # 50kb
+            self.minChunkSize = 2
+        elif size < 100000: # 100kb
+            self.minChunkSize = 4
+        elif size < 500000: # 500kb
+            self.minChunkSize = 8
+        elif size < 1000000: # 1mb
+            self.minChunkSize = 16
+        else: # >1mb
+            self.minChunkSize = 32
+        self.minMatchSize = self.minChunkSize * 2
+
+        logging.info("Reducer Start: ScanSpeed:{} Iteration:{} MinChunkSize:{} MinMatchSize:{}".format(
+            self.scanSpeed.name, self.iterations, self.minChunkSize, self.minMatchSize))
         timeStart = time.time()
         self._scanDataPart(data, offsetStart, offsetEnd)
         timeEnd = time.time()
@@ -83,27 +94,6 @@ class Reducer():
         self.chunks_tested += 1
         self._printStatus()
 
-        # adjust for long scan times
-        # double every x matches, starting from y
-        # This should make the algo not go so deep, and cover multiple matches,
-        # which means less scans. but also broader matches.
-        if self.scanSpeed is ScanSpeed.Fast:
-            chunksTestBase = 50
-            chunksTestDiv = 50
-        elif self.scanSpeed is ScanSpeed.Normal:
-            chunksTestBase = 120
-            chunksTestDiv = 60
-        elif self.scanSpeed is ScanSpeed.Slow:
-            chunksTestBase = 200
-            chunksTestDiv = 100
-        elif self.scanSpeed is ScanSpeed.Complete:
-            chunksTestBase = 10000
-            chunksTestDiv = 10000
-
-        if self.chunks_tested >= chunksTestBase and self.chunks_tested % chunksTestDiv == 0:
-            self.minMatchSize *= 2
-            logging.warn("Doubling minMatchSize to {}".format(self.minMatchSize))
-
         #logging.info(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
         #logging.info(f"Testing Top: {sectionStart}-{sectionStart+chunkSize}")
         #logging.info(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize}")
@@ -111,9 +101,9 @@ class Reducer():
         # dangling bytes
         # note that these have been detected, thats why they are being scanned.
         # so we can just add them
-        if chunkSize <= 2:
+        if chunkSize <= self.minChunkSize:
             dataBytes = data.getBytesRange(sectionStart, sectionEnd)
-            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart} bytes)" 
+            logging.info(f"Result: {sectionStart}-{sectionEnd} ({sectionEnd-sectionStart}b minChunk:{self.minChunkSize} X)"
                             + "\n" + hexdmp(dataBytes, offset=sectionStart))
             self._addMatch(sectionStart, sectionEnd)
             
