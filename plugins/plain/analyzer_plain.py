@@ -2,7 +2,7 @@ from typing import List, Tuple
 import time
 import datetime
 
-from model.model_base import ScanInfo
+from model.model_base import ScanInfo, ScanSpeed
 from reducer import Reducer
 from plugins.plain.file_plain import FilePlain
 from utils import *
@@ -11,9 +11,7 @@ from utils import *
 # no PE file, just check its content
 def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[Match, ScanInfo]:
     reducer = Reducer(filePlain, scanner)
-    scanInfo = ScanInfo()
-    scanInfo.scanTime = datetime.datetime.now()
-    scanInfo.scannerName = scanner.scanner_name
+    scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
     timeStart = time.time()
     matches = reducer.scan(0, len(filePlain.data))

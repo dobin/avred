@@ -6,6 +6,7 @@ import logging
 import pickle
 from dataclasses import dataclass
 from enum import Enum
+import datetime
 
 from model.model_data import Match
 from model.model_verification import Verification, Appraisal
@@ -19,13 +20,13 @@ class SectionScan():
 
 
 class ScanInfo():
-    def __init__(self):
-        self.scannerName: str = ''
+    def __init__(self, scannerName: str, scanSpeed: ScanSpeed):
+        self.scannerName: str = scannerName
+        self.scanSpeed: ScanSpeed = scanSpeed
+        self.scanTime = datetime.datetime.now()
+
         self.scannerPipe: str = ''
         self.scanDuration: int = 0
-        self.scanTime = None
-        self.scanSpeed = ScanSpeed.Unknown
-        
         self.sectionScan: SectionScan = []
         self.chunksTested: int = 0
         self.matchesAdded: int = 0
@@ -61,7 +62,7 @@ class Outcome():
         self.isAugmented: bool = False
         self.isOutflanked: bool = False
 
-        self.scanInfo: ScanInfo = ScanInfo()
+        self.scanInfo: ScanInfo = ScanInfo("", ScanSpeed.Unknown)
         self.fileStructure: str = ''
 
         self.appraisal: Appraisal = Appraisal.Unknown

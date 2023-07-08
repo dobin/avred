@@ -16,10 +16,7 @@ def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
     isolate = analyzerOptions.get("isolate", False)
     scanSpeed = analyzerOptions.get("scanSpeed", ScanSpeed.Normal)
-    scanInfo = ScanInfo()
-    scanInfo.scanSpeed = scanSpeed
-    scanInfo.scannerName = scanner.scanner_name
-    scanInfo.scanTime = datetime.datetime.now()
+    scanInfo = ScanInfo(scanner.scanner_name, scanSpeed)
 
     # prepare the reducer with the file
     reducer = Reducer(filePe, scanner, scanSpeed)

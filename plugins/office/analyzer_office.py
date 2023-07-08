@@ -5,7 +5,7 @@ import datetime
 
 from reducer import Reducer
 from utils import *
-from model.model_base import Scanner, ScanInfo
+from model.model_base import Scanner, ScanInfo, ScanSpeed
 from model.model_data import Match
 import pcodedmp.pcodedmp as pcodedmp
 from plugins.office.file_office import FileOffice
@@ -15,9 +15,7 @@ def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
     reducer = Reducer(fileOffice, scanner)
-    scanInfo = ScanInfo()
-    scanInfo.scanTime = datetime.datetime.now()
-    scanInfo.scannerName = scanner.scanner_name
+    scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
     timeStart = time.time()
     matches = reducer.scan(0, fileOffice.Data().getLength())

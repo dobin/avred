@@ -11,7 +11,7 @@ import signal
 import time
 
 from config import config
-from model.model_base import Outcome, ScanSpeed
+from model.model_base import Outcome, ScanSpeed, Scanner, ScanInfo
 from model.model_data import Data
 from model.model_verification import Appraisal
 from filehelper import FileType
@@ -114,7 +114,7 @@ def scanUploads(args, scanner):
             handleFile(filepath, args, scanner)
 
 
-def handleFile(filename, args, scanner):
+def handleFile(filename, args, scanner: Scanner):
     file = None
     analyzerOptions = {}
     plugin: Plugin = None
@@ -161,19 +161,21 @@ def handleFile(filename, args, scanner):
         scanner.checkOnlineOrExit()
 
         # unmodified file detected?
-        outcome.isDetected = True
-        outcome.isScanned = True
+        outcome.isScanned = True  # we do the scan now
         if not scanIsDetected(file, scanner):
             outcome.isDetected = False
             outcome.appraisal = Appraisal.Undetected
+            outcome.scanInfo = ScanInfo(scanner.scanner_name, analyzerOptions['scanSpeed'])
             logging.info("isDetected: {}".format(outcome.isDetected))
             outcome.saveToFile(file.filepath)
             hashCache.save()
             return
-        
+        outcome.isDetected = True
+
         # quick check hash
         if scanIsHash(file, scanner):
             outcome.appraisal = Appraisal.Hash
+            outcome.scanInfo = ScanInfo(scanner.scanner_name, analyzerOptions['scanSpeed'])
             logging.info("Appraisal: {}".format(outcome.appraisal))
             outcome.saveToFile(file.filepath)
             hashCache.save()
