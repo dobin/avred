@@ -61,7 +61,6 @@ def verificationAnalyzer(verifications: List[VerificationEntry]) -> MatchConclus
         matchConclusion = MatchConclusion(verifyResults)
         return matchConclusion
 
-
     matchCount = len(verifications[0].matchTests)
     idx = 0
     while idx < matchCount:

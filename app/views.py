@@ -233,7 +233,6 @@ def hex_filter(s):
     return hex(s)
 
 
-
 @views.app_template_filter('mydate')
 def date_filter(s):
     if s is None: 

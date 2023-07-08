@@ -27,8 +27,8 @@ from verifier import verify
 from minimizer import minimizeMatches
 
 def handler(signum, frame):
-    msg = "Ctrl-c was pressed, quitting"
-    print(msg, end="\r", flush=True)
+    print("Ctrl-c was pressed, quitting.", end="\r\n", flush=True)
+    print("If it doesnt quit, press ctrl-c rapidly...", end="\r\n", flush=True)
     exit(1)
 signal.signal(signal.SIGINT, handler)
 
