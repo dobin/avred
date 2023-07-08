@@ -59,29 +59,13 @@ def main():
         pprint.pprint(config.getConfig())
         return
 
-    # Server load and alive check
-    if args.server not in config.get("server"):
-        logging.error(f"Could not find server with name '{args.server}' in config.json")
-        exit(1)
-    url = config.get("server")[args.server]
-    if url.startswith("http"):
-        scanner = ScannerRest(url, args.server)
-    elif url.startswith("yara"):
-        scanner = ScannerYara(url.replace("yara://", ""), args.server)
-    else:
-        logging.error("Not a valid URL, should start with http or yara: " + url)
-        return
-
     # do the scan
-    if args.uploads:
-        scanUploads(args, scanner)
+    setupLogging(args.file)
+    logging.info("Using file: {}".format(args.file))
+    if args.checkonly:
+        checkFile(args.file, args.server)
     else:
-        setupLogging(args.file)
-        logging.info("Using file: {}".format(args.file))
-        if args.checkonly:
-            checkFile(args.file, scanner)
-        else:
-            handleFile(args.file, args, scanner)
+        handleFile(args.file, args, args.server)
 
 
 def setupLogging(filename):
@@ -114,10 +98,11 @@ def scanUploads(args, scanner):
             handleFile(filepath, args, scanner)
 
 
-def handleFile(filename, args, scanner: Scanner):
+def handleFile(filename, args, serverName):
     file = None
     analyzerOptions = {}
     plugin: Plugin = None
+    outcome: Outcome = None
 
     filenameOutcome = filename + ".outcome"
     logging.info("Handle file: " + filename)
@@ -140,16 +125,29 @@ def handleFile(filename, args, scanner: Scanner):
         logging.error("Unknown filetype, aborting")
         exit(1)
 
+    scanner = None
     # load existing outcome
     if os.path.exists(filenameOutcome):
         with open(filenameOutcome, 'rb') as handle:
             outcome = pickle.load(handle)
+
+        logging.warn("Using scanner as defined in outcome: {}".format(
+            outcome.scanInfo.scannerName))
+        scanner = getScannerObj(outcome.scanInfo.scannerName)
+        if scanner is None:
+            return
 
         if args.reinfo:
             fileInfo = getFileInfo(file)
             outcome.fileInfo = fileInfo
             outcome.saveToFile(file.filepath)
     else:
+        logging.info("Using scanner from command line: {}".format(
+            serverName))
+        scanner = getScannerObj(serverName)
+        if scanner is None:
+            return
+
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
         analyzerOptions['scanSpeed'] = ScanSpeed(args.scanspeed)
@@ -298,7 +296,11 @@ def outflankFile(outflank, outcome: Outcome, file, scanner):
 
 
 # Check if file gets detected by the scanner
-def checkFile(filepath, scanner):
+def checkFile(filepath, serverName):
+    scanner = getScannerObj(serverName)
+    if scanner is None:
+        return
+
     data = None
     with open(filepath, 'rb') as file:
         data = file.read()
@@ -337,6 +339,23 @@ def scanIsHash(file: BaseFile, scanner, start=0, size=0) -> bool:
 def printMatches(matches):
     for match in matches:
         print("Match: " + str(match))
+
+
+def getScannerObj(serverName):
+    # Server load and alive check
+    if serverName not in config.get("server"):
+        logging.error(f"Could not find server with name '{serverName}' in config.json")
+        exit(1)
+    url = config.get("server")[serverName]
+    if url.startswith("http"):
+        scanner = ScannerRest(url, serverName)
+    elif url.startswith("yara"):
+        scanner = ScannerYara(url.replace("yara://", ""), serverName)
+    else:
+        logging.error("Not a valid URL, should start with http or yara: " + url)
+        return None
+    
+    return scanner
 
 
 if __name__ == "__main__":
