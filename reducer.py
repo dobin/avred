@@ -48,13 +48,13 @@ class Reducer():
         if size < 50000: # 50kb
             self.minChunkSize = 2
         elif size < 100000: # 100kb
-            self.minChunkSize = 4
-        elif size < 500000: # 500kb
             self.minChunkSize = 8
-        elif size < 1000000: # 1mb
+        elif size < 500000: # 500kb
             self.minChunkSize = 16
-        else: # >1mb
+        elif size < 1000000: # 1mb
             self.minChunkSize = 32
+        else: # >1mb
+            self.minChunkSize = 64
         self.minMatchSize = self.minChunkSize * 2
 
         logging.info("Reducer Start: ScanSpeed:{} Iteration:{} MinChunkSize:{} MinMatchSize:{}".format(
@@ -97,6 +97,13 @@ class Reducer():
         #logging.info(f"Testing: {sectionStart}-{sectionEnd} with size {sectionEnd-sectionStart} (chunkSize {chunkSize} bytes)")
         #logging.info(f"Testing Top: {sectionStart}-{sectionStart+chunkSize}")
         #logging.info(f"Testing Bot: {sectionStart+chunkSize}-{sectionStart+chunkSize+chunkSize}")
+
+        if self.chunks_tested > 0 and self.chunks_tested % 100 == 0:
+            logging.info("Doubling: minChunkSize: {}  minMatchSize: {}".format(
+                self.minChunkSize, self.minMatchSize
+            ))
+            self.minChunkSize *= 2
+            self.minMatchSize *= 2
 
         # dangling bytes
         # note that these have been detected, thats why they are being scanned.
