@@ -42,7 +42,6 @@
         
       </div>
       <div class="col-sm">
-
         <table class="table">
             <tr>
                 <td>Scanner Name: </td>
@@ -73,7 +72,6 @@
             </tr>
         
         </table>
-        
       </div>
     </div>
   </div>
@@ -82,34 +80,9 @@
 File is not detected by AV.
 {% endif %}
 
-{% if outcome.outflankPatches|length > 0 %}
-<h2>Patches</h2>
-<table class="table">
-    <tr>
-        <th>Match ID</th>
-        <th>Offset</th>
-        <th>Info</th>
-        <th>Patch</th>
-        <th>Considereations</th>
-    </tr>
-    {% for patch in outcome.outflankPatches %}
-    <tr>
-        <td>{{patch.matchIdx}}</td>
-        <td>{{patch.offset}}</td>
-        <td>{{patch.info}}</td>
-        <td>
-<pre>{{patch.asmOne.offset|hexint}}: {{patch.asmOne.disasm}}
-{{patch.asmTwo.offset|hexint}}: {{patch.asmTwo.disasm}}</pre>
-        </td>
-        <td>{{patch.considerations}}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-{% if current_user.is_authenticated %}
-<a href="{{request.path}}/outflank">Download</a> patched file (undetected)<br>
-{% endif %}
-<br>
+{% if session['showDetails'] and outcome.fileStructure != '' %}
+<h2>File Structure</h2>
+<pre>{{outcome.fileStructure}}</pre>
 {% endif %}
 
 
@@ -152,9 +125,35 @@ File is not detected by AV.
 
 {% endif %}
 
-{% if session['showDetails'] and outcome.fileStructure != '' %}
-<h2>File Structure</h2>
-<pre>{{outcome.fileStructure}}</pre>
+
+{% if outcome.outflankPatches|length > 0 %}
+<h2>Patches</h2>
+<table class="table">
+    <tr>
+        <th>Match ID</th>
+        <th>Offset</th>
+        <th>Info</th>
+        <th>Patch</th>
+        <th>Considereations</th>
+    </tr>
+    {% for patch in outcome.outflankPatches %}
+    <tr>
+        <td>{{patch.matchIdx}}</td>
+        <td>{{patch.offset}}</td>
+        <td>{{patch.info}}</td>
+        <td>
+<pre>{{patch.asmOne.offset|hexint}}: {{patch.asmOne.disasm}}
+{{patch.asmTwo.offset|hexint}}: {{patch.asmTwo.disasm}}</pre>
+        </td>
+        <td>{{patch.considerations}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if current_user.is_authenticated %}
+<a href="{{request.path}}/outflank">Download</a> patched file (undetected)<br>
+{% endif %}
+<br>
 {% endif %}
 
 </div>
