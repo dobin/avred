@@ -80,15 +80,49 @@
 File is not detected by AV.
 {% endif %}
 
-{% if session['showDetails'] and outcome.fileStructure != '' %}
-<h2>File Structure</h2>
-<pre>{{outcome.fileStructure}}</pre>
+{% if session['showDetails'] %}
+<h2>Sections</h2>
+
+<div class="container">
+    <div class="row">
+      <div class="col-sm">
+
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Offset</th>
+        <th>VirtAddr</th>
+        <th>Size</th>
+        <th>Scan</th>
+        <th>Detected</th>
+    </tr>
+
+    {% for section in outcome.sections %}
+    <tr>
+        <td>{{section.name}}</td>
+        <td>{{section.addr}}</td>
+        <td>{{section.virtaddr}}</td>
+        <td>{{section.size}}</td>
+        <td>{{section.scan|nicebool}}</td>
+        <td>{{section.detected|nicebool}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+        </div>
+    </div>
+</div>
 {% endif %}
 
 
 {% if outcome.matches|length > 0 %}
 <br>
 <h2>Matches</h2>
+
+<div class="container">
+    <div class="row">
+      <div class="col-sm">
+
 <table class="table">
     <tr>
         <th>#</th>
@@ -117,10 +151,17 @@ File is not detected by AV.
     {% endfor %}
 </table>
 
+
+
 {% if current_user.is_authenticated %}
 <a href="{{request.path}}/downloadPatchMatch/">Download</a> with all matches overwritten</td>
 <br>
 {% endif %}
+
+        </div>
+    </div>
+</div>
+
 <br>
 
 {% endif %}

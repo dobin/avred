@@ -42,7 +42,7 @@ class Reducer():
     def scan(self, offsetStart, offsetEnd) -> List[Match]:
         """Scan self.file.Data() from offsetStart to offsetEnd, return matches"""
         self.init()
-        data = self.file.Data()  # get the data of the file to work on
+        data = deepcopy(self.file.Data())  # get the data of the file to work on as copy
 
         size = offsetEnd - offsetStart
         if size < 50000: # 50kb

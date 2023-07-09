@@ -153,7 +153,6 @@ def handleFile(filename, args, serverName):
         analyzerOptions['scanSpeed'] = ScanSpeed(args.scanspeed)
 
     hashCache.load()
-
     # scan
     if not outcome.isScanned or args.rescan:
         scanner.checkOnlineOrExit()
@@ -211,6 +210,8 @@ def handleFile(filename, args, serverName):
                break
 
             iteration += 1
+
+        outcome.sections = filePlay.sectionsBag.sections
 
     hashCache.save()
     #if not outcome.isMinimized:

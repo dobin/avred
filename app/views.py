@@ -232,7 +232,6 @@ def hex_filter(s):
 def hex_filter(s):
     return hex(s)
 
-
 @views.app_template_filter('mydate')
 def date_filter(s):
     if s is None: 
@@ -242,6 +241,13 @@ def date_filter(s):
 @views.app_template_filter('prettynumber')
 def date_filter(s):
     return f"{s:,}"
+
+@views.app_template_filter('nicebool')
+def nicebool_filter(s):
+    if s is True:
+        return "y"
+    else:
+        return "n"
 
 
 ## Utils 

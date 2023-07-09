@@ -13,12 +13,6 @@ from model.model_verification import Verification, Appraisal
 from model.model_code import AsmInstruction, Section
 
 
-class SectionScan():
-    def __init__(self):
-        self.section: Section = None
-        self.result: bool = False
-
-
 class ScanInfo():
     def __init__(self, scannerName: str, scanSpeed: ScanSpeed):
         self.scannerName: str = scannerName
@@ -27,9 +21,10 @@ class ScanInfo():
 
         self.scannerPipe: str = ''
         self.scanDuration: int = 0
-        self.sectionScan: SectionScan = []
+        self.sections: List[Section] = []
         self.chunksTested: int = 0
         self.matchesAdded: int = 0
+
 
     def __str__(self):
         s = ''
@@ -62,9 +57,8 @@ class Outcome():
         self.isAugmented: bool = False
         self.isOutflanked: bool = False
 
+        self.sections: List[Section] = []
         self.scanInfo: ScanInfo = ScanInfo("", ScanSpeed.Unknown)
-        self.fileStructure: str = ''
-
         self.appraisal: Appraisal = Appraisal.Unknown
 
 

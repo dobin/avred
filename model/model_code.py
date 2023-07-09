@@ -13,7 +13,8 @@ class Section:
     addr: int
     size: int
     virtaddr: int
-    scan: bool = True
+    scan: bool = True       # if this section should be scanned
+    detected: bool = False  # if this section is being detected
 
 
 class SectionsBag:

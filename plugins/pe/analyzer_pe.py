@@ -89,18 +89,19 @@ def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
     """hide each section of filePe, return the ones which wont be detected anymore (have a dominant influence)"""
     detected_sections: List[Section] = []
 
-    for section in filePe.sectionsBag.sections:
-        if not section.scan:
-            continue
+    for idx, section in enumerate(filePe.sectionsBag.sections):
         filePeCopy = deepcopy(filePe)
-
-        #logging.info("Hide section: {}  start: {}  size: {}".format(section.name, section.addr, section.size))
         filePeCopy.hideSection(section)
-        status = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
-        if not status:
-            detected_sections += [section]
+        detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
+        if not detected:
+            # always store scan result
+            filePe.sectionsBag.sections[idx].detected = True
 
-        logging.info(f"Hide: {section.name} -> Detected: {status}")
+            # only return if we should scan it
+            if section.scan:
+                detected_sections += [section]
+
+        logging.info(f"Hide: {section.name} -> Detected: {detected}")
 
     return detected_sections
 
@@ -109,16 +110,19 @@ def findDetectedSectionsIsolate(filePe: FilePe, scanner) -> List[Section]:
     """for each section, hide everything except it (isolate), and return which one gets detected (have a dominant influence)"""
     detected_sections = []
 
-    for section in filePe.sectionsBag.sections:
-        if not section.scan:
-            continue
+    for idx, section in enumerate(filePe.sectionsBag.sections):
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideAllSectionsExcept(section.name)
-        status = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
+        detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
 
-        if status:
-            detected_sections += [section]
+        if not detected:
+            # always store scan result
+            filePe.sectionsBag.sections[idx].detected = True
 
-        logging.info(f"Hide all except: {section.name} -> Detected: {status}")
+            # only return if we should scan it
+            if section.scan:
+                detected_sections += [section]
+
+        logging.info(f"Hide all except: {section.name} -> Detected: {detected}")
 
     return detected_sections
