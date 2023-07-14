@@ -97,7 +97,7 @@ File is not detected by AV.
         <th>Detected</th>
     </tr>
 
-    {% for section in outcome.sections %}
+    {% for section in outcome.sections|sort %}
     <tr>
         <td>{{section.name}}</td>
         <td>{{section.addr}}</td>
