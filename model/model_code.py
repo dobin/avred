@@ -7,14 +7,23 @@ from enum import Enum
 import logging
 
 
-@dataclass
 class Section:
-    name: str
-    addr: int
-    size: int
-    virtaddr: int
-    scan: bool = True       # if this section should be scanned
-    detected: bool = False  # if this section is being detected
+    def __init__(self, name: str, addr: int, size: int, virtaddr: int, scan: bool = True, detected: bool = False):
+        name: str = name
+        addr: int = addr
+        size: int = size
+        virtaddr: int = virtaddr
+        scan: bool = scan          # if this section should be scanned
+        detected: bool = detected  # if this section is being detected
+
+
+    def __eq__(self, other: Section):
+        if other.addr == self.addr and other.size == self.size:
+            return True
+        return False
+    
+    def __lt__(self, other: Section):
+        return self.addr < other.addr
 
 
 class SectionsBag:
