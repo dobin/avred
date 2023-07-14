@@ -17,7 +17,7 @@ class Config(object):
         with open(CONFIG_FILE) as jsonfile:
             try:
                 self.data = yaml.safe_load(jsonfile)
-            except ValueError as e:
+            except yaml.YAMLError as e:
                 print('Decoding {} as failed with: {}'.format(CONFIG_FILE, e))
                 quit()
 
