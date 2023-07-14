@@ -10,6 +10,7 @@ from typing import List, Tuple
 from model.model_data import Match
 from model.model_code import AsmInstruction, UiDisasmLine, SectionType
 from plugins.pe.file_pe import FilePe
+from config import MAX_DISASM_SIZE
 
 
 # Fix for https://github.com/radareorg/radare2-r2pipe/issues/146
@@ -40,8 +41,9 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         if matchSection is None: 
             logging.warn("No section found for offset {}".format(match.fileOffset))
         elif matchSection.name == ".text":
-            matchAsmInstructions, matchDisasmLines = disassemblePe(
-                r2, filePe, match.start(), match.size)
+            if match.size < MAX_DISASM_SIZE:
+                matchAsmInstructions, matchDisasmLines = disassemblePe(
+                    r2, filePe, match.start(), match.size)
             match.sectionType = SectionType.CODE
         else:
             match.sectionType = SectionType.DATA

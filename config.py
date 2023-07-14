@@ -1,6 +1,10 @@
 import yaml
 import os
 
+# Some static globals
+MAX_HEXDUMP_SIZE = 2048
+MAX_DISASM_SIZE = 512
+
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 
 class Config(object):

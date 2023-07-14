@@ -5,6 +5,7 @@ from typing import List
 from intervaltree import IntervalTree
 
 from model.model_data import Match
+from config import MAX_HEXDUMP_SIZE
 
 
 def saveMatchesToFile(filename, matches):
@@ -41,10 +42,9 @@ def convertMatchesIt(matchesIt: IntervalTree, iteration: int = 0, baseIdx: int =
         idx += 1
     return matches
 
-MAX_HEXDUMP_SIZE = 2048
 
 def hexdmp(src, offset=0, length=16):
-    if len(src) > 2048:
+    if len(src) > MAX_HEXDUMP_SIZE:
         return "Match too large ({} > {} max, do not show".format(len(src), MAX_HEXDUMP_SIZE)
 
     result = []

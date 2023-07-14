@@ -7,6 +7,7 @@ from plugins.dotnet.dncilparser import DncilParser
 from plugins.dotnet.dncilparser import IlMethod
 
 from utils import *
+from config import MAX_DISASM_SIZE
 
 from dotnetfile import DotNetPE
 from dotnetfile.structures import DOTNET_CLR_HEADER
@@ -40,10 +41,11 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             sections = dotnetSectionsBag.getSectionsForRange(match.start(), match.end())
             info += ','.join(s.name for s in sections)
 
-        if matchSectionName == ".text":  # only disassemble in .text
-            # get disassembly
-            matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
-            info += " " + " ".join(methodNames)
+        if matchSectionName == ".text":
+            # only disassemble if the match is reasonably small. same for function names
+            if match.size < MAX_DISASM_SIZE:
+                matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
+                info += " " + " ".join(methodNames)
             
             # .text has most of DotNet, check if its methods
             if dotnetSectionsBag.getSectionNameByAddr(match.start()) == "methods":
