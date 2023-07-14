@@ -10,6 +10,7 @@ from model.model_base import Scanner, ScanInfo, ScanSpeed
 from model.model_data import Match
 from model.model_code import Section
 from plugins.pe.file_pe import FilePe
+from scanning import scanIsHash
 
 
 def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
@@ -66,11 +67,16 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
         # analyze each detected section
         scanStages.append('scan:by-section')
         for section in detected_sections:
-            logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
-            moreMatches = reducer.scan(
-                offsetStart=section.addr, 
-                offsetEnd=section.addr+section.size)
-            matches += moreMatches
+            # check first if its hash based (rare)
+            if scanIsHash(filePe, scanner, section.addr, section.size):
+                logging.info("Section {} appears to be hash checked.")
+                matches.append(Match(len(matches), section.addr, section.size, 0))
+            else:
+                logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
+                moreMatches = reducer.scan(
+                    offsetStart=section.addr, 
+                    offsetEnd=section.addr+section.size)
+                matches += moreMatches
 
         # there are instances where the section-based scanning does not yield any result.
         if len(moreMatches) == 0:

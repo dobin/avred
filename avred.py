@@ -8,14 +8,14 @@ from filehelper import *
 from copy import deepcopy
 import pprint
 import signal
-import time
 
 from config import config
 from model.model_base import Outcome, ScanSpeed, Scanner, ScanInfo
-from model.model_data import Data
+
 from model.model_verification import Appraisal
 from filehelper import FileType
 from scanner import ScannerRest, ScannerYara, hashCache
+from scanning import scanIsHash
 from model.model_verification import VerifyStatus
 
 from plugins.plain.plugin_plain import PluginPlain
@@ -25,6 +25,7 @@ from plugins.office.plugin_office import PluginOffice
 from plugins.model import Plugin
 from verifier import verify
 from minimizer import minimizeMatches
+
 
 def handler(signum, frame):
     print("Ctrl-c was pressed, quitting.", end="\r\n", flush=True)
@@ -57,6 +58,10 @@ def main():
     if args.Config:
         print("Config path: " + config.getConfigPath())
         pprint.pprint(config.getConfig())
+        return
+    
+    if not os.path.exists(args.file):
+        print("File {} does not exist. Aborting".format(args.file))
         return
 
     # do the scan
@@ -131,7 +136,7 @@ def handleFile(filename, args, serverName):
         with open(filenameOutcome, 'rb') as handle:
             outcome = pickle.load(handle)
 
-        logging.warn("Using scanner as defined in outcome: {}".format(
+        logging.warning("Using scanner as defined in outcome: {}".format(
             outcome.scanInfo.scannerName))
         scanner = getScannerObj(outcome.scanInfo.scannerName)
         if scanner is None:
@@ -310,31 +315,6 @@ def checkFile(filepath, serverName):
         print(f"File is detected")
     else:
         print(f"File is not detected")
-
-
-def scanIsHash(file: BaseFile, scanner, start=0, size=0) -> bool:
-    """check if the detection is hash based (complete file)"""
-
-    # default is everything
-    if start == 0 and size == 0:
-        size = file.Data().getLength()
-
-    firstData: Data = file.DataCopy()
-    firstOff = int(size//3 * 1)
-    firstData.patchDataFill(firstOff, 1)
-    firstFileData: Data = file.getFileDataWith(firstData)
-    firstRes = scanner.scannerDetectsBytes(firstFileData.getBytes(), file.filename)
-
-    lastOff = int((size//3) * 2)
-    lastData: Data = file.DataCopy()
-    lastData.patchDataFill(lastOff, 1)
-    lastFileData: Data = file.getFileDataWith(lastData)
-    lastRes = scanner.scannerDetectsBytes(lastFileData.getBytes(), file.filename)
-
-    if not firstRes and not lastRes:
-        return True
-    else:
-        return False
 
 
 def printMatches(matches):
