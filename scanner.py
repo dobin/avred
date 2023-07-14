@@ -91,12 +91,13 @@ class ScannerRest(Scanner):
         jsonRes = res.json()
         scanTime = round(time.time() - timeStart, 3)
 
+        # basically internal server error, e.g. AMSI not working
         if res.status_code != 200:
-            logging.error("Err: " + str(res.status_code))
-            logging.error("Err: " + str(res.text))
+            logging.error("Error Code {}: {}".format(res.status_code, res.text))
+            raise Exception("Server error, aborting")
         
+        # server works and returns a result
         ret_value = jsonRes['detected']
-
         if config.get("hashCache") == True:
             hashCache.addResult(data, filename, ret_value, scanTime, self.scanner_name)
         return ret_value
