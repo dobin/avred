@@ -74,10 +74,10 @@ def outflankDotnet(
         data.patchData(patch.offset, patch.replaceBytes)
         ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
-            logging.warn("Outflank possible")
+            logging.warning("Outflank possible")
             return ret
         #else:
-        #    logging.warn("Outflank failed: " + str(patch))
+        #    logging.warning("Outflank failed: " + str(patch))
     
     # fail
     logging.info("Outflank failed with attempted {} patches".format(len(results)))

@@ -22,7 +22,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     """Correlates file offsets in matches with the disassembles filePe methods"""
     dotnetSectionsBag = getDotNetSections(filePe)
     if dotnetSectionsBag is None:
-        logging.warn("No dotNet sections")
+        logging.warning("No dotNet sections")
     dncilParser = DncilParser(filePe.filepath)
     
     for match in matches:

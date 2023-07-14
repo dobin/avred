@@ -69,7 +69,7 @@ def convertDisasmAddr(ole: olefile.olefile.OleFileIO, results: List[DisasmEntry]
             ite.data.end = physEnd
 
             if physBegin > physEnd:
-                logging.warn("Physical addresses: {}-{}, cant add interval".format(physBegin, physEnd))
+                logging.warning("Physical addresses: {}-{}, cant add interval".format(physBegin, physEnd))
             else:
                 it.add(Interval(physBegin, physEnd, ite.data))
       

@@ -49,7 +49,7 @@ class FilePe(BaseFile):
                 if addr < min:
                     min = addr
             else:
-                logging.warn("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
+                logging.warning("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
 
         self.sectionsBag.addSection(Section('Header', 0, min, 0, False))
 

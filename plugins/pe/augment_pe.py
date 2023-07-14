@@ -39,7 +39,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
             matchSectionName = matchSection.name
 
         if matchSection is None: 
-            logging.warn("No section found for offset {}".format(match.fileOffset))
+            logging.warning("No section found for offset {}".format(match.fileOffset))
         elif matchSection.name == ".text":
             if match.size < MAX_DISASM_SIZE:
                 matchAsmInstructions, matchDisasmLines = disassemblePe(
