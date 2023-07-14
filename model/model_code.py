@@ -9,12 +9,12 @@ import logging
 
 class Section:
     def __init__(self, name: str, addr: int, size: int, virtaddr: int, scan: bool = True, detected: bool = False):
-        name: str = name
-        addr: int = addr
-        size: int = size
-        virtaddr: int = virtaddr
-        scan: bool = scan          # if this section should be scanned
-        detected: bool = detected  # if this section is being detected
+        self.name: str = name
+        self.addr: int = addr
+        self.size: int = size
+        self.virtaddr: int = virtaddr
+        self.scan: bool = scan          # if this section should be scanned
+        self.detected: bool = detected  # if this section is being detected
 
 
     def __eq__(self, other: Section):
