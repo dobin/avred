@@ -1,46 +1,65 @@
 import logging
-import json
 import re
-from typing import List
-from intervaltree import IntervalTree
+from typing import List, Tuple
+import pickle
+import os
 
+from model.model_base import Outcome
 from model.model_data import Match
 from config import MAX_HEXDUMP_SIZE
 
-
-def saveMatchesToFile(filename, matches):
-    # convert first
-    results = []
-    for match in matches: 
-        result = {
-            "start": match.begin,
-            "end": match.end,
-        }
-        results.append(result)
-
-    with open(filename, 'w') as outfile:
-        json.dump(results, outfile)
+EXT_INFO = ".outcome"
+EXT_LOG = ".log"
 
 
-def printMatches(data, matches: List[Match]):
-    for i in matches:
-        size = i.end - i.begin
-        dataDump = data[i.begin:i.end]
+def getOutcomesFromDir(dir: str) -> List[Outcome]:
+    outcomes = []
 
-        print(f"[*] Signature between {i.begin} and {i.end} size {size}: ")
-        print(hexdmp(dataDump, offset=i.begin))
+    filepaths = get_filepaths(dir, EXT_INFO)
+    for filepath in sorted(filepaths):
+        filepath = filepath[:-len(EXT_INFO)]
+        outcome, _, errStr = getFileData(filepath)
+        if errStr is not None:
+            logging.error("Err parsing file: {} {}".format(filepath, errStr))
+            continue
+        outcomes.append(outcome)
+    return outcomes
 
-        logging.info(f"[*] Signature between {i.begin} and {i.end} size {size}: " + "\n" + hexdmp(dataDump, offset=i.begin))
+
+def get_filepaths(folder, ext) -> List[str]:
+    filenames = [f for f in os.listdir(folder) if f.endswith(ext)]
+    return [os.path.join(folder, f) for f in filenames]
 
 
-def convertMatchesIt(matchesIt: IntervalTree, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
-    matches: List[Match] = []
-    idx = 0 + baseIdx
-    for m in sorted(matchesIt):
-        match = Match(idx, m.begin, m.end-m.begin, iteration)
-        matches.append(match)
-        idx += 1
-    return matches
+def getFileData(filepath) -> Tuple[Outcome, str, str]:
+    verifyDataFile = filepath + EXT_INFO
+    logFilename = filepath + EXT_LOG
+
+    outcome: Outcome = None
+    logData: str = None
+
+    # Main file (exe, docx etc.)
+    if not os.path.isfile(filepath):
+        logging.error("File does not exist: " + filepath)
+        return None, None, 'File not found: ' + filepath
+
+    # log file
+    logData = ""
+    if os.path.isfile(logFilename):
+        with open(logFilename) as f:
+            logData = f.read()
+    else:
+        return None, None, 'File not found: ' + logFilename
+
+    # Outcome
+    outcome: Outcome = None
+    if os.path.isfile(verifyDataFile):
+        with open(verifyDataFile, "rb") as input_file:
+            outcome = pickle.load(input_file)
+    else:
+        return None, None, 'File not found: ' + verifyDataFile
+
+    return outcome, logData, None
 
 
 def hexdmp(src, offset=0, length=16):

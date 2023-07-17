@@ -1,20 +1,19 @@
 from flask import Blueprint, current_app, flash, request, redirect, url_for, render_template, send_file, make_response, session
 from werkzeug.utils import secure_filename
 import os
-import pickle
 import logging
 from flask_login import login_user, login_required, current_user
 import io
+from typing import List
 
 from app.views_auth import load_user
 
 from model.model_base import Outcome
 from model.model_data import Match
+from utils import getOutcomesFromDir, getFileData
 
 #from waitress import serve
 
-EXT_INFO = ".outcome"
-EXT_LOG = ".log"
 
 views = Blueprint('views', __name__)
 
@@ -54,17 +53,7 @@ def settings():
 @views.route("/files")
 @login_required
 def files_list():
-
-    filepaths = get_filepaths(current_app.config['UPLOAD_FOLDER'], EXT_INFO)
-    outcomes = []
-    for filepath in sorted(filepaths):
-        filepath = filepath[:-len(EXT_INFO)]
-        outcome, _, errStr = getFileData(filepath)
-        if errStr is not None:
-            logging.error("Err parsing file: {} {}".format(filepath, errStr))
-            continue
-        outcomes.append(outcome)
-    
+    outcomes: List[Outcome] = getOutcomesFromDir(current_app.config['UPLOAD_FOLDER'])
     return render_template('files_list.html', outcomes=outcomes)
 
 
@@ -199,19 +188,7 @@ def example(filename):
 
 @views.route("/examples")
 def examples_list():
-    examples = get_filepaths(current_app.config['EXAMPLE_FOLDER'], EXT_INFO)
-
-    outcomes = []
-    for example in examples:
-        filepath = example[:-len(EXT_INFO)]
-
-        outcome, fileInfo, errStr = getFileData(filepath)
-        if errStr is not None:
-            logging.error("Err: {} {}".format(example, errStr))
-            continue
-
-        outcomes.append(outcome)
-    
+    outcomes = getOutcomesFromDir(current_app.config['EXAMPLE_FOLDER'])
     return render_template('files_list.html', outcomes=outcomes, examples=True)
 
 
@@ -248,41 +225,3 @@ def nicebool_filter(s):
         return "y"
     else:
         return "n"
-
-
-## Utils 
-
-def get_filepaths(folder, ext):
-    filenames = [f for f in os.listdir(folder) if f.endswith(ext)]
-    return [os.path.join(folder, f) for f in filenames]
-
-
-def getFileData(filepath):
-    verifyDataFile = filepath + EXT_INFO
-    logFilename = filepath + EXT_LOG
-
-    outcome: Outcome = None
-    logData: str = None
-
-    # Main file (exe, docx etc.)
-    if not os.path.isfile(filepath):
-        logging.error("File does not exist: " + filepath)
-        return None, None, 'File not found: ' + filepath
-
-    # log file
-    logData = ""
-    if os.path.isfile(logFilename):
-        with open(logFilename) as f:
-            logData = f.read()
-    else:
-        return None, None, 'File not found: ' + logFilename
-
-    # Outcome
-    outcome: Outcome = None
-    if os.path.isfile(verifyDataFile):
-        with open(verifyDataFile, "rb") as input_file:
-            outcome = pickle.load(input_file)
-    else:
-        return None, None, 'File not found: ' + verifyDataFile
-
-    return outcome, logData, None
