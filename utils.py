@@ -3,6 +3,7 @@ import re
 from typing import List, Tuple
 import pickle
 import os
+from intervaltree import IntervalTree
 
 from model.model_base import Outcome
 from model.model_data import Match
@@ -24,6 +25,25 @@ def getOutcomesFromDir(dir: str) -> List[Outcome]:
             continue
         outcomes.append(outcome)
     return outcomes
+
+
+def OutcomesToCsv(outcomes: List[Outcome]):
+    ret  = ''
+    ret += "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt\r\n"
+    for outcome in outcomes:
+        ret += "{};{};{};{};{};{};{};{}\r\n".format(
+            outcome.fileInfo.name,
+            outcome.fileInfo.ident,
+            outcome.fileInfo.size,
+
+            outcome.scanInfo.scanDuration,
+            outcome.scanInfo.chunksTested,
+            outcome.scanInfo.matchesAdded,
+
+            outcome.appraisal.name,
+            len(outcome.matches)
+        )
+    return ret
 
 
 def get_filepaths(folder, ext) -> List[str]:

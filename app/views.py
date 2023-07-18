@@ -5,12 +5,13 @@ import logging
 from flask_login import login_user, login_required, current_user
 import io
 from typing import List
+from datetime import date
 
 from app.views_auth import load_user
 
 from model.model_base import Outcome
 from model.model_data import Match
-from utils import getOutcomesFromDir, getFileData
+from utils import getOutcomesFromDir, getFileData, OutcomesToCsv
 
 #from waitress import serve
 
@@ -55,6 +56,19 @@ def settings():
 def files_list():
     outcomes: List[Outcome] = getOutcomesFromDir(current_app.config['UPLOAD_FOLDER'])
     return render_template('files_list.html', outcomes=outcomes)
+
+
+@views.route("/filesAsCsv")
+@login_required
+def files_csv():
+    outcomes: List[Outcome] = getOutcomesFromDir(current_app.config['UPLOAD_FOLDER'])
+    csv = OutcomesToCsv(outcomes)
+    filename = 'avred-' + date.today().strftime("%Y-%m-%d") + '.csv'
+
+    response = make_response(csv)
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = "attachment; filename={}".format(filename)
+    return response
 
 
 @views.route("/file/<filename>")
