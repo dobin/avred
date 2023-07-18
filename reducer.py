@@ -168,3 +168,13 @@ class Reducer():
             self.lastPrintTime = currentTime
             logging.info("Reducing: {} chunks done, found {} matches ({} added)".format(
                 self.chunks_tested, len(self.it), self.matchesAdded))
+
+
+def convertMatchesIt(matchesIt: IntervalTree, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
+    matches: List[Match] = []
+    idx = 0 + baseIdx
+    for m in sorted(matchesIt):
+        match = Match(idx, m.begin, m.end-m.begin, iteration)
+        matches.append(match)
+        idx += 1
+    return matches

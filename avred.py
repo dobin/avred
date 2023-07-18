@@ -341,15 +341,5 @@ def getScannerObj(serverName):
     return scanner
 
 
-def convertMatchesIt(matchesIt: IntervalTree, iteration: int = 0, baseIdx: int = 0) -> List[Match]:
-    matches: List[Match] = []
-    idx = 0 + baseIdx
-    for m in sorted(matchesIt):
-        match = Match(idx, m.begin, m.end-m.begin, iteration)
-        matches.append(match)
-        idx += 1
-    return matches
-
-
 if __name__ == "__main__":
     main()
