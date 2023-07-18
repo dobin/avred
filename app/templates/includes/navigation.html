@@ -35,8 +35,9 @@
                             data-on="On" data-off="Off" {% if session["showDetails"] %}checked{% endif %}>
                     </div>
                 </form>
-
+                {% if current_user.is_authenticated %}
                 &nbsp;&nbsp;<a href="/filesAsCsv">(csv)</a>
+                {% endif %}
             </ul>
         </div>
     </div>
