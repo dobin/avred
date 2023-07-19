@@ -31,6 +31,9 @@ def OutcomesToCsv(outcomes: List[Outcome]):
     ret  = ''
     ret += "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt\r\n"
     for outcome in outcomes:
+        if not outcome.isScanned:
+            continue
+
         ret += "{};{};{};{};{};{};{};{}".format(
             outcome.fileInfo.name,
             outcome.fileInfo.ident,
@@ -43,8 +46,10 @@ def OutcomesToCsv(outcomes: List[Outcome]):
             outcome.appraisal.name,
             len(outcome.matches)
         )
-        for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
-            ret += ";{}".format(verifyStatus.name)
+
+        if outcome.verification:
+            for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
+                ret += ";{}".format(verifyStatus.name)
 
         ret += "\r\n"
     return ret
