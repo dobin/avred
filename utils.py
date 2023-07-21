@@ -7,6 +7,7 @@ from intervaltree import IntervalTree
 
 from model.model_base import Outcome
 from model.model_data import Match
+from model.model_verification import VerifyStatus
 from config import MAX_HEXDUMP_SIZE
 
 EXT_INFO = ".outcome"
@@ -48,6 +49,12 @@ def OutcomesToCsv(outcomes: List[Outcome]):
         )
 
         if outcome.verification:
+            cntDom = 0
+            for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
+                if verifyStatus is VerifyStatus.DOMINANT:
+                    cntDom += 1
+            ret += ";{}".format(cntDom)
+
             for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
                 ret += ";{}".format(verifyStatus.name)
 
