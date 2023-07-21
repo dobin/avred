@@ -8,6 +8,7 @@ from intervaltree import IntervalTree
 from model.model_base import Outcome
 from model.model_data import Match
 from model.model_verification import VerifyStatus
+from model.model_code import SectionType
 from config import MAX_HEXDUMP_SIZE
 
 EXT_INFO = ".outcome"
@@ -30,12 +31,26 @@ def getOutcomesFromDir(dir: str) -> List[Outcome]:
 
 def OutcomesToCsv(outcomes: List[Outcome]):
     ret  = ''
-    ret += "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt\r\n"
+    ret += "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt;CntDom;CntCode;CntData\r\n"
     for outcome in outcomes:
         if not outcome.isScanned:
             continue
 
-        ret += "{};{};{};{};{};{};{};{}".format(
+        cntDom = 0
+        cntCode = 0
+        cntData = 0
+        if outcome.verification:
+            for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
+                if verifyStatus is not VerifyStatus.IRRELEVANT:
+                    cntDom += 1
+
+            for match in outcome.matches:
+                if match.sectionType is SectionType.CODE:
+                    cntCode += 1
+                if match.sectionType is SectionType.DATA:
+                    cntData += 1
+
+        ret += "{};{};{};{};{};{};{};{};{};{};{}".format(
             outcome.fileInfo.name,
             outcome.fileInfo.ident,
             outcome.fileInfo.size,
@@ -45,16 +60,15 @@ def OutcomesToCsv(outcomes: List[Outcome]):
             outcome.scanInfo.matchesAdded,
 
             outcome.appraisal.name,
-            len(outcome.matches)
+            len(outcome.matches),
+            cntDom,
+            cntCode,
+            cntData,
         )
 
-        if outcome.verification:
-            cntDom = 0
-            for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
-                if verifyStatus is VerifyStatus.DOMINANT:
-                    cntDom += 1
-            ret += ";{}".format(cntDom)
 
+
+        if outcome.verification:
             for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
                 ret += ";{}".format(verifyStatus.name)
 
