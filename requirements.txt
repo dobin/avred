@@ -11,9 +11,9 @@ dncil
 dnfile
 olefile
 oletools
-python-magic-bin
 psutil
 flask-login
 yara-python==4.2.3
 bitstring
 brotli
+python-magic
