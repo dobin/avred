@@ -167,12 +167,12 @@ $ podman build -t avred .
 
 run:
 ```
-$ podman run -p 9001:5000 -e "server=1.1.1.1:8001" --name avred -d avred
+$ podman run -p 9001:5000 -e "server=http://1.1.1.1:8001" --name avred -d avred
 ```
 
 run with upload directory mounted:
 ```
-$ podman run -p 9001:5000 -e "server=1.1.1.1:8001" -v $HOME/avred-uploads:/opt/avred/app/upload/  --name avred -d avred 
+$ podman run -p 9001:5000 -e "server=http://1.1.1.1:8001" -v $HOME/avred-uploads:/opt/avred/app/upload/  --name avred -d avred 
 ```
 
 
