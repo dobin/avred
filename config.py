@@ -1,5 +1,6 @@
 import yaml
 import os
+import logging
 
 # Some static globals
 MAX_HEXDUMP_SIZE = 2048
@@ -24,6 +25,12 @@ class Config(object):
             except yaml.YAMLError as e:
                 print('Decoding {} as failed with: {}'.format(CONFIG_FILE, e))
                 quit()
+
+        if 'server' in os.environ:
+            server = os.environ["server"] 
+            self.data["server"] = { "server": server }
+            print("Using ENV: server={}, overwriting all others from config.yaml".format(
+                server))
 
     def get(self, value):
         return self.data.get(value, "")
