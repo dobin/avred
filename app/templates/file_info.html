@@ -80,7 +80,7 @@
 File is not detected by AV.
 {% endif %}
 
-{% if session['showDetails'] %}
+{% if session['showDetails'] and outcome.sections|length > 0 %}
 <h2>Sections</h2>
 
 <div class="container">
