@@ -6,7 +6,7 @@ import pstats
 from scanner import *
 from model.model_base import *
 from model.model_code import *
-from utils import getOutcomesFromDir, OutcomesToCsv
+from myutils import getOutcomesFromDir, OutcomesToCsv
 
 HASHCACHE_FILE = "hashcache.pickle"
 

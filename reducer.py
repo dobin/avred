@@ -8,7 +8,7 @@ from model.model_base import Scanner, ScanSpeed
 from model.model_data import Data, Match
 from plugins.model import BaseFile
 
-from utils import *
+from myutils import *
 
 PRINT_DELAY_SECONDS = 2
 
@@ -16,14 +16,14 @@ PRINT_DELAY_SECONDS = 2
 class Reducer():
     """Reducer will scan data in file with scanner, and return List of matches"""
 
-    def __init__(self, file: BaseFile, scanner: Scanner, scanSpeed=ScanSpeed.Normal):
+    def __init__(self, file: BaseFile, scanner: Scanner, scanSpeed=ScanSpeed.Normal, iteration: int = 0):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
         self.scanSpeed: ScanSpeed = scanSpeed
 
         self.matchesAdded: int = 0
         self.chunks_tested: int = 0
-        self.iterations: int = 0
+        self.iteration: int = iteration
         self.matchIdx: int = 0
 
         self.minMatchSize: int = 4
@@ -58,7 +58,7 @@ class Reducer():
         self.minMatchSize = self.minChunkSize * 2
 
         logging.info("Reducer Start: ScanSpeed:{} Iteration:{} MinChunkSize:{} MinMatchSize:{}".format(
-            self.scanSpeed.name, self.iterations, self.minChunkSize, self.minMatchSize))
+            self.scanSpeed.name, self.iteration, self.minChunkSize, self.minMatchSize))
         timeStart = time.time()
         self._scanDataPart(data, offsetStart, offsetEnd)
         timeEnd = time.time()
@@ -66,9 +66,8 @@ class Reducer():
         scanTime = round(timeEnd - timeStart)
         logging.info("Reducer Result: Time:{} Chunks:{} MatchesAdded:{} MatchesFinal:{}".format(
             scanTime, self.chunks_tested, self.matchesAdded, len(self.it)))
-        matches = convertMatchesIt(self.it, self.iterations, self.matchIdx)
+        matches = convertMatchesIt(self.it, self.iteration, self.matchIdx)
         self.matchIdx += len(matches)
-        self.iterations += 1
 
         return matches
 

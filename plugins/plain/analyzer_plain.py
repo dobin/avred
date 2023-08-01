@@ -5,7 +5,6 @@ import datetime
 from model.model_base import ScanInfo, ScanSpeed
 from reducer import Reducer
 from plugins.plain.file_plain import FilePlain
-from utils import *
 
 
 # no PE file, just check its content

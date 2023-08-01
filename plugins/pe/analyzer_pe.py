@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from utils import *
+from myutils import *
 import time
 import datetime
 from typing import List, Tuple
@@ -13,7 +13,7 @@ from plugins.pe.file_pe import FilePe
 from scanning import scanIsHash
 
 
-def analyzeFilePe(filePe: FilePe, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+def analyzeFilePe(filePe: FilePe, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
     isolate = analyzerOptions.get("isolate", False)
     scanSpeed = analyzerOptions.get("scanSpeed", ScanSpeed.Normal)
@@ -50,7 +50,6 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         logging.info(f"  section: {section.name}")
-
 
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:
