@@ -58,6 +58,15 @@ def upload_file():
         fileName = request.files['file'].filename
         fileData = request.files['file'].read()
 
+        # check if server is online
+        try:
+            serverUrl = current_app.config['AVRED_SERVERS'][serverName]
+            response = requests.get(serverUrl, timeout=1)
+            if not response.ok:
+                return  'Server offline: ' + serverName, 400
+        except requests.exceptions.Timeout:
+            return  'Server offline: ' + serverName, 400
+
         # handle zip file: extract inner file
         if fileName.split(".")[-1] == "zip":
             # this all works on the file-like request.files['file']
