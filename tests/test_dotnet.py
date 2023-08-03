@@ -1,10 +1,29 @@
+from typing import List
 import unittest
-from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
-from plugins.dotnet.dncilparser import DncilParser
+
 from model.model_data import Match
+from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
+from plugins.dotnet.dotnet_data import DotnetData
+from plugins.dotnet.dncilparser import DncilParser
 from plugins.pe.file_pe import FilePe
 from plugins.dotnet.outflank_dotnet import outflankDotnet
-from typing import List
+
+
+
+class DotnetDataTest(unittest.TestCase):
+    def test_dotnetdata(self):
+        dotnetData = DotnetData("tests/data/dotnet-test.dll")
+        dotnetData.init()
+        entries = dotnetData.findBy(0x42c, 0x42c+8)
+
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        self.assertEqual(entry.tableName, "MethodDef")
+        self.assertEqual(entry.offset, 0x42c)
+        self.assertEqual(entry.size, 14)
+
+        
+        
 
 
 class DotnetDisasmTest(unittest.TestCase):

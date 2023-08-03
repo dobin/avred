@@ -64,7 +64,7 @@ class SectionsBag:
 
     def getSectionsForRange(self, start: int, end: int) -> List[Section]:
         res = self.sectionsIntervalTree.overlap(start, end)
-        res = [r[2] for r in res]
+        res = [r[2] for r in res] # convert to list
         return res
     
 

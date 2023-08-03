@@ -3,8 +3,8 @@ import logging
 from typing import List, Tuple, Set
 
 from plugins.pe.file_pe import FilePe, getDotNetSections
-from plugins.dotnet.dncilparser import DncilParser
-from plugins.dotnet.dncilparser import IlMethod
+from plugins.dotnet.dncilparser import DncilParser, IlMethod
+from plugins.dotnet.dotnet_data import DotnetData, DotnetDataEntry
 
 from utils import *
 from config import MAX_DISASM_SIZE
@@ -24,6 +24,8 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     if dotnetSectionsBag is None:
         logging.warning("No dotNet sections")
     dncilParser = DncilParser(filePe.filepath)
+    dotNetData = DotnetData(filePe.filepath)
+    dotNetData.init()
     
     for match in matches:
         matchDisasmLines: List[UiDisasmLine] = []
@@ -52,6 +54,18 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
                 match.sectionType = SectionType.CODE
             else:
                 match.sectionType = SectionType.DATA
+                results: List[DotnetDataEntry] = dotNetData.findBy(match.start(), match.end())
+                uidl: List[UiDisasmLine] = []
+                for res in results:
+                    u = UiDisasmLine(
+                        res.offset, 
+                        0,
+                        True,
+                        res.tableName + res.data,
+                        res.tableName + res.data)
+                    uidl.append(u)
+                matchDisasmLines = uidl
+                    
         else:
             match.sectionType = SectionType.DATA
 
@@ -114,18 +128,6 @@ def disassembleDotNet(offset: int, size: int, dncilParser: DncilParser) -> Tuple
             "Function: {}".format(ilMethod.getName())
         )
         uiDisasmLines.append(uiDisasmLine)
-
-        #if ilMethod.getHeaderSize() > 1: # should be either 1 or 12
-        #    asdf
-
-        #uiDisasmLine = UiDisasmLine(
-        #    ilMethod.getOffset(), 
-        #    ilMethod.getRva(),
-        #    isPart, 
-        #    "Header size: {}".format(ilMethod.getHeaderSize()),
-        #    "Header size: {}".format(ilMethod.getHeaderSize())
-        #)
-        #uiDisasmLines.append(uiDisasmLine)
 
         # find all instructions of method which are part of the match
         for asmInstruction in ilMethod.instructions:
