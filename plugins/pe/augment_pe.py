@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from utils import *
+from myutils import *
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
 import json

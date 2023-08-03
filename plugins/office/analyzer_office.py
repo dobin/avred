@@ -4,7 +4,6 @@ import time
 import datetime
 
 from reducer import Reducer
-from utils import *
 from model.model_base import Scanner, ScanInfo, ScanSpeed
 from model.model_data import Match
 import pcodedmp.pcodedmp as pcodedmp

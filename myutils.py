@@ -3,12 +3,12 @@ import re
 from typing import List, Tuple
 import pickle
 import os
-from intervaltree import IntervalTree
 
 from model.model_base import Outcome
-from model.model_data import Match
 from model.model_verification import VerifyStatus
 from model.model_code import SectionType
+from myutils import *
+
 from config import MAX_HEXDUMP_SIZE
 
 EXT_INFO = ".outcome"

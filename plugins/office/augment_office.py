@@ -4,7 +4,7 @@ from typing import List, Tuple
 from intervaltree import Interval, IntervalTree
 import os
 
-from utils import *
+from myutils import *
 from model.model_data import Match
 from model.model_code import UiDisasmLine
 import pcodedmp.pcodedmp as pcodedmp

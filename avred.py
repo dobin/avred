@@ -199,7 +199,7 @@ def handleFile(filename, args, serverName):
 
             # get matches
             logging.info("Scanning for matches...")
-            matches, scanInfo = plugin.analyzeFile(filePlay, scanner, analyzerOptions)
+            matches, scanInfo = plugin.analyzeFile(filePlay, scanner, iteration, analyzerOptions)
             outcome.matches += matches
             logging.info("Result: {} matches".format(len(matches)))
             outcome.scanInfo = scanInfo

@@ -11,7 +11,7 @@ from app.views_auth import load_user
 
 from model.model_base import Outcome
 from model.model_data import Match
-from utils import getOutcomesFromDir, getFileData, OutcomesToCsv
+from myutils import getOutcomesFromDir, getFileData, OutcomesToCsv
 
 #from waitress import serve
 

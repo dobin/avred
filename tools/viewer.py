@@ -3,7 +3,7 @@ import json
 import pprint
 import r2pipe
 from ansi2html import Ansi2HTMLConverter
-from utils import *
+from myutils import *
 
 PREV = 16
 POST = 16

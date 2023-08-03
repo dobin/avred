@@ -11,8 +11,7 @@ from tests.helpers import TestDetection
 from tests.scanners import *
 from model.model_data import Match
 from model.model_verification import MatchConclusion, VerifyStatus
-from utils import hexdmp, hexstr, removeAnsi
-
+from myutils import hexdmp, hexstr, removeAnsi
 
 
 class PeTest(unittest.TestCase):

@@ -6,7 +6,7 @@ from plugins.pe.file_pe import FilePe, getDotNetSections
 from plugins.dotnet.dncilparser import DncilParser, IlMethod
 from plugins.dotnet.dotnet_data import DotnetData, DotnetDataEntry
 
-from utils import *
+from myutils import *
 from config import MAX_DISASM_SIZE
 
 from dotnetfile import DotNetPE
