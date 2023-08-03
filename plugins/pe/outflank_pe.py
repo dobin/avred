@@ -17,6 +17,8 @@ def outflankPe(
     useTypes = [ 'mov', 'lea', 'xor', 'and', 'inc', 'cmp' ]
     blacklist = [ 'clc' ]
 
+    logging.info("-> Matches: {}   VerifyStatus: B: {}".format(len(matches), len(matchConclusion.verifyStatus)))
+
     for idx, match in enumerate(matches):
         if idx > len(matchConclusion.verifyStatus)+1:
             logging.error("Could not find verifyStatus with index: {}. Delete outcome and scan again.".format(idx))
@@ -78,10 +80,10 @@ def outflankPe(
         data.patchData(patch.offset, patch.replaceBytes)
         ret.append(patch)
         if not scanner.scannerDetectsBytes(data.getBytes(), filePe.filename):
-            logging.warn("Outflank possible")
+            logging.warning("Outflank possible")
             return ret
         #else:
-        #    logging.warn("Outflank failed: " + str(patch))
+        #    logging.warning("Outflank failed: " + str(patch))
     
     # fail
     logging.info("Outflank failed with attempted {} patches".format(len(results)))

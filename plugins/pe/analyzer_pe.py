@@ -106,7 +106,7 @@ def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
             if section.scan:
                 detected_sections += [section]
 
-        logging.info(f"Hide: {section.name} -> Detected: {detected}")
+        logging.info(f"Hide: {section.name} -> Detected: {detected} (to scan: {section.scan})")
 
     return detected_sections
 
@@ -128,6 +128,6 @@ def findDetectedSectionsIsolate(filePe: FilePe, scanner) -> List[Section]:
             if section.scan:
                 detected_sections += [section]
 
-        logging.info(f"Hide all except: {section.name} -> Detected: {detected}")
+        logging.info(f"Hide all except: {section.name} -> Detected: {detected}  (to scan: {section.scan})")
 
     return detected_sections
