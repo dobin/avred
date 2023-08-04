@@ -2,7 +2,7 @@ from typing import List, Tuple
 import time
 import datetime
 
-from model.model_base import ScanInfo, ScanSpeed
+from model.model_base import ScanInfo, ScanSpeed, Match
 from reducer import Reducer
 from plugins.plain.file_plain import FilePlain
 
