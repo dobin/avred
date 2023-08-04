@@ -4,7 +4,6 @@ import io
 import sys
 import string
 import logging
-import argparse
 import binascii
 import contextlib
 import tabulate
@@ -15,7 +14,6 @@ import dnfile
 import dnfile.base
 import dnfile.enums
 
-from ppretty import ppretty
 
 # Lots of functions from 
 # https://github.com/malwarefrank/dnfile/blob/master/examples/dndump.py
@@ -230,15 +228,6 @@ def render_pe(ostream: Formatter, dn) -> List[DotnetDataEntry]:
                 for i, row in enumerate(table.rows):
                     ostream = Formatter()
                     ostream.writeln("[%d]:" % (i + 1))
-
-                    #attrs = vars(row)
-                    # {'kids': 0, 'name': 'Dog', 'color': 'Spotted', 'age': 10, 'legs': 2, 'smell': 'Alot'}
-                    # now dump this in some way or another
-                    #print(', '.join("%s: %s" % item for item in attrs.items()))
-                    #print(ppretty(row.struct, seq_length=100))
-                    #print("AAA: 0x{:x}".format(row.struct.__file_offset__))
-
-                    #ostream.writeln("AAA: {}".format(row.struct.__file_offset__))
 
                     with indenting(ostream):
                         rows = []
