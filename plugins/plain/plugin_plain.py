@@ -16,9 +16,9 @@ class PluginPlain(Plugin):
         return file
 
     
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         # We use the simple PE analyzer
-        return analyzeFilePlain(file, scanner, analyzerOptions)
+        return analyzeFilePlain(file, scanner, iteration, analyzerOptions)
 
     
     def augmentFile(self, file: BaseFile, matches: List[Match]) -> str:

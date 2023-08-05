@@ -68,7 +68,7 @@ class Plugin():
         pass
 
     @abstractmethod
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         pass
 
     @abstractmethod
