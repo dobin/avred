@@ -30,15 +30,19 @@ def getOutcomesFromDir(dir: str) -> List[Outcome]:
 
 
 def OutcomesToCsv(outcomes: List[Outcome]):
-    ret  = ''
-    ret += "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt;CntDom;CntCode;CntData\r\n"
+    matchSectionKeys = []
+    csvHeader = "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt;CntDom;CntCode;CntData"
+
+    lines = []
     for outcome in outcomes:
+        ret  = ''
         if not outcome.isScanned:
             continue
 
         cntDom = 0
         cntCode = 0
         cntData = 0
+        matchSections = {}
         if outcome.verification:
             for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
                 if verifyStatus is not VerifyStatus.IRRELEVANT:
@@ -49,6 +53,15 @@ def OutcomesToCsv(outcomes: List[Outcome]):
                     cntCode += 1
                 if match.sectionType is SectionType.DATA:
                     cntData += 1
+
+                n = match.section.name
+                if n in matchSections:
+                    matchSections[n] += 1
+                else:
+                    matchSections[n] = 1
+
+                if n not in matchSectionKeys:
+                    matchSectionKeys.append(n)
 
         ret += "{};{};{};{};{};{};{};{};{};{};{}".format(
             outcome.fileInfo.name,
@@ -66,13 +79,33 @@ def OutcomesToCsv(outcomes: List[Outcome]):
             cntData,
         )
 
+        #if outcome.verification:
+        #    for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
+        #        ret += ";{}".format(verifyStatus.name)
+        lines.append({
+            "line": ret,
+            "sections": matchSections
+        })
+
+    matchSectionKeys = sorted(matchSectionKeys)
+
+    ret = ''
+    ret += csvHeader
+    for k in matchSectionKeys:
+        ret += ",{}".format(k)
+    ret += "\r\n"
+
+    for entry in lines:
+        a = ''
+        for k in matchSectionKeys:
+            if k in entry["sections"]:
+                a += ",{}".format(entry["sections"][k])
+            else:
+                a += ",0"
+
+        ret += entry["line"] + a + "\r\n"
 
 
-        if outcome.verification:
-            for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
-                ret += ";{}".format(verifyStatus.name)
-
-        ret += "\r\n"
     return ret
 
 

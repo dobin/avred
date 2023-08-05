@@ -69,7 +69,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         else:
             match.sectionType = SectionType.DATA
 
-        match.setSection(matchSection)
+        match.setSection(dotnetSectionsBag.getSectionByAddr(match.fileOffset))
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)
