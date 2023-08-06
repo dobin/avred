@@ -69,7 +69,16 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         else:
             match.sectionType = SectionType.DATA
 
-        match.setSection(dotnetSectionsBag.getSectionByAddr(match.fileOffset))
+        # take dotnet section
+        relevantSection = dotnetSectionsBag.getSectionByAddr(match.fileOffset)
+        if relevantSection is None:
+            # or pe section if not in dotnet section
+            relevantSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
+        if relevantSection is None:
+            # should never be reached
+            relevantSection = "unknown?"
+
+        match.setSection()
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)
