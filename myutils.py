@@ -95,16 +95,16 @@ def OutcomesToCsv(outcomes: List[Outcome]):
     ret = ''
     ret += csvHeader
     for k in matchSectionKeys:
-        ret += ",{}".format(k)
+        ret += ";{}".format(k)
     ret += "\r\n"
 
     for entry in lines:
         a = ''
         for k in matchSectionKeys:
             if k in entry["sections"]:
-                a += ",{}".format(entry["sections"][k])
+                a += ";{}".format(entry["sections"][k])
             else:
-                a += ",0"
+                a += ";0"
 
         ret += entry["line"] + a + "\r\n"
 
