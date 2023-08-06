@@ -54,7 +54,10 @@ def OutcomesToCsv(outcomes: List[Outcome]):
                 if match.sectionType is SectionType.DATA:
                     cntData += 1
 
-                n = match.section.name
+                if match.section is None:
+                    n = 'unknown'
+                else:
+                    n = match.section.name
                 if n in matchSections:
                     matchSections[n] += 1
                 else:
