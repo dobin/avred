@@ -78,7 +78,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             # should never be reached
             relevantSection = "unknown?"
 
-        match.setSection()
+        match.setSection(relevantSection)
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)
