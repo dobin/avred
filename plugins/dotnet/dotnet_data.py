@@ -38,6 +38,7 @@ class DotnetData():
     def findBy(self, start: int, end: int):
         res = self.it.overlap(start, end)
         res = [r[2] for r in res] # convert to list
+        res.sort(key=lambda x: x.offset)
         return res
 
 
@@ -218,7 +219,6 @@ def render_pe(ostream: Formatter, dn) -> List[DotnetDataEntry]:
 
     ostream.writeln("tables:")
     ostreamOut = ostream
-    
 
     with indenting(ostream):
         for table in dn.net.mdtables.tables_list:
@@ -337,4 +337,5 @@ def render_pe(ostream: Formatter, dn) -> List[DotnetDataEntry]:
                         int(row.struct.sizeof()),
                         ostream.getvalue()))
 
+    entries.sort(key=lambda x: x.offset)
     return entries
