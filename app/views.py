@@ -4,7 +4,7 @@ import os
 import logging
 from flask_login import login_user, login_required, current_user
 import io
-from typing import List
+from typing import List, Tuple
 from datetime import date
 
 from app.views_auth import load_user
@@ -133,12 +133,24 @@ def fileDownloadPatchMatch(filename, id):
         return redirect('index.html')
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
+    errStr, fileData = getPatchMatch(filepath)
+    if errStr is not None:
+        return errStr
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
+
+def getPatchMatch(filepath) -> Tuple[str, bytearray]:
     outcome, logData, errStr = getFileData(filepath)
     if errStr is not None or outcome is None or logData is None: 
-        return "Error: " + errStr
+        return "Error: " + errStr, None
     
     if not os.path.isfile(filepath):
-        return "Error: File not found: " + filepath
+        return "Error: File not found: " + filepath, None
     with open(filepath, 'rb') as file:
         fileData: bytearray = bytearray(file.read())
 
@@ -148,12 +160,8 @@ def fileDownloadPatchMatch(filename, id):
     data = b"\x00" * len
     fileData[offset:offset+len] = data
 
-    return send_file(
-        io.BytesIO(fileData),
-        mimetype='application/octet-stream',
-        as_attachment=True,
-        attachment_filename=filename
-    )
+    return None, fileData
+
 
 @views.route("/file/<filename>/downloadPatchMatch/")
 @login_required
@@ -163,12 +171,25 @@ def fileDownloadPatchFull(filename):
         return redirect('index.html')
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
+    errorStr, fileData = getPatchMatch(filepath)
+    if errorStr is not None:
+        return errorStr
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
+
+
+def getPatchMatch(filepath: str) -> Tuple[str, bytearray]:
     outcome, logData, errStr = getFileData(filepath)
     if errStr is not None or outcome is None or logData is None: 
-        return "Error: " + errStr
+        return "Error: " + errStr, None
     
     if not os.path.isfile(filepath):
-        return "Error: File not found: " + filepath
+        return "Error: File not found: " + filepath, None
     with open(filepath, 'rb') as file:
         fileData: bytearray = bytearray(file.read())
 
@@ -179,12 +200,7 @@ def fileDownloadPatchFull(filename):
         data = b"\x00" * len
         fileData[offset:offset+len] = data
 
-    return send_file(
-        io.BytesIO(fileData),
-        mimetype='application/octet-stream',
-        as_attachment=True,
-        attachment_filename=filename
-    )
+    return None, fileData
 
 
 ### Examples related
@@ -207,11 +223,52 @@ def examples_list():
 
 
 @views.route("/example/<filename>/download")
+@login_required
 def fileDownloadExample(filename):
     filename = secure_filename(filename)
     filepath = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
     return send_file(filepath, as_attachment=True)
 
+
+@views.route("/example/<filename>/downloadPatchMatch/")
+@login_required
+def fileDownloadExamplePatchFull(filename):
+    if filename != secure_filename(filename):
+        flash('Invalid filename')
+        return redirect('index.html')
+    filepath = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
+
+    errorStr, fileData = getPatchMatch(filepath)
+    if errorStr is not None:
+        return errorStr
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
+
+
+@views.route("/example/<filename>/downloadPatchMatch/<id>")
+@login_required
+def fileDownloadExamplePatchMatch(filename, id):
+    id = int(id)
+    if filename != secure_filename(filename):
+        flash('Invalid filename')
+        return redirect('index.html')
+    filepath = os.path.join(current_app.config['EXAMPLE_FOLDER'], filename)
+
+    errStr, fileData = getPatchMatch(filepath)
+    if errStr is not None:
+        return errStr
+
+    return send_file(
+        io.BytesIO(fileData),
+        mimetype='application/octet-stream',
+        as_attachment=True,
+        attachment_filename=filename
+    )
 
 ## Filters
 
