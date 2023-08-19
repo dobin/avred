@@ -67,10 +67,12 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
         scanStages.append('scan:by-section')
         for section in detected_sections:
             # check first if its hash based (rare)
+            logging.info("Check if hash: {} start: {}  size: {}".format(section.name, section.addr, section.size))
             if scanIsHash(filePe, scanner, section.addr, section.size):
                 logging.info("Section {} appears to be hash checked.")
                 matches.append(Match(len(matches), section.addr, section.size, 0))
             else:
+                logging.info(f"Section {section.name} is not identified by hash")
                 logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
                 moreMatches = reducer.scan(
                     offsetStart=section.addr, 
