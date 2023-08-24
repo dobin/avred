@@ -5,15 +5,16 @@ import datetime
 from model.model_base import ScanInfo, ScanSpeed, Match
 from reducer import Reducer
 from plugins.plain.file_plain import FilePlain
+from myutils import hexdmp
 
 
 # no PE file, just check its content
-def analyzeFilePlain(filePlain, scanner, iteration, analyzerOptions) -> Tuple[Match, ScanInfo]:
+def analyzeFilePlain(filePlain: FilePlain, scanner, iteration, analyzerOptions) -> Tuple[Match, ScanInfo]:
     reducer = Reducer(filePlain, scanner)
     scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
     timeStart = time.time()
-    matches = reducer.scan(0, len(filePlain.data))
+    matches = reducer.scan(0, filePlain.Data().getLength())
     scanInfo.scanDuration = round(time.time() - timeStart)
 
     return matches, scanInfo
