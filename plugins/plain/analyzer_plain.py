@@ -8,7 +8,7 @@ from plugins.plain.file_plain import FilePlain
 
 
 # no PE file, just check its content
-def analyzeFilePlain(filePlain, scanner, analyzerOptions) -> Tuple[Match, ScanInfo]:
+def analyzeFilePlain(filePlain, scanner, iteration, analyzerOptions) -> Tuple[Match, ScanInfo]:
     reducer = Reducer(filePlain, scanner)
     scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
