@@ -44,16 +44,18 @@
 
   <form method="POST" enctype="multipart/form-data" action="/upload">
   <div class="row row-cols-lg-auto g-3">
+    <!--
     <div class="col">
-      <select class="form-select" name="scanSpeed">
+          <select class="form-select" name="scanSpeed">
             <option value="1">Fast</option>
             <option value="2" selected>Normal</option>
             <option value="3">Slow</option>
       </select>
     </div>
-
+    -->
 
       <div class="col">
+        AV:
         <select class="form-select" name="server">
           {% for server in servers %}
               <option value="{{server['name']}}">{{server['name']}}</option>"
@@ -62,13 +64,22 @@
       </div>
 
       <div class="col">
+          File to analyze:
           <input class="form-control" type="file" name="file">
       </div>
 
       <div class="col">
-          <button class="btn btn-primary" type="submit" value="Upload">Upload</button>
+        <i>PDB (optional):</i>
+        <input class="form-control" type="file" name="filePdb">
       </div>
-  </div>
+
+      <div class="col">
+        <br>
+        <button class="btn btn-primary" type="submit" value="Upload">Upload</button>
+      </div>
+
+    </div>
+
   </form>
 
   </div>

@@ -27,7 +27,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     r2 = r2pipe.open(filePe.filepath)
 
     # check if pdf file exists
-    pdbFile = filePe.filepath.replace(".exe", ".pdb")
+    pdbFile = filePe.filepath + ".pdb"
     if os.path.exists(pdbFile):
         logging.info("Loading PDB file: {}".format(pdbFile))
         r2.cmd("idp {}".format(pdbFile))
@@ -78,7 +78,6 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
     #virtAddrDisasm = filePe.offsetToRva(fileOffset)
     matchDisasmLines: List[UiDisasmLine] = []
-    matchAsmInstructions: List[AsmInstruction] = []
     offset = fileOffset
 
     # get all strings

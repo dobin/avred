@@ -22,7 +22,13 @@ def upload_tracker(filename):
     # if process doesnt exist anymore, we finished
     avredRuns = False
     for proc in psutil.process_iter():
-        cmdline = ' '.join(proc.cmdline())
+        try:
+            cmdline = ' '.join(proc.cmdline())
+        except:
+            # on osx, dont have permissions to join cmdline if the process
+            # is not the same user as we are...
+            continue
+
         # bad heuristics, but works
         # "/usr/bin/python3 avred.py --server amsi --file app/upload/E0CF9EE613F1FB79.test1.exe"
         # FIXME: This can be used as an oracle to gain information about other users filenames
@@ -45,6 +51,8 @@ def upload_tracker(filename):
 @views_upload.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        prod = True
+
         # Check all required parameters
         if 'server' not in request.form or not request.form['server'].isalnum():
             # no haxxoring in server name
@@ -62,10 +70,11 @@ def upload_file():
         try:
             serverUrl = current_app.config['AVRED_SERVERS'][serverName]
             response = requests.get(serverUrl, timeout=1)
-            if not response.ok:
+            if not response.ok and prod:
                 return  'Server offline: ' + serverName, 400
         except requests.exceptions.Timeout:
-            return  'Server offline: ' + serverName, 400
+            if prod:
+                return  'Server offline: ' + serverName, 400
 
         # handle zip file: extract inner file
         if fileName.split(".")[-1] == "zip":
@@ -99,9 +108,20 @@ def upload_file():
         with open(uploadsPath, "wb") as f:
             f.write(fileData)
 
+        # check if we also got a PDB, and just store it alongside
+        if 'filePdb' in request.files and request.files['filePdb'].filename != '':
+            pdbFilename = secureFilename + ".gdb"
+            pdbPath = os.path.join(current_app.config['UPLOAD_FOLDER'], pdbFilename)
+            pdbData = request.files['filePdb'].read()
+
+            with open(pdbPath, "wb") as f:
+                f.write(pdbData)
+                logging.info("Wrote pdb file to {}".format(pdbPath))
+
         # scan the (extracted) file in the background as separate process
         cli_scanner = current_app.config['AVRED_SCANNER']
-        subprocess.Popen([sys.executable, cli_scanner, "--server", serverName, "--file", uploadsPath ], shell=False)
+        if prod:
+            subprocess.Popen([sys.executable, cli_scanner, "--server", serverName, "--file", uploadsPath ], shell=False)
 
         # redirect to the upload tracker
         return redirect(url_for('views_upload.upload_tracker', filename=secureFilename))
