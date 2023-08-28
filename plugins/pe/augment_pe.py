@@ -25,9 +25,17 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
     r2 = r2pipe.open(filePe.filepath)
-    r2.cmd("aaa")
+
+    # check if pdf file exists
+    pdbFile = filePe.filepath.replace(".exe", ".pdb")
+    if os.path.exists(pdbFile):
+        logging.info("Loading PDB file: {}".format(pdbFile))
+        r2.cmd("idp {}".format(pdbFile))
+
+    r2.cmd("aaa")  # aaaa
 
     for match in matches:
+        matchRva = filePe.offsetToRva(match.start())
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump: str = hexdmp(matchBytes, offset=match.start())
         matchDisasmLines: List[UiDisasmLine] = []
@@ -46,8 +54,12 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
                     r2, filePe, match.start(), match.size)
             match.sectionType = SectionType.CODE
         else:
+            if match.size < MAX_DISASM_SIZE:
+                matchDisasmLines = dataRefPe(
+                    r2, filePe, match.start(), match.size)
             match.sectionType = SectionType.DATA
 
+        match.setRva(matchRva)
         match.setData(matchBytes)
         match.setSection(matchSection)
         match.setDataHexdump(matchHexdump)
@@ -61,6 +73,37 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
+
+
+def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
+    #virtAddrDisasm = filePe.offsetToRva(fileOffset)
+    matchDisasmLines: List[UiDisasmLine] = []
+    matchAsmInstructions: List[AsmInstruction] = []
+    offset = fileOffset
+
+    # get all strings
+    stringsJson = r2.cmd("izj")
+    strings = json.loads(stringsJson)
+    # convert to intervaltree
+    it = IntervalTree()
+    for s in strings:
+        it.add( Interval(s["paddr"], s["paddr"] + s["size"], s))
+
+    # find all strings which overlap
+    its = it.overlap(Interval(offset, offset+size))
+    for i in its:
+        s = i[2]
+        logging.info("Found addr {} in str: {}".format(offset, s["paddr"]))
+
+        # for each string (addr), print its references
+        ref = r2.cmd("axt @{}".format(s["vaddr"]))
+        logging.info("  Ref: {}".format(ref))
+
+        text = ref
+        disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
+        matchDisasmLines.append(disasmLine)
+
+    return matchDisasmLines
 
 
 conv = Ansi2HTMLConverter()

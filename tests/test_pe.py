@@ -194,3 +194,16 @@ class PeTest(unittest.TestCase):
 
         self.assertEqual(patches[0].offset, 2894)
         self.assertEqual(patches[1].offset, 2902)
+
+
+    def test_pedataref(self):
+        filePe = FilePe()
+        filePe.loadFromFile("/Users/dobin/Downloads/malware/Outflank-Dumpert.exe") 
+
+        matches = [ Match(0, 0x0000b7f0, 16) ]
+        augmentFilePe(filePe, matches)
+        self.assertEqual(1, len(matches))
+        match = matches[0]
+        self.assertEqual(1, len(match.disasmLines))
+        disasmLine = match.disasmLines[0]
+        self.assertTrue("fcn.140011032 0x14001297d [DATA] lea rcx, str.__" in disasmLine.text)
