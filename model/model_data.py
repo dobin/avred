@@ -96,6 +96,7 @@ class Match():
         self.iteration = iteration
         
         # set by augmentation
+        self.rva: int = 0
         self.data: bytes = b''
         self.dataHexdump: str = ''
         self.sectionInfo: str = ''
@@ -109,6 +110,9 @@ class Match():
 
     def end(self):
         return self.fileOffset + self.size
+
+    def setRva(self, rva: int):
+        self.rva = rva
 
     def setData(self, data):
         self.data = data
