@@ -88,17 +88,15 @@ def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
     for s in strings:
         it.add( Interval(s["paddr"], s["paddr"] + s["size"], s))
 
-    # find all strings which overlap
+    # find all strings which we overlap
     its = it.overlap(Interval(offset, offset+size))
     for i in its:
         s = i[2]
-        logging.info("Found addr {} in str: {}".format(offset, s["paddr"]))
+        #logging.info("Found addr {} in str: {}".format(offset, s["paddr"]))
 
         # for each string (addr), print its references
-        ref = r2.cmd("axt @{}".format(s["vaddr"]))
-        logging.info("  Ref: {}".format(ref))
-
-        text = ref
+        text = r2.cmd("axt @{}".format(s["vaddr"]))
+        #logging.info("  Ref: {}".format(ref))
         disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
         matchDisasmLines.append(disasmLine)
 
