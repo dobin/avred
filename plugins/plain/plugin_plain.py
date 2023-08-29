@@ -1,9 +1,10 @@
-from plugins.model import Plugin, BaseFile
+from model.plugin_model import Plugin
 from model.model_base import Scanner, OutflankPatch, ScanInfo
 from model.model_data import Match
 from model.model_verification import MatchConclusion
+from model.file_model import BaseFile
 from typing import List, Tuple, Set
-
+from reducer import Reducer
 from plugins.plain.analyzer_plain import analyzeFilePlain
 from plugins.plain.file_plain import FilePlain
 
@@ -16,9 +17,9 @@ class PluginPlain(Plugin):
         return file
 
     
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         # We use the simple PE analyzer
-        return analyzeFilePlain(file, scanner, iteration, analyzerOptions)
+        return analyzeFilePlain(file, scanner, reducer, analyzerOptions)
 
     
     def augmentFile(self, file: BaseFile, matches: List[Match]) -> str:

@@ -1,5 +1,5 @@
 from model.model_data import Data
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 import logging
 
 
@@ -23,7 +23,6 @@ def scanIsHash(file: BaseFile, scanner, start=0, size=0) -> bool:
         d: Data = file.DataCopy()
         d.patchDataFill(offset, 1)
         detected = scanner.scannerDetectsBytes(d.getBytes(), file.filename)
-        logging.info("CheckHash: Offset:{} -> Detected:{}".format(offset, detected))
         scanResults.append(detected)
 
     # if all modifications result in not-detected, its hash based

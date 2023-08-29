@@ -1,5 +1,5 @@
 import unittest
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 
 
 class ModelTest(unittest.TestCase):

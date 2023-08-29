@@ -24,9 +24,10 @@ from plugins.plain.plugin_plain import PluginPlain
 from plugins.dotnet.plugin_dotnet import PluginDotNet
 from plugins.pe.plugin_pe import PluginPe
 from plugins.office.plugin_office import PluginOffice
-from plugins.model import Plugin
+from model.plugin_model import Plugin
 from verifier import verify
 from minimizer import minimizeMatches
+from reducer import Reducer
 
 
 def handler(signum, frame):
@@ -132,6 +133,7 @@ def handleFile(filename, args, serverName):
         logging.error("Unknown filetype, aborting")
         exit(1)
 
+    # scanner is the connection to the AV-oracle
     scanner = None
     # load existing outcome
     if os.path.exists(filenameOutcome):
@@ -157,7 +159,6 @@ def handleFile(filename, args, serverName):
 
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
-        analyzerOptions['scanSpeed'] = ScanSpeed(args.scanspeed)
 
     hashCache.load()
     # scan
@@ -191,6 +192,7 @@ def handleFile(filename, args, serverName):
         isDetected = True  # we now know that the file is being detected
         filePlay = deepcopy(file)  # leave original unmodified, apply matches for iterative scanning here
         iteration = 0
+        reducer = Reducer(filePlay, scanner, ScanSpeed(args.scanspeed), iteration=iteration)
         MAX_ITERATIONS = 6
         while isDetected:
             if iteration > MAX_ITERATIONS:
@@ -199,7 +201,7 @@ def handleFile(filename, args, serverName):
 
             # get matches
             logging.info("Scanning for matches...")
-            matches, scanInfo = plugin.analyzeFile(filePlay, scanner, iteration, analyzerOptions)
+            matches, scanInfo = plugin.analyzeFile(filePlay, scanner, reducer, analyzerOptions)
             outcome.matches += matches
             logging.info("Result: {} matches".format(len(matches)))
             outcome.scanInfo = scanInfo
@@ -213,10 +215,12 @@ def handleFile(filename, args, serverName):
                 logging.info("Still detected on iteration {}, apply {} matches and do again".format(
                     iteration, len(matches)
                 ))
+                iteration += 1
+                # not really necessary to create a new reducer
+                # but it is tho (reset scan chunk size and similar)
+                reducer = Reducer(filePlay, scanner, ScanSpeed(args.scanspeed), iteration=iteration)
             else:
                break
-
-            iteration += 1
 
         outcome.sections = filePlay.sectionsBag.sections
 

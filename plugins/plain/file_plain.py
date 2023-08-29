@@ -1,6 +1,6 @@
 import logging
 import os
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 
 
 class FilePlain(BaseFile):

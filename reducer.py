@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from model.model_base import Scanner, ScanSpeed
 from model.model_data import Data, Match
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 
 from myutils import *
 
@@ -16,14 +16,14 @@ PRINT_DELAY_SECONDS = 2
 class Reducer():
     """Reducer will scan data in file with scanner, and return List of matches"""
 
-    def __init__(self, file: BaseFile, scanner: Scanner, scanSpeed=ScanSpeed.Normal, iteration: int = 0):
+    def __init__(self, file: BaseFile, scanner: Scanner, iteration: int = 0, scanSpeed=ScanSpeed.Normal):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
         self.scanSpeed: ScanSpeed = scanSpeed
+        self.iteration: int = iteration
 
         self.matchesAdded: int = 0
         self.chunks_tested: int = 0
-        self.iteration: int = iteration
         self.matchIdx: int = 0
 
         self.minMatchSize: int = 4

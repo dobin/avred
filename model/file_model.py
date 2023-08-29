@@ -1,12 +1,7 @@
-from dataclasses import dataclass
 import os
 import copy
-from abc import abstractmethod
-from typing import List, Tuple, Set
 
 from model.model_data import Match, Data
-from model.model_verification import MatchConclusion
-from model.model_base import Scanner, OutflankPatch, ScanInfo
 
 
 class BaseFile():
@@ -57,26 +52,3 @@ class BaseFile():
         self.filename = filename
         self.fileData = Data(data)
         return self.parseFile()
-
-
-class Plugin():
-    def __init__(self):
-        pass
-    
-    @abstractmethod
-    def makeFile(self, filepath: str):
-        pass
-
-    @abstractmethod
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
-        pass
-
-    @abstractmethod
-    def augmentMatches(self, file: BaseFile, matches: List[Match]) -> str:
-        pass
-
-    @abstractmethod
-    def outflankFile(
-        self, filePe: BaseFile, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
-    ) -> List[OutflankPatch]:
-        pass

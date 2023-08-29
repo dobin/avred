@@ -5,7 +5,7 @@ from typing import List
 
 from model.model_data import Match
 from model.model_verification import *
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 
 
 # Middle: 8

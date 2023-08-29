@@ -13,14 +13,13 @@ from plugins.pe.file_pe import FilePe
 from scanning import scanIsHash
 
 
-def analyzeFilePe(filePe: FilePe, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+def analyzeFilePe(filePe: FilePe, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
     isolate = analyzerOptions.get("isolate", False)
     scanSpeed = analyzerOptions.get("scanSpeed", ScanSpeed.Normal)
     scanInfo = ScanInfo(scanner.scanner_name, scanSpeed)
 
     # prepare the reducer with the file
-    reducer = Reducer(filePe, scanner, scanSpeed)
     timeStart = time.time()
     matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer, isolate)
     scanInfo.scanDuration = round(time.time() - timeStart)

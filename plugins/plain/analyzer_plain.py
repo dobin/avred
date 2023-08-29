@@ -9,8 +9,7 @@ from myutils import hexdmp
 
 
 # no PE file, just check its content
-def analyzeFilePlain(filePlain: FilePlain, scanner, iteration, analyzerOptions) -> Tuple[Match, ScanInfo]:
-    reducer = Reducer(filePlain, scanner)
+def analyzeFilePlain(filePlain: FilePlain, scanner, reducer, analyzerOptions) -> Tuple[Match, ScanInfo]:
     scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
     timeStart = time.time()

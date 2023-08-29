@@ -3,11 +3,13 @@ from typing import List, Tuple, Set
 from model.model_base import Scanner, OutflankPatch, ScanInfo
 from model.model_data import Match
 from model.model_verification import MatchConclusion
-from plugins.model import Plugin, BaseFile
+from model.plugin_model import Plugin
+from model.file_model import BaseFile
 from plugins.pe.analyzer_pe import analyzeFilePe
 from plugins.dotnet.augment_dotnet import augmentFileDotnet
 from plugins.dotnet.outflank_dotnet import outflankDotnet
 from plugins.pe.file_pe import FilePe
+from reducer import Reducer
 
 
 class PluginDotNet(Plugin):
@@ -18,9 +20,9 @@ class PluginDotNet(Plugin):
         return file
 
     
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         # We use the simple PE analyzer
-        return analyzeFilePe(file, scanner, iteration, analyzerOptions)
+        return analyzeFilePe(file, scanner, reducer, analyzerOptions)
 
     
     def augmentFile(self, file: BaseFile, matches: List[Match]) -> str:

@@ -4,7 +4,7 @@ import pefile
 import inspect
 
 from model.model_code import Section, SectionsBag
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 
 from dotnetfile import DotNetPE
 from dotnetfile.util import FileLocation

@@ -1,12 +1,13 @@
-from plugins.model import Plugin, BaseFile
+from model.plugin_model import Plugin
 from model.model_base import Scanner, Match, OutflankPatch, ScanInfo
 from model.model_data import Match
 from model.model_verification import MatchConclusion
 from typing import List, Tuple, Set
-
+from reducer import Reducer
 from plugins.office.analyzer_office import analyzeFileWord
 from plugins.office.augment_office import augmentFileWord
 from plugins.office.file_office import FileOffice
+from model.file_model import BaseFile
 
 
 class PluginOffice(Plugin):
@@ -17,9 +18,9 @@ class PluginOffice(Plugin):
         return file
 
     
-    def analyzeFile(self, file: BaseFile, scanner: Scanner, iteration: int = 0, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+    def analyzeFile(self, file: BaseFile, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
         # We use the simple PE analyzer
-        return analyzeFileWord(file, scanner, iteration, analyzerOptions)
+        return analyzeFileWord(file, scanner, reducer, analyzerOptions)
 
     
     def augmentFile(self, file: BaseFile, matches: List[Match]) -> str:

@@ -10,10 +10,9 @@ import pcodedmp.pcodedmp as pcodedmp
 from plugins.office.file_office import FileOffice
 
 
-def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
+def analyzeFileWord(fileOffice: FileOffice, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     # Scans a office file given with fileOffice with Scanner scanner. 
     # Returns all matches.
-    reducer = Reducer(fileOffice, scanner)
     scanInfo = ScanInfo(scanner.scanner_name, ScanSpeed.Normal)
 
     timeStart = time.time()

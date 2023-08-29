@@ -4,7 +4,7 @@ import hashlib
 from typing import List, Set, Dict, Tuple, Optional
 from enum import Enum
 
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 from model.model_base import FileInfo
 
 

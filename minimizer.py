@@ -1,7 +1,7 @@
 from typing import List
 from copy import deepcopy
 
-from plugins.model import BaseFile
+from model.file_model import BaseFile
 from model.model_base import Match, ScanSpeed
 from scanner import Scanner
 from reducer import Reducer
