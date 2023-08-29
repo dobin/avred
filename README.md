@@ -14,7 +14,7 @@ It is mainly used to make it easier for RedTeamers to obfuscate their tools.
 
 Check it out: [avred.r00ted.ch](https://avred.r00ted.ch)
 
-Slides: [HITB Slides Cracking The Shield.pdf](https://github.com/dobin/avred/blob/main/doc/HITB%20Slides%20Cracking%20The%20Shield.pdf)
+Slides: [HITB Slides Cracking The Shield.pdf](https://github.com/dobin/avred/blob/main/doc/HITB%20Slides%20Cracking%20the%20Shield.pdf)
 
 
 ## Comparison to ThreatCheck
