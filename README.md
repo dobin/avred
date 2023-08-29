@@ -1,26 +1,29 @@
 # avred
 
-Antivirus reducer. 
+AntiVirus REDucer for AntiVirus REDteaming.
 
 Avred is being used to identify which parts of a file are identified
 by a Antivirus, and tries to show as much possible information and context about each match. 
 
 This includes: 
 * Section names of matches
-* Decompilation if match contains code
 * Verification of matches
+* Augmentation of matches as disassembled code or data references
 
 It is mainly used to make it easier for RedTeamers to obfuscate their tools. 
 
 Check it out: [avred.r00ted.ch](https://avred.r00ted.ch)
+
+Slides: [HITB Slides Cracking The Shield.pdf](https://github.com/dobin/avred/blob/main/doc/HITB%20Slides%20Cracking%20The%20Shield.pdf)
 
 
 ## Comparison to ThreatCheck
 
 Compared to ThreatCheck, avred has multiple features:
 
-* Shows all matches, not just one. This 
-* Shows disassembly of matches
+* Shows all matches (not just one)
+* Verifies the matches to make sure they work
+* Shows more information of matches
 * Shows relevance of match, so you can target the weakest one
 
  
@@ -155,8 +158,10 @@ File nomenclature:
 * `file.exe`: The file you want to scan
 * `file.exe.log`: All log output of the scanning (with `--logtofile`)
 * `file.exe.outcome`: Pickled Outcome data structure with all further information
+* `file.exe.pdb`: If you have debug symbols
 
-For the webapp, files are uploaded to `app/uploads`. 
+For the webapp, files are uploaded to `app/uploads/`. 
+
 
 ## Docker
 
@@ -189,6 +194,9 @@ Based on:
 
 ## Tests
 
+Coverage:
+```
 python3 -m coverage run -m unittest  -> .coverage
 python3 -m coverage report  -> stdout 
 python3 -m coverage html  -> ./htmlcov/index.html
+```
