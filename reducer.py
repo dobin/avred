@@ -16,7 +16,7 @@ PRINT_DELAY_SECONDS = 2
 class Reducer():
     """Reducer will scan data in file with scanner, and return List of matches"""
 
-    def __init__(self, file: BaseFile, scanner: Scanner, iteration: int = 0, scanSpeed=ScanSpeed.Normal):
+    def __init__(self, file: BaseFile, scanner: Scanner, iteration: int = 0, scanSpeed: ScanSpeed = ScanSpeed.Normal):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
         self.scanSpeed: ScanSpeed = scanSpeed

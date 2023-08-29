@@ -192,7 +192,7 @@ def handleFile(filename, args, serverName):
         isDetected = True  # we now know that the file is being detected
         filePlay = deepcopy(file)  # leave original unmodified, apply matches for iterative scanning here
         iteration = 0
-        reducer = Reducer(filePlay, scanner, ScanSpeed(args.scanspeed), iteration=iteration)
+        reducer = Reducer(filePlay, scanner, iteration, ScanSpeed(args.scanspeed))
         MAX_ITERATIONS = 6
         while isDetected:
             if iteration > MAX_ITERATIONS:
