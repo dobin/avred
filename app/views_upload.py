@@ -110,7 +110,7 @@ def upload_file():
 
         # check if we also got a PDB, and just store it alongside
         if 'filePdb' in request.files and request.files['filePdb'].filename != '':
-            pdbFilename = secureFilename + ".gdb"
+            pdbFilename = secureFilename + ".pdb"
             pdbPath = os.path.join(current_app.config['UPLOAD_FOLDER'], pdbFilename)
             pdbData = request.files['filePdb'].read()
 
