@@ -218,7 +218,8 @@ def handleFile(filename, args, serverName):
                 iteration += 1
                 # not really necessary to create a new reducer
                 # but it is tho (reset scan chunk size and similar)
-                reducer = Reducer(filePlay, scanner, iteration, ScanSpeed(args.scanspeed))
+                # but take-over previous matchIdx so we have unique incremental match ids
+                reducer = Reducer(filePlay, scanner, iteration, ScanSpeed(args.scanspeed), matchIdx=reducer.matchIdx)
             else:
                break
 

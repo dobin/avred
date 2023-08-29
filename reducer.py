@@ -16,15 +16,15 @@ PRINT_DELAY_SECONDS = 2
 class Reducer():
     """Reducer will scan data in file with scanner, and return List of matches"""
 
-    def __init__(self, file: BaseFile, scanner: Scanner, iteration: int = 0, scanSpeed: ScanSpeed = ScanSpeed.Normal):
+    def __init__(self, file: BaseFile, scanner: Scanner, iteration: int = 0, scanSpeed: ScanSpeed = ScanSpeed.Normal, matchIdx: int = 0):
         self.file: BaseFile = file
         self.scanner: Scanner = scanner
         self.scanSpeed: ScanSpeed = scanSpeed
         self.iteration: int = iteration
+        self.matchIdx: int = matchIdx
 
         self.matchesAdded: int = 0
         self.chunks_tested: int = 0
-        self.matchIdx: int = 0
 
         self.minMatchSize: int = 4
         self.minChunkSize: int = 4  # sane default for now. Will be adjusted based on section size on scan()
