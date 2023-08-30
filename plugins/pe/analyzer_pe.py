@@ -57,7 +57,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
         
         # start at .text section, which is usually the first one. Offset 512
         # this will skip scanning of PE headers, which gives unecessary false positives
-        offsetStart = filePe.sectionsBag.getSectionByName(".text").addr
+        offsetStart = filePe.sectionsBag.getSectionByName(".text").physaddr
         offsetEnd = filePe.Data().getLength()
         moreMatches = reducer.scan(offsetStart, offsetEnd)
         matches += moreMatches
@@ -66,16 +66,16 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
         scanStages.append('scan:by-section')
         for section in detected_sections:
             # check first if its hash based (rare)
-            logging.info("Check if hash on section:{} start:{} size:{}".format(section.name, section.addr, section.size))
-            if scanIsHash(filePe, scanner, section.addr, section.size):
+            logging.info("Check if hash on section:{} start:{} size:{}".format(section.name, section.physaddr, section.size))
+            if scanIsHash(filePe, scanner, section.physaddr, section.size):
                 logging.info("Section {} appears to be hash checked.")
-                matches.append(Match(len(matches), section.addr, section.size, 0))
+                matches.append(Match(len(matches), section.physaddr, section.size, 0))
             else:
                 logging.info(f"Section {section.name} is not identified by hash")
-                logging.info(f"Launching bytes analysis on section: {section.name} ({section.addr}-{section.addr+section.size})")
+                logging.info(f"Launching bytes analysis on section: {section.name} ({section.physaddr}-{section.physaddr+section.size})")
                 moreMatches = reducer.scan(
-                    offsetStart=section.addr, 
-                    offsetEnd=section.addr+section.size)
+                    offsetStart=section.physaddr, 
+                    offsetEnd=section.physaddr+section.size)
                 matches += moreMatches
 
         # there are instances where the section-based scanning does not yield any result.
@@ -84,7 +84,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
             logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer (flat-scan)")
             scanStages.append('scan:flat_2')
             moreMatches = reducer.scan(
-                offsetStart=filePe.sectionsBag.getSectionByName(".text").addr, # start at .code, skip header(s)
+                offsetStart=filePe.sectionsBag.getSectionByName(".text").physaddr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
             matches += moreMatches
 

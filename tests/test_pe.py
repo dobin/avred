@@ -132,8 +132,8 @@ class PeTest(unittest.TestCase):
         r2 = r2pipe.open(filePe.filepath)
         r2.cmd("aaa")
 
-        self.assertEqual(0x004014f7, filePe.offsetToRva(2807))
-        self.assertEqual(2807, filePe.codeRvaToOffset(0x004014f7))
+        self.assertEqual(0x004014f7, filePe.physOffsetToRva(2807))
+        self.assertEqual(2807, filePe.codeRvaToPhysOffset(0x004014f7))
 
         # 0x004014e0
         start = 2807  # AF7
@@ -165,7 +165,7 @@ class PeTest(unittest.TestCase):
         r2 = r2pipe.open(filePe.filepath)
         r2.cmd("aaa")
 
-        fileOffset = filePe.codeRvaToOffset(0x0040154e)
+        fileOffset = filePe.codeRvaToPhysOffset(0x0040154e)
         matchAsmInstructions, matchDisasmLines = disassemblePe(
             r2, filePe, fileOffset, 16, moreUiLines=0)
         
@@ -207,3 +207,10 @@ class PeTest(unittest.TestCase):
         self.assertEqual(1, len(match.disasmLines))
         disasmLine = match.disasmLines[0]
         self.assertTrue("fcn.140011032 0x14001297d [DATA] lea rcx, str.__" in disasmLine.text)
+
+
+    def test_pe_iat(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/test.exe") 
+        iatOffset = filePe.iatOffset
+        self.assertEqual(0x8fdc, iatOffset)

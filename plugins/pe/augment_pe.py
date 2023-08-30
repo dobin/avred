@@ -35,13 +35,13 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     r2.cmd("aaa")  # aaaa
 
     for match in matches:
-        matchRva = filePe.offsetToRva(match.start())
+        matchRva = filePe.physOffsetToRva(match.start())
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump: str = hexdmp(matchBytes, offset=match.start())
         matchDisasmLines: List[UiDisasmLine] = []
         matchAsmInstructions: List[AsmInstruction] = []
 
-        matchSection = filePe.sectionsBag.getSectionByAddr(match.start())
+        matchSection = filePe.sectionsBag.getSectionByPhysAddr(match.start())
         matchSectionName = '<unknown>'
         if matchSection is not None:
             matchSectionName = matchSection.name
@@ -71,7 +71,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     s = ''
     for matchSection in filePe.sectionsBag.sections:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
-            matchSection.name, matchSection.addr, matchSection.virtaddr, matchSection.size, matchSection.scan)
+            matchSection.name, matchSection.physaddr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
 
 
@@ -105,7 +105,7 @@ def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
 
 conv = Ansi2HTMLConverter()
 def disassemblePe(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLines=16):
-    virtAddrDisasm = filePe.offsetToRva(fileOffset)
+    virtAddrDisasm = filePe.physOffsetToRva(fileOffset)
 
     matchDisasmLines: List[UiDisasmLine] = []
     matchAsmInstructions: List[AsmInstruction] = []
@@ -118,7 +118,7 @@ def disassemblePe(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLi
     asm = json.loads(asm)
     for a in asm:
         asmVirtAddr = int(a['offset'])
-        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+        asmFileOffset = filePe.codeRvaToPhysOffset(asmVirtAddr)
 
         if (asmFileOffset < fileOffset) or (asmFileOffset > fileOffset + sizeDisasm):
             # we print number of assembly instructions, not bytes,
@@ -150,7 +150,7 @@ def disassemblePe(r2, filePe: FilePe, fileOffset: int, sizeDisasm: int, moreUiLi
     # ui disassemly lines
     for a in asmColor:
         asmVirtAddr = int(a['offset'])
-        asmFileOffset = filePe.codeRvaToOffset(asmVirtAddr)
+        asmFileOffset = filePe.codeRvaToPhysOffset(asmVirtAddr)
 
         if (asmVirtAddr < (virtAddrDisasm-moreUiLines)) or (asmVirtAddr > (virtAddrDisasm + sizeDisasm + moreUiLines)):
             # we print number of assembly instructions, not bytes,

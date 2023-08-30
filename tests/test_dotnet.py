@@ -123,15 +123,15 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag = getDotNetSections(filePe)
 
         section = sectionsBag.getSectionByName('DotNet Header')
-        self.assertEqual(section.addr, 512)
+        self.assertEqual(section.physaddr, 512)
         self.assertEqual(section.size, 72)
 
         section = sectionsBag.getSectionByName('methods')
-        self.assertEqual(section.addr, 584)
+        self.assertEqual(section.physaddr, 584)
         self.assertEqual(section.size, 28)
 
         section = sectionsBag.getSectionByName('#~ Stream Header')
-        self.assertEqual(section.addr, 644)
+        self.assertEqual(section.physaddr, 644)
         self.assertEqual(section.size, 12)
 
 
@@ -139,7 +139,7 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
         sectionsBag = getDotNetSections(filePe) 
-        overlap = sectionsBag.getSectionsForRange(600, 750)
+        overlap = sectionsBag.getSectionsForPhysRange(600, 750)
         
         self.assertEqual(len(overlap), 8)
         #self.assertEqual(overlap[0].name, "Stream: #~")
@@ -154,11 +154,11 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag.printSections()
 
         section = sectionsBag.getSectionByName("DotNet Header")
-        self.assertEqual(section.addr, 512)
+        self.assertEqual(section.physaddr, 512)
         self.assertEqual(section.size, 72)
 
         section = sectionsBag.getSectionByName("#~ Stream Header")
-        self.assertEqual(section.addr, 644)
+        self.assertEqual(section.physaddr, 644)
         self.assertEqual(section.size, 12)
 
         #section = sectionsBag.getSectionByName("Metadata Directory")
@@ -198,5 +198,5 @@ class DotnetDisasmTest(unittest.TestCase):
         sectionsBag = getDotNetSections(filePe)
 
         section = sectionsBag.getSectionByName("Signature")
-        self.assertEqual(section.addr, 2088)
+        self.assertEqual(section.physaddr, 2088)
         self.assertEqual(section.size, 128)

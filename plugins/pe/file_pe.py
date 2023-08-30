@@ -16,6 +16,7 @@ class FilePe(BaseFile):
         self.sectionsBag: SectionsBag = SectionsBag()
         self.isDotNet: bool = False
         self.baseAddr: int = 0
+        self.iatOffset: int = 0
         
 
     def parseFile(self) -> bool:
@@ -24,14 +25,16 @@ class FilePe(BaseFile):
         dataBytes = self.data.getBytes()
         pepe = pefile.PE(data=dataBytes)
 
+        # DotNet or not
         # https://stackoverflow.com/questions/45574925/is-there-a-way-to-check-if-an-exe-is-dot-net-with-python-pefile
         isDotNet = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[14]
         if isDotNet.VirtualAddress != 0 and isDotNet.Size != 0:
             self.isDotNet = True
 
+        # Baseaddr
         self.baseAddr = pepe.OPTIONAL_HEADER.ImageBase
 
-        # Normal sections
+        # Normal PE sections
         min = len(dataBytes)
         for section in pepe.sections:
             name = ''
@@ -40,18 +43,22 @@ class FilePe(BaseFile):
             except:
                 # some binaries have invalid UTF8 in section name
                 name = ''.join('0x{:02x} '.format(x) for x in (section.Name))
-            addr = section.PointerToRawData
+            physAddr = section.PointerToRawData
             size = section.SizeOfRawData
             virtaddr = section.VirtualAddress
 
-            if addr != 0 and size != 0:
-                self.sectionsBag.addSection(Section(name, addr, size, virtaddr))
-                if addr < min:
-                    min = addr
+            if physAddr != 0 and size != 0:
+                self.sectionsBag.addSection(Section(name, physAddr, size, virtaddr))
+                if physAddr < min:
+                    min = physAddr
             else:
-                logging.warning("Section is invalid, not scanning: {} {} {}".format(name, addr, size))
-
+                logging.warning("Section is invalid, not scanning: {} {} {}".format(name, physAddr, size))
+        # Header too
         self.sectionsBag.addSection(Section('Header', 0, min, 0, False))
+
+        # add iat
+        iat_rva = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[12].VirtualAddress
+        self.iatOffset = self.rvaToPhysOffset(iat_rva)
 
         # handle dotnet
         if not self.isDotNet:
@@ -62,34 +69,43 @@ class FilePe(BaseFile):
         self.sectionsBag.getSectionByName(".text").scan = False
 
 
-    def codeRvaToOffset(self, rva: int) -> int: 
-        baseAddr = self.baseAddr
-        textSection = self.sectionsBag.getSectionByName('.text')
-        offsetToBase = rva - textSection.virtaddr
-        offset = textSection.addr - baseAddr + offsetToBase
+    def rvaToPhysOffset(self, rva: int) -> int: 
+        section = self.sectionsBag.getSectionByVirtAddr(rva)
+        if section is None:
+            logging.error("Could not find section for rva 0x{:x}".format(rva))
+        diff = rva - section.virtaddr
+        offset = section.physaddr + diff
         return offset
 
 
-    def offsetToRva(self, fileOffset: int) -> int:
+    def codeRvaToPhysOffset(self, rva: int) -> int: 
         baseAddr = self.baseAddr
-        matchSection = self.sectionsBag.getSectionByAddr(fileOffset)
+        textSection = self.sectionsBag.getSectionByName('.text')
+        offsetToBase = rva - textSection.virtaddr
+        offset = textSection.physaddr - baseAddr + offsetToBase
+        return offset
+
+
+    def physOffsetToRva(self, fileOffset: int) -> int:
+        baseAddr = self.baseAddr
+        matchSection = self.sectionsBag.getSectionByPhysAddr(fileOffset)
         
         # offset: of fileOffset from .text segment file offset
-        offset = fileOffset - matchSection.addr
+        offset = fileOffset - matchSection.physaddr
         # base=0x400000 + .text=0x1000 + offset=0x123
         addrDisasm = baseAddr + matchSection.virtaddr + offset    
 
         return addrDisasm
-
+    
 
     def hideAllSectionsExcept(self, sectionName: str):
         for section in self.sectionsBag.sections:
             if section.name != sectionName:
-                self.Data().hidePart(offset=section.addr, size=section.size)
+                self.Data().hidePart(offset=section.physaddr, size=section.size)
 
 
     def hideSection(self, section: Section):
-        self.Data().hidePart(offset=section.addr, size=section.size)
+        self.Data().hidePart(offset=section.physaddr, size=section.size)
 
 
 def getDotNetSections(filePe) -> SectionsBag:
@@ -100,11 +116,11 @@ def getDotNetSections(filePe) -> SectionsBag:
     dotnet_file = DotNetPE(filePe.filepath)
 
     textSection: Section = filePe.sectionsBag.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.addr
+    addrOffset = textSection.virtaddr - textSection.physaddr
     logging.info("Offset: {}".format(addrOffset))
 
     # header
-    cli_header_addr = textSection.addr
+    cli_header_addr = textSection.physaddr
     cli_header_vaddr = textSection.virtaddr
     cli_header_size = dotnet_file.clr_header.HeaderSize.value
     s = Section('DotNet Header', 

@@ -32,15 +32,15 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         matchAsmInstructions: List[AsmInstruction] = []
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump = hexdmp(matchBytes, offset=match.start())
-        matchSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)  # note: we take the PE section, not DotNet
-        matchSectionName = filePe.sectionsBag.getSectionNameByAddr(match.fileOffset)
+        matchSection = filePe.sectionsBag.getSectionByPhysAddr(match.fileOffset)  # note: we take the PE section, not DotNet
+        matchSectionName = filePe.sectionsBag.getSectionNameByPhysAddr(match.fileOffset)
 
         # set info: PE section name first
         info = matchSectionName + " "
 
         if dotnetSectionsBag is not None:
             # set info: .NET sections/streams name next if found
-            sections = dotnetSectionsBag.getSectionsForRange(match.start(), match.end())
+            sections = dotnetSectionsBag.getSectionsForPhysRange(match.start(), match.end())
             info += ','.join(s.name for s in sections)
 
         if matchSectionName == ".text":
@@ -50,7 +50,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
                 info += " " + " ".join(methodNames)
             
             # .text has most of DotNet, check if its methods
-            if dotnetSectionsBag.getSectionNameByAddr(match.start()) == "methods":
+            if dotnetSectionsBag.getSectionNameByPhysAddr(match.start()) == "methods":
                 match.sectionType = SectionType.CODE
             else:
                 match.sectionType = SectionType.DATA
@@ -70,10 +70,10 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             match.sectionType = SectionType.DATA
 
         # take dotnet section
-        relevantSection = dotnetSectionsBag.getSectionByAddr(match.fileOffset)
+        relevantSection = dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
         if relevantSection is None:
             # or pe section if not in dotnet section
-            relevantSection = filePe.sectionsBag.getSectionByAddr(match.fileOffset)
+            relevantSection = filePe.sectionsBag.getSectionByPhysAddr(match.fileOffset)
         if relevantSection is None:
             # should never be reached
             relevantSection = "unknown?"
@@ -88,7 +88,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     s = ''
     for section in filePe.sectionsBag.sections:
         s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
-            section.name, section.addr, section.virtaddr, section.size, section.scan)
+            section.name, section.physaddr, section.virtaddr, section.size, section.scan)
     return s
 
 
@@ -170,7 +170,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
     dotnet_file = DotNetPE(filePe.filepath)
 
     textSection = filePe.sectionsBag.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.addr
+    addrOffset = textSection.virtaddr - textSection.physaddr
 
     # DotNet header / CLI header / CLR header
     clrHeader: DOTNET_CLR_HEADER = dotnet_file.clr_header

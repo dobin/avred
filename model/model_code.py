@@ -10,7 +10,7 @@ import logging
 class Section:
     def __init__(self, name: str, addr: int, size: int, virtaddr: int, scan: bool = True, detected: bool = False):
         self.name: str = name
-        self.addr: int = addr
+        self.physaddr: int = addr
         self.size: int = size
         self.virtaddr: int = virtaddr
         self.scan: bool = scan          # if this section should be scanned
@@ -18,24 +18,25 @@ class Section:
 
 
     def __eq__(self, other: Section):
-        if other.addr == self.addr and other.size == self.size:
+        if other.physaddr == self.physaddr and other.size == self.size:
             return True
         return False
     
     def __lt__(self, other: Section):
-        return self.addr < other.addr
+        return self.physaddr < other.physaddr
 
 
 class SectionsBag:
     def __init__(self):
         self.sections: List[Section] = []
-        self.sectionsIntervalTree = IntervalTree()
+        self.sectionsByPhys: IntervalTree = IntervalTree()
 
 
     def addSection(self, section: Section):
         self.sections.append(section)
-        interval: Interval = Interval(section.addr, section.addr + section.size, section)
-        self.sectionsIntervalTree.add(interval)
+        interval: Interval = Interval(section.physaddr, section.physaddr + section.size, section)
+        self.sectionsByPhys.add(interval)
+
 
     def removeSectionByName(self, sectionName: str):
         new = []
@@ -48,29 +49,35 @@ class SectionsBag:
         return next((sec for sec in self.sections if sectionName in sec.name ), None)
 
 
-    def getSectionByAddr(self, address: int) -> Section:
+    def getSectionByPhysAddr(self, address: int) -> Section:
         for section in self.sections:
-            if address >= section.addr and address <= section.addr + section.size:
+            if address >= section.physaddr and address <= section.physaddr + section.size:
+                return section
+        return None
+    
+    def getSectionByVirtAddr(self, address: int) -> Section:
+        for section in self.sections:
+            if address >= section.virtaddr and address <= section.virtaddr + section.size:
                 return section
         return None
     
 
-    def getSectionNameByAddr(self, address: int) -> Section:
+    def getSectionNameByPhysAddr(self, address: int) -> Section:
         for section in self.sections:
-            if address >= section.addr and address <= section.addr + section.size:
+            if address >= section.physaddr and address <= section.physaddr + section.size:
                 return section.name
         return "<unknown>"
     
 
-    def getSectionsForRange(self, start: int, end: int) -> List[Section]:
-        res = self.sectionsIntervalTree.overlap(start, end)
+    def getSectionsForPhysRange(self, start: int, end: int) -> List[Section]:
+        res = self.sectionsByPhys.overlap(start, end)
         res = [r[2] for r in res] # convert to list
         return res
     
 
     def printSections(self):
         for section in self.sections:
-            print(f"Section {section.name}\t  addr: {hex(section.addr)}   size: {section.size} ")
+            print(f"Section {section.name}\t  addr: {hex(section.physaddr)}   size: {section.size} ")
 
 
 gpRegisters = [ 
