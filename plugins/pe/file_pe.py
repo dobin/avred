@@ -10,13 +10,14 @@ from dotnetfile import DotNetPE
 from dotnetfile.util import FileLocation
 
 
+
 class FilePe(BaseFile):
     def __init__(self):
         super().__init__()
-        self.sectionsBag: SectionsBag = SectionsBag()
+        self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file
         self.isDotNet: bool = False
         self.baseAddr: int = 0
-        self.iatOffset: int = 0
+        self.regionsBag: SectionsBag = SectionsBag()  # more details
         
 
     def parseFile(self) -> bool:
@@ -48,29 +49,40 @@ class FilePe(BaseFile):
             virtaddr = section.VirtualAddress
 
             if physAddr != 0 and size != 0:
-                self.sectionsBag.addSection(Section(name, physAddr, size, virtaddr))
+                self.peSectionsBag.addSection(Section(name, physAddr, size, virtaddr))
                 if physAddr < min:
                     min = physAddr
             else:
-                logging.warning("Section is invalid, not scanning: {} {} {}".format(name, physAddr, size))
-        # Header too
-        self.sectionsBag.addSection(Section('Header', 0, min, 0, False))
+                logging.info("Section is invalid, not scanning: {} addr:{} size:{}".format(name, physAddr, size))
+        # Header belongs to it too (as its the part of the file not covered by sections)
+        self.peSectionsBag.addSection(Section('Header', 0, min, 0, False))
 
-        # add iat
-        iat_rva = pepe.OPTIONAL_HEADER.DATA_DIRECTORY[12].VirtualAddress
-        self.iatOffset = self.rvaToPhysOffset(iat_rva)
+        # Directory "sections"
+        for n, entry in enumerate(pepe.OPTIONAL_HEADER.DATA_DIRECTORY):
+            if entry.VirtualAddress == 0:
+                continue
+            
+            self.regionsBag.addSection(Section(
+                directoryTables[n],
+                self.rvaToPhysOffset(entry.VirtualAddress),
+                entry.Size,
+                entry.VirtualAddress,
+                scan=False,
+                detected=False
+            ))
+        self.regionsBag.printSections()
 
         # handle dotnet
         if not self.isDotNet:
             return
         dotnetSections = getDotNetSections(self)
         for section in dotnetSections.sections:
-            self.sectionsBag.sections.append(section)
-        self.sectionsBag.getSectionByName(".text").scan = False
+            self.peSectionsBag.sections.append(section)
+        self.peSectionsBag.getSectionByName(".text").scan = False
 
 
     def rvaToPhysOffset(self, rva: int) -> int: 
-        section = self.sectionsBag.getSectionByVirtAddr(rva)
+        section = self.peSectionsBag.getSectionByVirtAddr(rva)
         if section is None:
             logging.error("Could not find section for rva 0x{:x}".format(rva))
         diff = rva - section.virtaddr
@@ -80,7 +92,7 @@ class FilePe(BaseFile):
 
     def codeRvaToPhysOffset(self, rva: int) -> int: 
         baseAddr = self.baseAddr
-        textSection = self.sectionsBag.getSectionByName('.text')
+        textSection = self.peSectionsBag.getSectionByName('.text')
         offsetToBase = rva - textSection.virtaddr
         offset = textSection.physaddr - baseAddr + offsetToBase
         return offset
@@ -88,7 +100,7 @@ class FilePe(BaseFile):
 
     def physOffsetToRva(self, fileOffset: int) -> int:
         baseAddr = self.baseAddr
-        matchSection = self.sectionsBag.getSectionByPhysAddr(fileOffset)
+        matchSection = self.peSectionsBag.getSectionByPhysAddr(fileOffset)
         
         # offset: of fileOffset from .text segment file offset
         offset = fileOffset - matchSection.physaddr
@@ -99,7 +111,7 @@ class FilePe(BaseFile):
     
 
     def hideAllSectionsExcept(self, sectionName: str):
-        for section in self.sectionsBag.sections:
+        for section in self.peSectionsBag.sections:
             if section.name != sectionName:
                 self.Data().hidePart(offset=section.physaddr, size=section.size)
 
@@ -193,3 +205,22 @@ def getDotNetSections(filePe) -> SectionsBag:
 
     return sectionsBag
 
+
+# Name correspond to their index
+directoryTables = [
+    "IMAGE_DIRECTORY_ENTRY_EXPORT",
+    "IMAGE_DIRECTORY_ENTRY_IMPORT",
+    "IMAGE_DIRECTORY_ENTRY_RESOURCE",
+    "IMAGE_DIRECTORY_ENTRY_EXCEPTION",
+    "IMAGE_DIRECTORY_ENTRY_SECURITY",
+    "IMAGE_DIRECTORY_ENTRY_BASERELOC",
+    "IMAGE_DIRECTORY_ENTRY_DEBUG",
+    "IMAGE_DIRECTORY_ENTRY_ARCHITECTURE",
+    "IMAGE_DIRECTORY_ENTRY_GLOBALPTR",
+    "IMAGE_DIRECTORY_ENTRY_TLS",
+    "IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG",
+    "IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT",
+    "IMAGE_DIRECTORY_ENTRY_IAT",
+    "IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT",
+    "IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR",
+]

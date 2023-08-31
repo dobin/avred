@@ -32,8 +32,8 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         matchAsmInstructions: List[AsmInstruction] = []
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump = hexdmp(matchBytes, offset=match.start())
-        matchSection = filePe.sectionsBag.getSectionByPhysAddr(match.fileOffset)  # note: we take the PE section, not DotNet
-        matchSectionName = filePe.sectionsBag.getSectionNameByPhysAddr(match.fileOffset)
+        matchSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)  # note: we take the PE section, not DotNet
+        matchSectionName = filePe.peSectionsBag.getSectionNameByPhysAddr(match.fileOffset)
 
         # set info: PE section name first
         info = matchSectionName + " "
@@ -73,7 +73,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         relevantSection = dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
         if relevantSection is None:
             # or pe section if not in dotnet section
-            relevantSection = filePe.sectionsBag.getSectionByPhysAddr(match.fileOffset)
+            relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
         if relevantSection is None:
             # should never be reached
             relevantSection = "unknown?"
@@ -86,7 +86,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         match.setAsmInstructions(matchAsmInstructions)
 
     s = ''
-    for section in filePe.sectionsBag.sections:
+    for section in filePe.peSectionsBag.sections:
         s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             section.name, section.physaddr, section.virtaddr, section.size, section.scan)
     return s
@@ -169,7 +169,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
     uiDisasmLines: List[UiDisasmLine] = []  # all diasassmbled IL
     dotnet_file = DotNetPE(filePe.filepath)
 
-    textSection = filePe.sectionsBag.getSectionByName('.text')
+    textSection = filePe.peSectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.physaddr
 
     # DotNet header / CLI header / CLR header

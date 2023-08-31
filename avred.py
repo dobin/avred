@@ -223,7 +223,7 @@ def handleFile(filename, args, serverName):
             else:
                break
 
-        outcome.sections = filePlay.sectionsBag.sections
+        outcome.sections = filePlay.peSectionsBag.sections
 
     hashCache.save()
     #if not outcome.isMinimized:

@@ -44,6 +44,7 @@ class SectionsBag:
             if section.name != sectionName:
                 new.append(section)
         self.sections = new
+        
 
     def getSectionByName(self, sectionName: str) -> Section:
         return next((sec for sec in self.sections if sectionName in sec.name ), None)
@@ -54,6 +55,7 @@ class SectionsBag:
             if address >= section.physaddr and address <= section.physaddr + section.size:
                 return section
         return None
+    
     
     def getSectionByVirtAddr(self, address: int) -> Section:
         for section in self.sections:

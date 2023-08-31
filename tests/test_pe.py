@@ -212,5 +212,7 @@ class PeTest(unittest.TestCase):
     def test_pe_iat(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
-        iatOffset = filePe.iatOffset
-        self.assertEqual(0x8fdc, iatOffset)
+        iatRegion = filePe.regionsBag.getSectionByName("IMAGE_DIRECTORY_ENTRY_IAT")
+        self.assertIsNotNone(iatRegion)
+        self.assertEqual(iatRegion.physaddr, 0x8fdc)
+

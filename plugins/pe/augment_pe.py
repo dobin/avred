@@ -26,7 +26,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # Returns a FileInfo object with detailed file information too.
     r2 = r2pipe.open(filePe.filepath)
 
-    # check if pdf file exists
+    # load PDB file if exists
     pdbFile = filePe.filepath + ".pdb"
     if os.path.exists(pdbFile):
         logging.info("Loading PDB file: {}".format(pdbFile))
@@ -41,7 +41,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         matchDisasmLines: List[UiDisasmLine] = []
         matchAsmInstructions: List[AsmInstruction] = []
 
-        matchSection = filePe.sectionsBag.getSectionByPhysAddr(match.start())
+        matchSection = filePe.peSectionsBag.getSectionByPhysAddr(match.start())
         matchSectionName = '<unknown>'
         if matchSection is not None:
             matchSectionName = matchSection.name
@@ -69,7 +69,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
 
     # file structure
     s = ''
-    for matchSection in filePe.sectionsBag.sections:
+    for matchSection in filePe.peSectionsBag.sections:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             matchSection.name, matchSection.physaddr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s

@@ -57,7 +57,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
         
         # start at .text section, which is usually the first one. Offset 512
         # this will skip scanning of PE headers, which gives unecessary false positives
-        offsetStart = filePe.sectionsBag.getSectionByName(".text").physaddr
+        offsetStart = filePe.peSectionsBag.getSectionByName(".text").physaddr
         offsetEnd = filePe.Data().getLength()
         moreMatches = reducer.scan(offsetStart, offsetEnd)
         matches += moreMatches
@@ -84,7 +84,7 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
             logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer (flat-scan)")
             scanStages.append('scan:flat_2')
             moreMatches = reducer.scan(
-                offsetStart=filePe.sectionsBag.getSectionByName(".text").physaddr, # start at .code, skip header(s)
+                offsetStart=filePe.peSectionsBag.getSectionByName(".text").physaddr, # start at .code, skip header(s)
                 offsetEnd=filePe.Data().getLength())
             matches += moreMatches
 
@@ -95,13 +95,13 @@ def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
     """hide each section of filePe, return the ones which wont be detected anymore (have a dominant influence)"""
     detected_sections: List[Section] = []
 
-    for idx, section in enumerate(filePe.sectionsBag.sections):
+    for idx, section in enumerate(filePe.peSectionsBag.sections):
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section)
         detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
         if not detected:
             # always store scan result
-            filePe.sectionsBag.sections[idx].detected = True
+            filePe.peSectionsBag.sections[idx].detected = True
 
             # only return if we should scan it
             if section.scan:
@@ -116,14 +116,14 @@ def findDetectedSectionsIsolate(filePe: FilePe, scanner) -> List[Section]:
     """for each section, hide everything except it (isolate), and return which one gets detected (have a dominant influence)"""
     detected_sections = []
 
-    for idx, section in enumerate(filePe.sectionsBag.sections):
+    for idx, section in enumerate(filePe.peSectionsBag.sections):
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideAllSectionsExcept(section.name)
         detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
 
         if not detected:
             # always store scan result
-            filePe.sectionsBag.sections[idx].detected = True
+            filePe.peSectionsBag.sections[idx].detected = True
 
             # only return if we should scan it
             if section.scan:
