@@ -95,6 +95,7 @@ File is not detected by AV.
         <th>Offset</th>
         <th>Size</th>
         <th>Section</th>
+        <th>Detail</th>
         <th>SectionType</th>
         <th>Conclusion</th>
     </tr>
@@ -106,6 +107,7 @@ File is not detected by AV.
         <td>{{match.fileOffset}}</td>
         <td>{{match.size}}</td>
         <td>{{match.sectionInfo}}</td>
+        <td>{{match.sectionDetail}}</td>
         <td>{{match.sectionType.name}}</td>
 
         {% with index = loop.index0 %}

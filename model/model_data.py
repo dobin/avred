@@ -99,7 +99,9 @@ class Match():
         self.rva: int = 0
         self.data: bytes = b''
         self.dataHexdump: str = ''
-        self.sectionInfo: str = ''
+        self.sectionInfo: str = ''  # info about the section the match is in
+        self.sectionDetail: str = ''  # more detailed info
+
         self.section: Section = Section('', 0, 0, 0, False)  # init with empty section
         self.sectionType: SectionType = SectionType.UNKNOWN
         self.disasmLines: List[UiDisasmLine] = []
@@ -122,6 +124,9 @@ class Match():
 
     def setSectionInfo(self, info):
         self.sectionInfo = info
+
+    def setSectionDetail(self, detail):
+        self.sectionDetail = detail
 
     def getSectionInfo(self):
         return self.sectionInfo

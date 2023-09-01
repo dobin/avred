@@ -37,6 +37,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
 
         # set info: PE section name first
         info = matchSectionName + " "
+        detail = ''
 
         if dotnetSectionsBag is not None:
             # set info: .NET sections/streams name next if found
@@ -47,7 +48,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             # only disassemble if the match is reasonably small. same for function names
             if match.size < MAX_DISASM_SIZE:
                 matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
-                info += " " + " ".join(methodNames)
+                detail += " " + " ".join(methodNames)
             
             # .text has most of DotNet, check if its methods
             if dotnetSectionsBag.getSectionNameByPhysAddr(match.start()) == "methods":
@@ -82,6 +83,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         match.setData(matchBytes)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(info)
+        match.setSectionDetail(detail)
         match.setDisasmLines(matchDisasmLines)
         match.setAsmInstructions(matchAsmInstructions)
 
@@ -90,7 +92,6 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             section.name, section.physaddr, section.virtaddr, section.size, section.scan)
     return s
-
 
 
 def disassembleDotNet(offset: int, size: int, dncilParser: DncilParser) -> Tuple[List[AsmInstruction], List[UiDisasmLine], Set[str]]:
