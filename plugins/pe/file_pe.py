@@ -126,7 +126,7 @@ def getDotNetSections(filePe) -> SectionsBag:
 
     dotnet_file = DotNetPE(filePe.filepath)
 
-    textSection: Section = filePe.sectionsBag.getSectionByName('.text')
+    textSection: Section = filePe.peSectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.physaddr
     logging.info("Offset: {}".format(addrOffset))
 
