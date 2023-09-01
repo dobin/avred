@@ -80,11 +80,11 @@ def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
     matchDisasmLines: List[UiDisasmLine] = []
     offset = fileOffset
 
+    it = IntervalTree()
+
     # get all strings
     stringsJson = r2.cmd("izj")
     strings = json.loads(stringsJson)
-    # convert to intervaltree
-    it = IntervalTree()
     for s in strings:
         it.add( Interval(s["paddr"], s["paddr"] + s["size"], s))
 
@@ -92,13 +92,16 @@ def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
     its = it.overlap(Interval(offset, offset+size))
     for i in its:
         s = i[2]
-        #logging.info("Found addr {} in str: {}".format(offset, s["paddr"]))
-
         # for each string (addr), print its references
         text = r2.cmd("axt @{}".format(s["vaddr"]))
         #logging.info("  Ref: {}".format(ref))
         disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
         matchDisasmLines.append(disasmLine)
+
+    it = IntervalTree()
+
+    # check if it contains data from IMPORT
+    
 
     return matchDisasmLines
 

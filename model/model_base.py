@@ -58,6 +58,7 @@ class Outcome():
         self.isOutflanked: bool = False
 
         self.sections: List[Section] = []
+        self.regions: List[Section] = []
         self.scanInfo: ScanInfo = ScanInfo("", ScanSpeed.Unknown)
         self.appraisal: Appraisal = Appraisal.Unknown
 

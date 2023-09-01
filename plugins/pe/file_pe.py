@@ -70,7 +70,6 @@ class FilePe(BaseFile):
                 scan=False,
                 detected=False
             ))
-        self.regionsBag.printSections()
 
         # handle dotnet
         if not self.isDotNet:

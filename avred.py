@@ -149,6 +149,8 @@ def handleFile(filename, args, serverName):
         if args.reinfo:
             fileInfo = getFileInfo(file)
             outcome.fileInfo = fileInfo
+            outcome.sections = file.peSectionsBag.sections
+            outcome.regions = file.regionsBag.sections
             outcome.saveToFile(file.filepath)
     else:
         logging.info("Using scanner from command line: {}".format(
@@ -159,6 +161,9 @@ def handleFile(filename, args, serverName):
 
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
+        outcome.sections = file.peSectionsBag.sections
+        outcome.regions = file.regionsBag.sections
+
 
     hashCache.load()
     # scan
@@ -223,7 +228,6 @@ def handleFile(filename, args, serverName):
             else:
                break
 
-        outcome.sections = filePlay.peSectionsBag.sections
 
     hashCache.save()
     #if not outcome.isMinimized:
