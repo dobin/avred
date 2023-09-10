@@ -86,7 +86,7 @@ Requires: python 3.8
 
 Install python deps:
 ```
-pip3 install -r requirements.txt
+pip3 install --upgrade -r requirements.txt
 ```
 
 If you get the error `ImportError: failed to find libmagic. Check your installation` try: 
@@ -97,6 +97,11 @@ pip3 install python-magic-bin==0.4.14
 Install radare2:
 * follow [instructions](https://github.com/radareorg/radare2#installation) on radare2 github
 * Or download exe from github [releases](https://github.com/radareorg/radare2/releases) and add to your `PATH` (e.g. on windows)
+
+
+## Upgrades
+
+
 
 
 ## Setup

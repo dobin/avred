@@ -95,10 +95,10 @@ class DotnetDisasmTest(unittest.TestCase):
         python3 searchbin.py --pattern "031F0a58100102" dotnet-test.dll
         Match at offset:            669          29D in dotnet-test.dll
 
-        Conclusion: 
-        Offset in file:       0x029c = 668
-        Offset in decompile:  0x209c
-        Difference:           0x1E00
+        Old notes for https://github.com/malwarefrank/dnfile/issues/77
+          Offset in file:       0x029c = 668
+          Offset in decompile:  0x209c
+          Difference:           0x1E00
         """
         matches = []
         match = Match(0, 669, 16) # 0x29D
