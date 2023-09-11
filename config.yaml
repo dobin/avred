@@ -1,4 +1,4 @@
 server:
   amsi: "http://192.168.88.127:8001/"
 password: ""
-hashCache: False
+hashCache: True

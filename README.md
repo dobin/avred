@@ -77,7 +77,18 @@ id:0  offset:12991  len:195
 ```
 
 
-## Screenshots
+## Upgrades
+
+Note: Data is stored in pickled `.outcome` files. When i change the model, 
+weird things gonna happen. 
+
+Usually this will solve it: 
+```
+$ rm app/upload/*.outcome; rm app/upload/*.log
+$ for i in app/upload/*; do ./avred.py --file "$i"; done
+```
+
+With hashcache enabled, this should be quick.
 
 
 ## Install 
@@ -97,10 +108,6 @@ pip3 install python-magic-bin==0.4.14
 Install radare2:
 * follow [instructions](https://github.com/radareorg/radare2#installation) on radare2 github
 * Or download exe from github [releases](https://github.com/radareorg/radare2/releases) and add to your `PATH` (e.g. on windows)
-
-
-## Upgrades
-
 
 
 
