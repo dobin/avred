@@ -17,6 +17,10 @@ class Section:
         self.detected: bool = detected  # if this section is being detected
 
 
+    def __str__(self):
+        return "{}: 0x{:x} {} 0x{:x} {} {}".format(self.name, self.physaddr, self.size, self.virtaddr, self.scan, self.detected)
+    
+
     def __eq__(self, other: Section):
         if other.physaddr == self.physaddr and other.size == self.size:
             return True

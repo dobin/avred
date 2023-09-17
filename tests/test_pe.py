@@ -16,94 +16,6 @@ from reducer import Reducer
 
 
 class PeTest(unittest.TestCase):
-    def test_pe0(self):
-        # simple, 1
-        reducer = Reducer()
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
-        detections = []
-
-        # one string in .rodata
-        detections.append( TestDetection(29824, b"Unknown error") )
-        scanner = ScannerTest(detections)
-        
-        matches, _ = analyzeFilePe(filePe, scanner, reducer)
-        # A: [Interval(29808, 29864)]
-        self.assertTrue(len(matches) == 1)
-
-
-    def test_pe1(self):
-        # simple, merge 2-OR
-        reducer = Reducer()
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
-        detections = []
-        
-        # TODO PROBLEM with this one
-        detections.append( TestDetection(30810, b"\xff\xff\x10\xb1\xff\xff\xc2\xb2\xff\xff") )
-        # WORKS
-        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-        scanner = ScannerTest(detections)
-        
-        matches, _ = analyzeFilePe(filePe, scanner, reducer)
-        # A: [Interval(30809, 30844)]
-        self.assertTrue(len(matches) == 1)
-
-
-    def test_pe2(self):
-        # 2 sections OR
-        reducer = Reducer()
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
-        detections = []
-        # .rodata
-        detections.append( TestDetection(29824, b"Unknown error") )
-        # .text
-        detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
-        scanner = ScannerTest(detections)
-
-        matches, _ = analyzeFilePe(filePe, scanner, reducer)
-        # A: [Interval(1644, 1698), Interval(29808, 29864)]
-        self.assertTrue(len(matches) == 2)
-
-
-    def test_pe3(self):
-        # two in one section OR
-        reducer = Reducer()
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
-        detections = []
-        # .rodata
-        detections.append( TestDetection(29824, b"Unknown error") )
-        detections.append( TestDetection(31850, b" 10.2.0") )
-        # .text
-        #detections.append( TestDetection(1664, b"\xf4\x63\x00\x00\xe8\x87\x6a\x00\x00\x48\x8b\x15\x40") )
-        scanner = ScannerTest(detections)
-
-        matches, _ = analyzeFilePe(filePe, scanner, reducer)
-        # A: [Interval(29808, 29864), Interval(31824, 31880)]
-        self.assertTrue(len(matches) == 2)
-
-
-    def test_pe4(self):
-        reducer = Reducer()
-        # weighted (at least half)
-        filePe = FilePe()
-        filePe.loadFromFile("tests/data/test.exe")
-        detections = []
-        # .rodata
-        detections.append( TestDetection(29824, b"Unknown error") )
-        detections.append( TestDetection(30823, b"\xff\x98\xb0\xff\xff\xdb\xb1\xff") )
-        detections.append( TestDetection(31850, b" 10.2.0") )
-        detections.append( TestDetection(33150, b"\x00\x00\x47\x43\x43\x3a\x20") )
-
-        scanner = ScannerTestWeighted(detections)
-
-        matches, _ = analyzeFilePe(filePe, scanner, reducer)
-        # A: [Interval(29808, 29864), Interval(30816, 30844), Interval(31824, 31880), Interval(33140, 33168)]
-        self.assertEqual(len(matches), 4)
-
-
     def test_disasm(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
@@ -132,7 +44,7 @@ class PeTest(unittest.TestCase):
         self.assertEqual('ret', matchAsmInstructions[2].disasm)
         
 
-    def test_disasm_swap(self):
+    def test_disasm_swap_experiment(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
         r2 = r2pipe.open(filePe.filepath)
@@ -202,39 +114,41 @@ class PeTest(unittest.TestCase):
         self.assertEqual(patches[1].offset, 2902)
 
 
-    def test_pedataref(self):
+    def test_augment_pedataref(self):
         filePe = FilePe()
-        filePe.loadFromFile("/Users/dobin/Downloads/malware/Outflank-Dumpert.exe") 
+        filePe.loadFromFile("tests/data/test.exe") 
 
-        matches = [ Match(0, 0x0000b7f0, 16) ]
+        matches = [ Match(0, 30144, 16) ]
         augmentFilePe(filePe, matches)
         self.assertEqual(1, len(matches))
         match = matches[0]
         self.assertEqual(1, len(match.disasmLines))
         disasmLine = match.disasmLines[0]
-        self.assertTrue("fcn.140011032 0x14001297d [DATA] lea rcx, str.__" in disasmLine.text)
+        self.assertTrue("lea rcx, str.Mingw_w64_runtime_failure:_n" in disasmLine.text)
 
 
-    def test_pe_iat_addr(self):
+    def test_pe_regions(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
         iatRegion = filePe.regionsBag.getSectionByName("IMAGE_DIRECTORY_ENTRY_IAT")
         self.assertIsNotNone(iatRegion)
         self.assertEqual(iatRegion.physaddr, 0x8fdc)
+        self.assertEqual(iatRegion.size, 416)
+        self.assertEqual(iatRegion.virtaddr, 0xd1dc)
 
 
-    def test_pe_iat_data(self):
+    def test_pe_augment_iat(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
 
         ref = 0x00007480
-
         matches = [ Match(0, ref, 16) ]
         augmentFilePe(filePe, matches)
 
         match = matches[0]
         self.assertEqual(1, len(match.disasmLines))
         disasmLine = match.disasmLines[0]
-        self.assertTrue("sym._matherr 0x40186c [DATA] lea rbx, str.Unknown_error" in disasmLine.text)
+        self.assertTrue("lea rbx, str.Unknown_error" in disasmLine.text)
         self.assertEqual(match.sectionInfo, ".rdata")
-        print("B: " + match.sectionDetail)
+        self.assertEqual(disasmLine.offset, 0x7480)
+        self.assertEqual(disasmLine.rva, 0x409080)

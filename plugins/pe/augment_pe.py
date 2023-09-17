@@ -19,6 +19,41 @@ def cmdcmd(r, cmd):
     return first if len(first) > 0 else r.cmd("")
 
 
+class DataReferor():
+    def __init__(self, r2):
+        self.r2 = r2
+        self.stringsIt: IntervalTree = IntervalTree()
+
+
+    def init(self):
+        # get all strings
+        stringsJson = self.r2.cmd("izj")
+        strings = json.loads(stringsJson)
+        stringsIt = IntervalTree()
+        for s in strings:
+            stringsIt.add( Interval(s["paddr"], s["paddr"] + s["size"], s))
+        self.stringsIt = stringsIt
+
+
+    def query(self, fileOffset: int, size: int) -> List[UiDisasmLine]:
+        matchDisasmLines: List[UiDisasmLine] = []
+        offset = fileOffset
+
+        # find all strings which we overlap
+        its = self.stringsIt.overlap(Interval(offset, offset+size))
+        for i in its:
+            s = i[2]
+            # details of that string
+            text = self.r2.cmd("axt @{}".format(s["vaddr"]))
+            disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
+            matchDisasmLines.append(disasmLine)
+
+        it = IntervalTree()
+        # check if it contains data from IMPORT
+
+        return matchDisasmLines
+
+
 def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     """Augments all matches with additional information from filePe"""
 
@@ -33,6 +68,9 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         r2.cmd("idp {}".format(pdbFile))
 
     r2.cmd("aaa")  # aaaa
+
+    dataReferor = DataReferor(r2)
+    dataReferor.init()
 
     for match in matches:
         matchRva = filePe.physOffsetToRva(match.start())
@@ -56,8 +94,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
             match.sectionType = SectionType.CODE
         else:
             if match.size < MAX_DISASM_SIZE:
-                matchDisasmLines = dataRefPe(
-                    r2, filePe, match.start(), match.size)
+                matchDisasmLines = dataReferor.query(match.start(), match.size)
             match.sectionType = SectionType.DATA
 
         match.setRva(matchRva)
@@ -75,34 +112,6 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             matchSection.name, matchSection.physaddr, matchSection.virtaddr, matchSection.size, matchSection.scan)
     return s
-
-
-def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int) -> List[UiDisasmLine]:
-    matchDisasmLines: List[UiDisasmLine] = []
-    offset = fileOffset
-    it = IntervalTree()
-
-    # get all strings
-    stringsJson = r2.cmd("izj")
-    strings = json.loads(stringsJson)
-    for s in strings:
-        it.add( Interval(s["paddr"], s["paddr"] + s["size"], s))
-
-    # find all strings which we overlap
-    its = it.overlap(Interval(offset, offset+size))
-    for i in its:
-        s = i[2]
-        # details of that string
-        text = r2.cmd("axt @{}".format(s["vaddr"]))
-        disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
-        matchDisasmLines.append(disasmLine)
-
-    it = IntervalTree()
-
-    # check if it contains data from IMPORT
-
-
-    return matchDisasmLines
 
 
 conv = Ansi2HTMLConverter()

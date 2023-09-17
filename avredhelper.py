@@ -2,10 +2,13 @@ import os
 import pickle
 import argparse
 import pstats
+import r2pipe
 
 from scanner import *
 from model.model_base import *
 from model.model_code import *
+from plugins.pe.file_pe import FilePe
+from plugins.pe.augment_pe import DataReferor
 from myutils import getOutcomesFromDir, OutcomesToCsv
 
 HASHCACHE_FILE = "hashcache.pickle"
@@ -40,6 +43,36 @@ def patchfile(fname: str, pos: int, data: bytes):
     fp.write(data)
 
     fp.close()
+
+
+def printFileInfo(filepath):
+    filePe = FilePe()
+    filePe.loadFromFile(filepath)
+
+    print("Sections:")
+    for section in filePe.peSectionsBag.sections:
+        print(section)
+
+    print("")
+    print("Regions:")
+    for region in filePe.regionsBag.sections:
+        print(region)
+
+
+def printFileDataInfo(filepath):
+    filePe = FilePe()
+    filePe.loadFromFile(filepath)
+
+    r2 = r2pipe.open(filePe.filepath)
+    r2.cmd("aaa")  # aaaa
+    dataReferor = DataReferor(r2)
+    dataReferor.init()
+    for s in dataReferor.stringsIt:
+        print(s[2])
+
+    disasmLines = dataReferor.query(30144, 28)
+    for disasmLine in disasmLines:
+        print(disasmLine.text)
     
 
 def printperf():
@@ -57,6 +90,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--hashcache", help="Print HashCache content", default=False, action='store_true')
     parser.add_argument("-o", "--outcome", help="Print HashCache content")
+    parser.add_argument("-i", "--info", help="PE File Info")
+    parser.add_argument("-d", "--data", help="PE File Data Info")
     parser.add_argument("-c", "--csv", help="Print csv of all outcome files in this directory")
     args = parser.parse_args()
 
@@ -66,7 +101,10 @@ def main():
         printoutcome(args.outcome)
     if args.csv is not None:
         printcsv(args.csv)
-
+    if args.info is not None:
+        printFileInfo(args.info)
+    if args.data is not None:
+        printFileDataInfo(args.data)
 
 if __name__ == "__main__":
     main()

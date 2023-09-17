@@ -7,6 +7,7 @@ from plugins.office.analyzer_office import analyzeFileWord
 from plugins.office.file_office import FileOffice
 from model.model_base import Scanner
 from tests.helpers import TestDetection
+from reducer import Reducer
 
 
 class OfficeTest(unittest.TestCase):
@@ -17,7 +18,8 @@ class OfficeTest(unittest.TestCase):
         detections.append( TestDetection(10656, b"e VB_Nam\x00e = ") )
 
         scanner = ScannerTestDocx(detections)
-        matches, _ = analyzeFileWord(fileOffice, scanner)
+        reducer = Reducer(fileOffice, scanner)
+        matches, _ = analyzeFileWord(fileOffice, scanner, reducer)
         # [Interval(0, 13312)]
         self.assertTrue(len(matches) == 1)
 
