@@ -10,10 +10,8 @@ from dotnetfile.util import FileLocation
 class FilePe(BaseFile):
     def __init__(self):
         super().__init__()
-        self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file
         self.isDotNet: bool = False
         self.baseAddr: int = 0
-        self.regionsBag: SectionsBag = SectionsBag()  # more details
         
 
     def parseFile(self) -> bool:

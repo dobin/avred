@@ -108,7 +108,9 @@ def scanUploads(args, scanner):
 
 def handleFile(filename, args, serverName):
     file = None
-    analyzerOptions = {}
+    analyzerOptions = {
+        "scanSpeed": ScanSpeed.Normal,
+    }
     plugin: Plugin = None
     outcome: Outcome = None
 

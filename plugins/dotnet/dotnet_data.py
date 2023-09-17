@@ -330,10 +330,9 @@ def render_pe(ostream: Formatter, dn) -> List[DotnetDataEntry]:
                                         if is_set:
                                             ostream.writeln(flag)
 
-                    correctionOffset = 0x1e00
                     entries.append(DotnetDataEntry(
                         table.name, 
-                        int(row.struct.get_file_offset()) - correctionOffset, 
+                        int(row.struct.get_file_offset()),
                         int(row.struct.sizeof()),
                         ostream.getvalue()))
 

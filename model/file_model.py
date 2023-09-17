@@ -2,6 +2,7 @@ import os
 import copy
 
 from model.model_data import Match, Data
+from model.model_code import Section, SectionsBag
 
 
 class BaseFile():
@@ -11,6 +12,9 @@ class BaseFile():
         self.filename: str = None
         self.fileData: Data = Data(b'')  # The content of the file
         self.data: Data = Data(b'')      # The data we work on
+
+        self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file
+        self.regionsBag: SectionsBag = SectionsBag()  # more details
         
 
     def parseFile(self) -> bool:
