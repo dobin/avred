@@ -77,6 +77,8 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
                     offsetStart=section.physaddr, 
                     offsetEnd=section.physaddr+section.size)
                 matches += moreMatches
+                if len(moreMatches) > 0:
+                    section.detected = True
 
         # there are instances where the section-based scanning does not yield any result.
         if len(moreMatches) == 0:
