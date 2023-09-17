@@ -1,14 +1,10 @@
 import logging
-import os
 import pefile
-import inspect
 
 from model.model_code import Section, SectionsBag
 from model.file_model import BaseFile
-
 from dotnetfile import DotNetPE
 from dotnetfile.util import FileLocation
-
 
 
 class FilePe(BaseFile):
@@ -21,6 +17,7 @@ class FilePe(BaseFile):
         
 
     def parseFile(self) -> bool:
+        """Parses PE file for sections and regions"""
         self.data = self.fileData  # no container, file is the data
 
         dataBytes = self.data.getBytes()
@@ -35,8 +32,25 @@ class FilePe(BaseFile):
         # Baseaddr
         self.baseAddr = pepe.OPTIONAL_HEADER.ImageBase
 
+        # self.peSectionsBag
+        self.parsePeSections(pepe, self.data.getLength())
+        # self.regionsBag
+        self.parsePeRegions(pepe)
+
+        # handle dotnet
+        if self.isDotNet:
+            # self.peSectionsBag
+            self.parseDotNetSections()
+            # added DotNet specific sections in .text, so disable scanning of .text
+            self.peSectionsBag.getSectionByName(".text").scan = False
+
+            # self.regionsBag
+            self.parseDotNetRegions()
+
+
+    def parsePeSections(self, pepe, fileLength):
         # Normal PE sections
-        min = len(dataBytes)
+        min = fileLength
         for section in pepe.sections:
             name = ''
             try:
@@ -57,6 +71,8 @@ class FilePe(BaseFile):
         # Header belongs to it too (as its the part of the file not covered by sections)
         self.peSectionsBag.addSection(Section('Header', 0, min, 0, False))
 
+
+    def parsePeRegions(self, pepe):
         # Directory "sections"
         for n, entry in enumerate(pepe.OPTIONAL_HEADER.DATA_DIRECTORY):
             if entry.VirtualAddress == 0:
@@ -71,13 +87,33 @@ class FilePe(BaseFile):
                 detected=False
             ))
 
-        # handle dotnet
-        if not self.isDotNet:
-            return
-        dotnetSections = getDotNetSections(self)
-        for section in dotnetSections.sections:
-            self.peSectionsBag.sections.append(section)
-        self.peSectionsBag.getSectionByName(".text").scan = False
+
+    def parseDotNetRegions(self):
+        dotnet_file = DotNetPE(self.filepath)
+        textSection: Section = self.peSectionsBag.getSectionByName('.text')
+        addrOffset = textSection.virtaddr - textSection.physaddr
+
+        # metadata header
+        metadata_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
+        metadata_header_vaddr = dotnet_file.dotnet_metadata_header.address
+        metadata_header_size = dotnet_file.dotnet_metadata_header.size
+
+        # Metadata header
+        s = Section('Metadata Header', 
+            metadata_header_addr,
+            metadata_header_size, 
+            metadata_header_vaddr,
+            False)
+        self.regionsBag.addSection(s)
+
+        # All stream headers
+        for streamHeader in dotnet_file.dotnet_stream_headers:
+            s = Section(streamHeader.string_representation,
+                streamHeader.address - addrOffset, 
+                streamHeader.size,
+                streamHeader.address,
+                False)
+            self.regionsBag.addSection(s)
 
 
     def rvaToPhysOffset(self, rva: int) -> int: 
@@ -119,90 +155,85 @@ class FilePe(BaseFile):
         self.Data().hidePart(offset=section.physaddr, size=section.size)
 
 
-def getDotNetSections(filePe) -> SectionsBag:
-    # Get more details about .net executable (e.g. streams)
-    # as most of it is just in PE .text
-    sectionsBag = SectionsBag()
+    def parseDotNetSections(self):
+        # Get more details about .net executable (e.g. streams)
+        # as most of it is just in PE .text
+        dotnet_file = DotNetPE(self.filepath)
+        textSection: Section = self.peSectionsBag.getSectionByName('.text')
+        addrOffset = textSection.virtaddr - textSection.physaddr
 
-    dotnet_file = DotNetPE(filePe.filepath)
-
-    textSection: Section = filePe.peSectionsBag.getSectionByName('.text')
-    addrOffset = textSection.virtaddr - textSection.physaddr
-    logging.info("Offset: {}".format(addrOffset))
-
-    # header
-    cli_header_addr = textSection.physaddr
-    cli_header_vaddr = textSection.virtaddr
-    cli_header_size = dotnet_file.clr_header.HeaderSize.value
-    s = Section('DotNet Header', 
-        cli_header_addr,   
-        cli_header_size, 
-        cli_header_vaddr,
-        False)
-    sectionsBag.addSection(s)
-
-    # metadata header
-    metadata_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
-    metadata_header_vaddr = dotnet_file.dotnet_metadata_header.address
-    metadata_header_size = dotnet_file.dotnet_metadata_header.size
-    s = Section('Metadata Header', 
-        metadata_header_addr,
-        metadata_header_size, 
-        metadata_header_vaddr,
-        False)
-    sectionsBag.addSection(s)
-
-    # methods
-    methods_addr = cli_header_addr + cli_header_size
-    methods_vaddr = cli_header_vaddr + cli_header_size
-    methods_size = metadata_header_addr - methods_addr
-    s = Section('methods', 
-        methods_addr,    
-        methods_size, 
-        methods_vaddr)
-    sectionsBag.addSection(s)
-    
-    # metadata directory
-    #metadata_directory_addr = dotnet_file.clr_header.MetaDataDirectoryAddress.value
-    #metadata_directory_addr -= addrOffset
-    #metadata_directory_size = dotnet_file.clr_header.MetaDataDirectorySize.value
-    #s = Section('Metadata Directory', 
-    #    metadata_directory_addr,
-    #    metadata_directory_size, 
-    #    0)
-    #sectionsBag.addSection(s)
-
-    # signature
-    signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
-    signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value    
-    if (signature_addr != 0):
-        signature_addr -= addrOffset
-        s = Section('Signature', 
-            signature_addr,
-            signature_size, 
-            0,
+        # header
+        cli_header_addr = textSection.physaddr
+        cli_header_vaddr = textSection.virtaddr
+        cli_header_size = dotnet_file.clr_header.HeaderSize.value
+        s = Section('DotNet Header', 
+            cli_header_addr,   
+            cli_header_size, 
+            cli_header_vaddr,
             False)
-        sectionsBag.addSection(s)
+        self.peSectionsBag.addSection(s)
 
-    # All stream headers
-    for streamHeader in dotnet_file.dotnet_stream_headers:
-        s = Section(streamHeader.string_representation,
-            streamHeader.address - addrOffset, 
-            streamHeader.size,
-            streamHeader.address,
-            False)
-        sectionsBag.addSection(s)
+        # more header:
+        # * start at metadata header
+        # * stop at metadata stream start
+        # (usually?)
+        more_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
+        more_header_vaddr = dotnet_file.dotnet_metadata_header.address
+        more_header_size = dotnet_file.dotnet_metadata_header.size
+        for streamHeader in dotnet_file.dotnet_stream_headers:
+            more_header_size += streamHeader.size
+        s = Section('MoreHeader', 
+            more_header_addr,     
+            more_header_size,
+            more_header_vaddr)
+        self.peSectionsBag.addSection(s)
 
-    # All streams
-    stream: FileLocation
-    for stream in dotnet_file.dotnet_streams:
-        s = Section(stream.string_representation,
-            stream.address - addrOffset, 
-            stream.size, 
-            stream.address)
-        sectionsBag.addSection(s)
+        # metadata header
+        metadata_header_addr = dotnet_file.dotnet_metadata_header.address - addrOffset
+        metadata_header_vaddr = dotnet_file.dotnet_metadata_header.address
+        metadata_header_size = dotnet_file.dotnet_metadata_header.size
 
-    return sectionsBag
+        # methods
+        methods_addr = cli_header_addr + cli_header_size
+        methods_vaddr = cli_header_vaddr + cli_header_size
+        methods_size = metadata_header_addr - methods_addr
+        s = Section('methods', 
+            methods_addr,    
+            methods_size, 
+            methods_vaddr)
+        self.peSectionsBag.addSection(s)
+        
+        # metadata directory
+        #metadata_directory_addr = dotnet_file.clr_header.MetaDataDirectoryAddress.value
+        #metadata_directory_addr -= addrOffset
+        #metadata_directory_size = dotnet_file.clr_header.MetaDataDirectorySize.value
+        #s = Section('Metadata Directory', 
+        #    metadata_directory_addr,
+        #    metadata_directory_size, 
+        #    0)
+        #sectionsBag.addSection(s)
+
+
+        # signature
+        signature_addr = dotnet_file.clr_header.StrongNameSignatureAddress.value
+        signature_size = dotnet_file.clr_header.StrongNameSignatureSize.value    
+        if (signature_addr != 0):
+            signature_addr -= addrOffset
+            s = Section('Signature', 
+                signature_addr,
+                signature_size, 
+                0,
+                False)
+            self.peSectionsBag.addSection(s)
+
+        # All streams
+        stream: FileLocation
+        for stream in dotnet_file.dotnet_streams:
+            s = Section(stream.string_representation,
+                stream.address - addrOffset, 
+                stream.size, 
+                stream.address)
+            self.peSectionsBag.addSection(s)
 
 
 # Name correspond to their index

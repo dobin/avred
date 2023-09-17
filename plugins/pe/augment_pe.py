@@ -45,6 +45,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         matchSectionName = '<unknown>'
         if matchSection is not None:
             matchSectionName = matchSection.name
+        matchDetail = ''
 
         if matchSection is None: 
             logging.warning("No section found for offset {}".format(match.fileOffset))
@@ -64,6 +65,7 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         match.setSection(matchSection)
         match.setDataHexdump(matchHexdump)
         match.setSectionInfo(matchSectionName)
+        match.setSectionDetail(matchDetail)
         match.setDisasmLines(matchDisasmLines)
         match.setAsmInstructions(matchAsmInstructions)
 
@@ -75,11 +77,9 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     return s
 
 
-def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
-    #virtAddrDisasm = filePe.offsetToRva(fileOffset)
+def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int) -> List[UiDisasmLine]:
     matchDisasmLines: List[UiDisasmLine] = []
     offset = fileOffset
-
     it = IntervalTree()
 
     # get all strings
@@ -92,16 +92,15 @@ def dataRefPe(r2, filePe: FilePe, fileOffset: int, size: int):
     its = it.overlap(Interval(offset, offset+size))
     for i in its:
         s = i[2]
-        # for each string (addr), print its references
+        # details of that string
         text = r2.cmd("axt @{}".format(s["vaddr"]))
-        #logging.info("  Ref: {}".format(ref))
         disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
         matchDisasmLines.append(disasmLine)
 
     it = IntervalTree()
 
     # check if it contains data from IMPORT
-    
+
 
     return matchDisasmLines
 

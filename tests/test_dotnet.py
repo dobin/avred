@@ -2,12 +2,11 @@ from typing import List
 import unittest
 
 from model.model_data import Match
-from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetSections, getDotNetDisassemblyHeader
+from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetDisassemblyHeader
 from plugins.dotnet.dotnet_data import DotnetData
 from plugins.dotnet.dncilparser import DncilParser
 from plugins.pe.file_pe import FilePe
 from plugins.dotnet.outflank_dotnet import outflankDotnet
-
 
 
 class DotnetDataTest(unittest.TestCase):
@@ -21,9 +20,6 @@ class DotnetDataTest(unittest.TestCase):
         self.assertEqual(entry.tableName, "MethodDef")
         self.assertEqual(entry.offset, 0x42c)
         self.assertEqual(entry.size, 14)
-
-        
-        
 
 
 class DotnetDisasmTest(unittest.TestCase):
@@ -120,17 +116,16 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld.dll")
 
         self.assertTrue(filePe.isDotNet)
-        sectionsBag = getDotNetSections(filePe)
 
-        section = sectionsBag.getSectionByName('DotNet Header')
+        section = filePe.peSectionsBag.getSectionByName('DotNet Header')
         self.assertEqual(section.physaddr, 512)
         self.assertEqual(section.size, 72)
 
-        section = sectionsBag.getSectionByName('methods')
+        section = filePe.peSectionsBag.getSectionByName('methods')
         self.assertEqual(section.physaddr, 584)
         self.assertEqual(section.size, 28)
 
-        section = sectionsBag.getSectionByName('#~ Stream Header')
+        section = filePe.peSectionsBag.getSectionByName('#~ Stream Header')
         self.assertEqual(section.physaddr, 644)
         self.assertEqual(section.size, 12)
 
@@ -138,10 +133,10 @@ class DotnetDisasmTest(unittest.TestCase):
     def test_dotnetsection_overlap(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
-        sectionsBag = getDotNetSections(filePe) 
-        overlap = sectionsBag.getSectionsForPhysRange(600, 750)
-        
+        overlap = filePe.peSectionsBag.getSectionsForPhysRange(600, 750)
         self.assertEqual(len(overlap), 8)
+        for a in filePe.peSectionsBag.sections:
+            print("A: " + str(a))
         #self.assertEqual(overlap[0].name, "Stream: #~")
         #self.assertEqual(overlap[1].name, "methods")
 
@@ -149,19 +144,18 @@ class DotnetDisasmTest(unittest.TestCase):
     def test_dotnetheaders(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
+ 
+        filePe.peSectionsBag.printSections()
 
-        sectionsBag = getDotNetSections(filePe) 
-        sectionsBag.printSections()
-
-        section = sectionsBag.getSectionByName("DotNet Header")
+        section = filePe.peSectionsBag.getSectionByName("DotNet Header")
         self.assertEqual(section.physaddr, 512)
         self.assertEqual(section.size, 72)
 
-        section = sectionsBag.getSectionByName("#~ Stream Header")
+        section = filePe.peSectionsBag.getSectionByName("#~ Stream Header")
         self.assertEqual(section.physaddr, 644)
         self.assertEqual(section.size, 12)
 
-        #section = sectionsBag.getSectionByName("Metadata Directory")
+        #section = peSectionsBag.getSectionByName("Metadata Directory")
         #self.assertEqual(section.addr, 612)
         #self.assertEqual(section.size, 1316)
 
@@ -195,8 +189,6 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
 
         self.assertTrue(filePe.isDotNet)
-        sectionsBag = getDotNetSections(filePe)
-
-        section = sectionsBag.getSectionByName("Signature")
+        section = filePe.peSectionsBag.getSectionByName("Signature")
         self.assertEqual(section.physaddr, 2088)
         self.assertEqual(section.size, 128)

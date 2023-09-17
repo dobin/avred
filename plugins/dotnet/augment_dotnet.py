@@ -2,7 +2,7 @@ from intervaltree import Interval, IntervalTree
 import logging
 from typing import List, Tuple, Set
 
-from plugins.pe.file_pe import FilePe, getDotNetSections
+from plugins.pe.file_pe import FilePe
 from plugins.dotnet.dncilparser import DncilParser, IlMethod
 from plugins.dotnet.dotnet_data import DotnetData, DotnetDataEntry
 
@@ -20,9 +20,6 @@ from model.model_code import AsmInstruction, UiDisasmLine, SectionType
 
 def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
     """Correlates file offsets in matches with the disassembles filePe methods"""
-    dotnetSectionsBag = getDotNetSections(filePe)
-    if dotnetSectionsBag is None:
-        logging.warning("No dotNet sections")
     dncilParser = DncilParser(filePe.filepath)
     dotNetData = DotnetData(filePe.filepath)
     dotNetData.init()
@@ -36,22 +33,24 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         matchSectionName = filePe.peSectionsBag.getSectionNameByPhysAddr(match.fileOffset)
 
         # set info: PE section name first
-        info = matchSectionName + " "
+        #info = matchSectionName + " "
         detail = ''
 
-        if dotnetSectionsBag is not None:
-            # set info: .NET sections/streams name next if found
-            sections = dotnetSectionsBag.getSectionsForPhysRange(match.start(), match.end())
-            info += ','.join(s.name for s in sections)
+        #if dotnetSectionsBag is not None:
+        # set info: .NET sections/streams name next if found
+        sections = filePe.peSectionsBag.getSectionsForPhysRange(match.start(), match.end()) 
+        regions = filePe.regionsBag.getSectionsForPhysRange(match.start(), match.end())
+        info = ' '.join(s.name for s in sections)
+        info += ' '.join(s.name for s in regions)
 
         if matchSectionName == ".text":
             # only disassemble if the match is reasonably small. same for function names
             if match.size < MAX_DISASM_SIZE:
                 matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
                 detail += " " + " ".join(methodNames)
-            
+
             # .text has most of DotNet, check if its methods
-            if dotnetSectionsBag.getSectionNameByPhysAddr(match.start()) == "methods":
+            if filePe.peSectionsBag.getSectionNameByPhysAddr(match.start()) == "methods":
                 match.sectionType = SectionType.CODE
             else:
                 match.sectionType = SectionType.DATA
@@ -65,19 +64,19 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
                         res.tableName + res.data,
                         res.tableName + res.data)
                     uidl.append(u)
-                matchDisasmLines = uidl
+                matchDisasmLines += uidl
                     
         else:
             match.sectionType = SectionType.DATA
 
         # take dotnet section
-        relevantSection = dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
-        if relevantSection is None:
-            # or pe section if not in dotnet section
-            relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
-        if relevantSection is None:
-            # should never be reached
-            relevantSection = "unknown?"
+        relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
+        #if relevantSection is None:
+        #    # or pe section if not in dotnet section
+        #    relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
+        #if relevantSection is None:
+        #    # should never be reached
+        #    relevantSection = "unknown?"
 
         match.setSection(relevantSection)
         match.setData(matchBytes)
