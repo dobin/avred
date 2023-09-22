@@ -59,7 +59,7 @@ def printFileInfo(filepath):
         print(region)
 
 
-def printFileDataInfo(filepath):
+def printFileDataInfo(filepath, offset, size):
     filePe = FilePe()
     filePe.loadFromFile(filepath)
 
@@ -67,10 +67,10 @@ def printFileDataInfo(filepath):
     r2.cmd("aaa")  # aaaa
     dataReferor = DataReferor(r2)
     dataReferor.init()
-    for s in dataReferor.stringsIt:
-        print(s[2])
+    #for s in dataReferor.stringsIt:
+    #    print(s[2])
 
-    disasmLines = dataReferor.query(30144, 28)
+    disasmLines = dataReferor.query(offset, size)
     for disasmLine in disasmLines:
         print(disasmLine.text)
     
@@ -88,23 +88,39 @@ def printcsv(dir: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--hashcache", help="Print HashCache content", default=False, action='store_true')
-    parser.add_argument("-o", "--outcome", help="Print HashCache content")
-    parser.add_argument("-i", "--info", help="PE File Info")
-    parser.add_argument("-d", "--data", help="PE File Data Info")
-    parser.add_argument("-c", "--csv", help="Print csv of all outcome files in this directory")
-    args = parser.parse_args()
+    subparsers = parser.add_subparsers(dest="command", help="Choose a command")
 
-    if args.hashcache:
+    # Hash Cache
+    parserHashcache = subparsers.add_parser("hashcache", help="")
+
+    # CSV
+    parserCsv = subparsers.add_parser("csv", help="")
+    parserCsv.add_argument("--directory", help="")
+    
+    # Outcome
+    parserOutcome = subparsers.add_parser("outcome", help="")
+    parserOutcome.add_argument("--file", help="")
+
+    # Info
+    parserInfo = subparsers.add_parser("info", help="")
+    parserInfo.add_argument("--file", help="")
+
+    # Augment
+    parserAugment = subparsers.add_parser("augment", help="")
+    parserAugment.add_argument("--file", help="")
+    parserAugment.add_argument("--offset", help="", type=int)
+    parserAugment.add_argument("--size", help="", type=int)
+ 
+    args = parser.parse_args()
+    if args.command == "csv":
+        printcsv(args.directory)
+    elif args.command == "hashcache":
         hashcache()
-    if args.outcome is not None:
-        printoutcome(args.outcome)
-    if args.csv is not None:
-        printcsv(args.csv)
-    if args.info is not None:
-        printFileInfo(args.info)
-    if args.data is not None:
-        printFileDataInfo(args.data)
+    elif args.command == "info":
+        printFileInfo(args.file)
+    elif args.command == "augment":
+        printFileDataInfo(args.file, args.offset, args.size)
+
 
 if __name__ == "__main__":
     main()

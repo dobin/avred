@@ -20,7 +20,8 @@ def cmdcmd(r, cmd):
 
 
 class DataReferor():
-    def __init__(self, r2):
+    def __init__(self, r2: r2pipe):
+        """Requires a valid open r2 pipe to work on"""
         self.r2 = r2
         self.stringsIt: IntervalTree = IntervalTree()
 

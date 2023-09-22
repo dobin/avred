@@ -8,17 +8,15 @@ from filehelper import *
 from copy import deepcopy
 import pprint
 import signal
-from intervaltree import Interval, IntervalTree
 
 
 from config import config
-from model.model_base import Outcome, ScanSpeed, Scanner, ScanInfo
+from model.model_base import Outcome, ScanSpeed, ScanInfo
 
 from model.model_verification import Appraisal, VerifyStatus
 from filehelper import FileType
 from scanner import ScannerRest, ScannerYara, hashCache
 from scanning import scanIsHash
-from model.model_base import Match
 
 from plugins.plain.plugin_plain import PluginPlain
 from plugins.dotnet.plugin_dotnet import PluginDotNet
@@ -26,7 +24,6 @@ from plugins.pe.plugin_pe import PluginPe
 from plugins.office.plugin_office import PluginOffice
 from model.plugin_model import Plugin
 from verifier import verify
-from minimizer import minimizeMatches
 from reducer import Reducer
 
 
