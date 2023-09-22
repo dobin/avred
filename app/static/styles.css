@@ -58,3 +58,9 @@ table.table td {
   margin-left: 0; 
   margin-right:0.5em;
 }
+
+.tooltip-inner {
+  max-width: 40em;
+  width: 40em;
+  text-align: left;
+}

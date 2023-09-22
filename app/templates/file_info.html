@@ -139,6 +139,7 @@ File is not detected by AV.
 <table class="table">
     <tr>
         <th>Name</th>
+        <th>Info</th>
         <th>Offset</th>
         <th>VirtAddr</th>
         <th>Size</th>
@@ -149,6 +150,17 @@ File is not detected by AV.
     {% for section in outcome.sections|sort %}
     <tr>
         <td>{{section.name}}</td>
+        <td>
+            {{sectionInfo.get(section.name, {})["info"]}}
+
+            {% if section.name in sectionInfo %}
+                <span data-bs-toggle="tooltip" data-bs-class="wider-tooltip" data-bs-html="true" data-bs-delay="300"
+                    title="{{sectionInfo[section.name]['Purpose'] }}<br><br>{{sectionInfo[section.name]['Description'] }}"
+                >
+                    <i class="bi bi-info-circle"></i>
+                </span>
+            {% endif %}
+        </td>
         <td>{{section.physaddr}}</td>
         <td>{{section.virtaddr}}</td>
         <td>{{section.size}}</td>
@@ -228,5 +240,13 @@ File is not detected by AV.
 {% endif %}
 <br>
 {% endif %}
+
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
 
 </div>

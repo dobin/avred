@@ -12,6 +12,7 @@ from app.views_auth import load_user
 from model.model_base import Outcome
 from model.model_data import Match
 from myutils import getOutcomesFromDir, getFileData, OutcomesToCsv
+from app.info import SectionInfo
 
 #from waitress import serve
 
@@ -85,7 +86,8 @@ def file(filename):
     return render_template('file.html',
                            outcome=outcome, 
                            logData=logData,
-                           servers=current_app.config['AVRED_SERVERS']
+                           servers=current_app.config['AVRED_SERVERS'],
+                           sectionInfo=SectionInfo,
                            )
 
 
