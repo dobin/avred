@@ -31,7 +31,7 @@ def getOutcomesFromDir(dir: str) -> List[Outcome]:
 
 def OutcomesToCsv(outcomes: List[Outcome]):
     matchSectionKeys = []
-    csvHeader = "name;ident;size;scanDuration;chunksTested;matchesAdded;appraisal;Cnt;CntDom;CntCode;CntData"
+    csvHeader = "name,ident,size,scanDuration,chunksTested,matchesAdded,appraisal,Cnt,CntDom,CntCode,CntData,IAT"
 
     lines = []
     for outcome in outcomes:
@@ -66,7 +66,9 @@ def OutcomesToCsv(outcomes: List[Outcome]):
                 if n not in matchSectionKeys:
                     matchSectionKeys.append(n)
 
-        ret += "{};{};{};{};{};{};{};{};{};{};{}".format(
+        iat = 'IMAGE_DIRECTORY_ENTRY_IMPORT' in match.sectionDetail
+
+        ret += "{},{},{},{},{},{},{},{},{},{},{},{}".format(
             outcome.fileInfo.name,
             outcome.fileInfo.ident,
             outcome.fileInfo.size,
@@ -80,11 +82,12 @@ def OutcomesToCsv(outcomes: List[Outcome]):
             cntDom,
             cntCode,
             cntData,
+            iat,
         )
 
         #if outcome.verification:
         #    for verifyStatus in outcome.verification.matchConclusions.verifyStatus:
-        #        ret += ";{}".format(verifyStatus.name)
+        #        ret += ",{}".format(verifyStatus.name)
         lines.append({
             "line": ret,
             "sections": matchSections
@@ -95,16 +98,16 @@ def OutcomesToCsv(outcomes: List[Outcome]):
     ret = ''
     ret += csvHeader
     for k in matchSectionKeys:
-        ret += ";{}".format(k)
+        ret += ",{}".format(k)
     ret += "\r\n"
 
     for entry in lines:
         a = ''
         for k in matchSectionKeys:
             if k in entry["sections"]:
-                a += ";{}".format(entry["sections"][k])
+                a += ",{}".format(entry["sections"][k])
             else:
-                a += ";0"
+                a += ",0"
 
         ret += entry["line"] + a + "\r\n"
 
