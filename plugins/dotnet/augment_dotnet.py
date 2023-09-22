@@ -55,6 +55,8 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             else:
                 match.sectionType = SectionType.DATA
                 results: List[DotnetDataEntry] = dotNetData.findBy(match.start(), match.end())
+
+                infoAdd: Set[str] = set()
                 uidl: List[UiDisasmLine] = []
                 for res in results:
                     u = UiDisasmLine(
@@ -64,7 +66,9 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
                         res.tableName + res.data,
                         res.tableName + res.data)
                     uidl.append(u)
+                    infoAdd.add(res.tableName)
                 matchDisasmLines += uidl
+                detail += " ".join(list(infoAdd))
                     
         else:
             match.sectionType = SectionType.DATA
