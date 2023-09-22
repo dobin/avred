@@ -98,6 +98,10 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
                 matchDisasmLines = dataReferor.query(match.start(), match.size)
             match.sectionType = SectionType.DATA
 
+            region = filePe.regionsBag.getSectionByPhysAddr(match.start())
+            if region is not None:
+                matchDetail += region.name
+
         match.setRva(matchRva)
         match.setData(matchBytes)
         match.setSection(matchSection)
