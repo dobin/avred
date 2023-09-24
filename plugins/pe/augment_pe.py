@@ -28,6 +28,7 @@ class DataReferor():
 
     def init(self):
         # get all strings
+        logging.info("R2: Get all strings")
         stringsJson = self.r2.cmd("izj")
         strings = json.loads(stringsJson)
         stringsIt = IntervalTree()
@@ -58,6 +59,7 @@ class DataReferor():
 def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     """Augments all matches with additional information from filePe"""
 
+    logging.info("Augment: File PE")
     # Augment the matches with R2 decompilation and section information.
     # Returns a FileInfo object with detailed file information too.
     r2 = r2pipe.open(filePe.filepath)
@@ -65,14 +67,16 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
     # load PDB file if exists
     pdbFile = filePe.filepath + ".pdb"
     if os.path.exists(pdbFile):
-        logging.info("Loading PDB file: {}".format(pdbFile))
+        logging.info("R2: Loading PDB file: {}".format(pdbFile))
         r2.cmd("idp {}".format(pdbFile))
 
+    logging.info("R2: Analyze")
     r2.cmd("aaa")  # aaaa
 
     dataReferor = DataReferor(r2)
     dataReferor.init()
 
+    logging.info("Augment: Matches")
     for match in matches:
         matchRva = filePe.physOffsetToRva(match.start())
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())

@@ -320,6 +320,7 @@ def checkFile(filepath, serverName):
     data = None
     with open(filepath, 'rb') as file:
         data = file.read()
+    print("Sending file to server")
     detected = scanner.scannerDetectsBytes(data, os.path.basename(filepath))
     if detected:
         print(f"File is detected")

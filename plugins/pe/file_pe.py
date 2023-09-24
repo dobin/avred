@@ -16,6 +16,7 @@ class FilePe(BaseFile):
 
     def parseFile(self) -> bool:
         """Parses PE file for sections and regions"""
+        logging.info("FilePe: Parse File")
         self.data = self.fileData  # no container, file is the data
 
         dataBytes = self.data.getBytes()
@@ -47,6 +48,7 @@ class FilePe(BaseFile):
 
 
     def parsePeSections(self, pepe, fileLength):
+        logging.info("FilePe: Parse PE Sections")
         # Normal PE sections
         min = fileLength
         for section in pepe.sections:
@@ -71,6 +73,7 @@ class FilePe(BaseFile):
 
 
     def parsePeRegions(self, pepe):
+        logging.info("FilePe: Parse PE Regions")
         # Directory "sections"
         for n, entry in enumerate(pepe.OPTIONAL_HEADER.DATA_DIRECTORY):
             if entry.VirtualAddress == 0:
@@ -91,6 +94,7 @@ class FilePe(BaseFile):
 
 
     def parseDotNetRegions(self):
+        logging.info("FilePe: Parse DotNet Regions")
         dotnet_file = DotNetPE(self.filepath)
         textSection: Section = self.peSectionsBag.getSectionByName('.text')
         addrOffset = textSection.virtaddr - textSection.physaddr
@@ -160,6 +164,7 @@ class FilePe(BaseFile):
 
 
     def parseDotNetSections(self):
+        logging.info("FilePe: Parse DotNet Sections")
         # Get more details about .net executable (e.g. streams)
         # as most of it is just in PE .text
         dotnet_file = DotNetPE(self.filepath)
