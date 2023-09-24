@@ -35,6 +35,7 @@ if __name__ == "__main__":
 	app.config['SESSION_TYPE'] = 'filesystem'
 	app.config['AVRED_SERVERS'] = config.get('server')
 	app.config['PASSWORD'] = config.get('password')
+	app.config['WebMaxFileSizeMb'] = config.get('WebMaxFileSizeMb')
 	app.config['AVRED_SCANNER'] = os.path.join(root_folder, 'avred.py')
 	app.config['ALLOWED_EXTENSIONS'] = { 'exe', 'dll', 'ps1', 'docm', 'bin', 'lnk' }
 

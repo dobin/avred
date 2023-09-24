@@ -66,7 +66,11 @@ def upload_file():
         fileName = request.files['file'].filename
         fileData = request.files['file'].read()
 
-        maxFileSize = 50 * 1024 * 1024
+        if current_app.config["WebMaxFileSizeMb"] == "":
+            # 50MB default
+            maxFileSize = 50 * 1024 * 1024
+        else:
+            maxFileSize = current_app.config["WebMaxFileSizeMb"] * 1024 * 1024
         if len (fileData) > maxFileSize:
             logging.warn("File too big: {}".format(len(fileData)))
             return "File size larget than {}".format(maxFileSize)
