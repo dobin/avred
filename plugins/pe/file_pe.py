@@ -74,8 +74,12 @@ class FilePe(BaseFile):
         # Directory "sections"
         for n, entry in enumerate(pepe.OPTIONAL_HEADER.DATA_DIRECTORY):
             if entry.VirtualAddress == 0:
+                logging.warn("Section {} has address 0, skipping".format(directoryTables[n]))
                 continue
-            
+            if entry.Size == 0:
+                logging.warn("Section {} has length 0, skipping".format(directoryTables[n]))
+                continue
+
             self.regionsBag.addSection(Section(
                 directoryTables[n],
                 self.rvaToPhysOffset(entry.VirtualAddress),
