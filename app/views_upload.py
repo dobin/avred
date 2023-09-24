@@ -56,15 +56,20 @@ def upload_file():
         # Check all required parameters
         if 'server' not in request.form or not request.form['server'].isalnum():
             # no haxxoring in server name
-            logging.error('Invalid server name')
+            logging.warn('Invalid server name')
             return 'Invalid server name', 400
         serverName = request.form['server']
         if not 'file' in request.files or request.files['file'].filename == '':
             # If the user does not select a file, the browser submits an empty file without a filename
-            logging.error('No selected file')
+            logging.warn('No selected file')
             return 'No file selected', 400
         fileName = request.files['file'].filename
         fileData = request.files['file'].read()
+
+        maxFileSize = 50 * 1024 * 1024
+        if len (fileData) > maxFileSize:
+            logging.warn("File too big: {}".format(len(fileData)))
+            return "File size larget than {}".format(maxFileSize)
 
         # check if server is online
         try:
