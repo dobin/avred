@@ -242,6 +242,10 @@ class DncilParser():
 
         pe: dnPE = dnfile.dnPE(path)
 
+        if pe.net.mdtables.MethodDef is None:
+            logging.warn("No MethodDef found - malformed PE DotNet?")
+            return
+
         # dncil works on methods
         row: MethodDefRow
         for row in pe.net.mdtables.MethodDef:

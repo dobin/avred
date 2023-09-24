@@ -117,7 +117,9 @@ class FilePe(BaseFile):
     def rvaToPhysOffset(self, rva: int) -> int: 
         section = self.peSectionsBag.getSectionByVirtAddr(rva)
         if section is None:
-            logging.error("Could not find section for rva 0x{:x}".format(rva))
+            logging.warn("Could not find section for rva 0x{:x}".format(rva))
+            return 0
+
         diff = rva - section.virtaddr
         offset = section.physaddr + diff
         return offset
