@@ -215,7 +215,7 @@ def example(filename):
     if errStr is not None: 
         return "Error: " + errStr
     
-    return render_template('file.html', outcome=outcome, logData=logData)
+    return render_template('file.html', outcome=outcome, logData=logData, sectionInfo=SectionInfo)
 
 
 @views.route("/examples")
