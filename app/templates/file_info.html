@@ -151,9 +151,9 @@ File is not detected by AV.
     <tr>
         <td>{{section.name}}</td>
         <td>
-            {{sectionInfo.get(section.name, {})["info"]}}
-
             {% if section.name in sectionInfo %}
+                {{sectionInfo[section.name]["info"]}}
+
                 <span data-bs-toggle="tooltip" data-bs-class="wider-tooltip" data-bs-html="true" data-bs-delay="300"
                     title="{{sectionInfo[section.name]['Purpose'] }}<br><br>{{sectionInfo[section.name]['Description'] }}"
                 >
