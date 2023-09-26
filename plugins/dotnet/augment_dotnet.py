@@ -29,8 +29,6 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         matchAsmInstructions: List[AsmInstruction] = []
         matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump = hexdmp(matchBytes, offset=match.start())
-        matchSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)  # note: we take the PE section, not DotNet
-        matchSectionName = filePe.peSectionsBag.getSectionNameByPhysAddr(match.fileOffset)
 
         # set info: PE section name first
         #info = matchSectionName + " "
@@ -43,14 +41,14 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         info = ' '.join(s.name for s in sections)
         info += ' '.join(s.name for s in regions)
 
-        if matchSectionName == ".text":
+        if filePe.peSectionsBag.containsSectionName(match.fileOffset, ".text"):
             # only disassemble if the match is reasonably small. same for function names
             if match.size < MAX_DISASM_SIZE:
                 matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
                 detail += " " + " ".join(methodNames)
 
             # .text has most of DotNet, check if its methods
-            if filePe.peSectionsBag.getSectionNameByPhysAddr(match.start()) == "methods":
+            if filePe.peSectionsBag.containsSectionName(match.fileOffset, "methods"):
                 match.sectionType = SectionType.CODE
             else:
                 match.sectionType = SectionType.DATA

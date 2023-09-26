@@ -68,6 +68,15 @@ class SectionsBag:
         return None
     
 
+    def containsSectionName(self, address: int, name: str) -> bool:
+        """Returns true if one of the section names of address is name"""
+        for section in self.sections:
+            if address >= section.physaddr and address <= section.physaddr + section.size:
+                if section.name == name:
+                    return True
+        return False
+
+
     def getSectionNameByPhysAddr(self, address: int) -> Section:
         for section in self.sections:
             if address >= section.physaddr and address <= section.physaddr + section.size:
