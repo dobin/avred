@@ -194,7 +194,8 @@ class FilePe(BaseFile):
         s = Section('MoreHeader', 
             more_header_addr,     
             more_header_size,
-            more_header_vaddr)
+            more_header_vaddr,
+            scan = False)
         self.peSectionsBag.addSection(s)
 
         # metadata header
