@@ -36,20 +36,19 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
 
         #if dotnetSectionsBag is not None:
         # set info: .NET sections/streams name next if found
-        sections = filePe.peSectionsBag.getSectionsForPhysRange(match.start(), match.end()) 
+        info = filePe.peSectionsBag.getSectionByPhysAddr(match.start()).name
+        info += " " + filePe.dotnetSectionsBag.getSectionByPhysAddr(match.start()).name
         regions = filePe.regionsBag.getSectionsForPhysRange(match.start(), match.end())
-        info = ' '.join(s.name for s in sections)
         info += ' '.join(s.name for s in regions)
 
         if filePe.peSectionsBag.containsSectionName(match.fileOffset, ".text"):
-            # only disassemble if the match is reasonably small. same for function names
-            if match.size < MAX_DISASM_SIZE:
-                matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
-                detail += " " + " ".join(methodNames)
-
             # .text has most of DotNet, check if its methods
-            if filePe.peSectionsBag.containsSectionName(match.fileOffset, "methods"):
+            if filePe.dotnetSectionsBag.containsSectionName(match.fileOffset, "methods"):
                 match.sectionType = SectionType.CODE
+                if match.size < MAX_DISASM_SIZE:
+                    # only disassemble if the match is reasonably small. same for function names
+                    matchAsmInstructions, matchDisasmLines, methodNames = disassembleDotNet(match.start(), match.size, dncilParser)
+                    detail += " " + " ".join(methodNames)
             else:
                 match.sectionType = SectionType.DATA
                 results: List[DotnetDataEntry] = dotNetData.findBy(match.start(), match.end())
@@ -72,7 +71,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
             match.sectionType = SectionType.DATA
 
         # take dotnet section
-        relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
+        relevantSection = filePe.dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
         #if relevantSection is None:
         #    # or pe section if not in dotnet section
         #    relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)

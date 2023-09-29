@@ -15,13 +15,12 @@ from scanning import scanIsHash
 
 def analyzeFilePe(filePe: FilePe, scanner: Scanner, reducer: Reducer, analyzerOptions={}) -> Tuple[Match, ScanInfo]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches and ScanInfo"""
-    isolate = analyzerOptions.get("isolate", False)
     scanSpeed = analyzerOptions.get("scanSpeed", ScanSpeed.Normal)
     scanInfo = ScanInfo(scanner.scanner_name, scanSpeed)
 
     # prepare the reducer with the file
     timeStart = time.time()
-    matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer, isolate)
+    matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer)
     scanInfo.scanDuration = round(time.time() - timeStart)
     scanInfo.scannerPipe = scanPipe
     scanInfo.chunksTested = reducer.chunks_tested
@@ -30,7 +29,7 @@ def analyzeFilePe(filePe: FilePe, scanner: Scanner, reducer: Reducer, analyzerOp
     return matches, scanInfo
 
 
-def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isolate=False) -> Tuple[List[Match], str]:
+def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Tuple[List[Match], str]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches"""
     scanStages = []
     matches: List[Match] = []
@@ -38,14 +37,8 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer, isola
     # identify which sections get detected
     # default is to not-isolate
     detected_sections = []
-    if isolate:
-        logging.info("Section Detection: Isolating sections (zero all others)")
-        scanStages.append('ident:zero-nontarget-sections')
-        detected_sections = findDetectedSectionsIsolate(filePe, scanner)
-    else:
-        logging.info("Section Detection: Zero section (leave all others intact)")
-        scanStages.append('ident:zero-target-section')
-        detected_sections = findDetectedSections(filePe, scanner)
+    logging.info("Section Detection: Zero section (leave all others intact)")
+    detected_sections = findDetectedSections(filePe, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         logging.info(f"  section: {section.name}")
@@ -97,40 +90,18 @@ def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
     """hide each section of filePe, return the ones which wont be detected anymore (have a dominant influence)"""
     detected_sections: List[Section] = []
 
-    for idx, section in enumerate(filePe.peSectionsBag.sections):
+    for idx, section in enumerate(filePe.scanSectionsBag.sections):
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section)
         detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
         if not detected:
             # always store scan result
-            filePe.peSectionsBag.sections[idx].detected = True
+            filePe.scanSectionsBag.sections[idx].detected = True
 
             # only return if we should scan it
             if section.scan:
                 detected_sections += [section]
 
         logging.info(f"Hide: {section.name} -> Detected: {detected} (to scan: {section.scan})")
-
-    return detected_sections
-
-
-def findDetectedSectionsIsolate(filePe: FilePe, scanner) -> List[Section]:
-    """for each section, hide everything except it (isolate), and return which one gets detected (have a dominant influence)"""
-    detected_sections = []
-
-    for idx, section in enumerate(filePe.peSectionsBag.sections):
-        filePeCopy = deepcopy(filePe)
-        filePeCopy.hideAllSectionsExcept(section.name)
-        detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
-
-        if not detected:
-            # always store scan result
-            filePe.peSectionsBag.sections[idx].detected = True
-
-            # only return if we should scan it
-            if section.scan:
-                detected_sections += [section]
-
-        logging.info(f"Hide all except: {section.name} -> Detected: {detected}  (to scan: {section.scan})")
 
     return detected_sections

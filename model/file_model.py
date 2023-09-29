@@ -13,8 +13,10 @@ class BaseFile():
         self.fileData: Data = Data(b'')  # The content of the file
         self.data: Data = Data(b'')      # The data we work on
 
-        self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file
-        self.regionsBag: SectionsBag = SectionsBag()  # more details
+        self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file, saved, overlap
+        self.dotnetSectionsBag: SectionsBag = SectionsBag()  # for DotNet "sections"
+        self.scanSectionsBag: SectionsBag = SectionsBag()  # the sections to scan, not-saved, no-overlap
+        self.regionsBag: SectionsBag = SectionsBag()  # more details saved, no-overlap
         
 
     def parseFile(self) -> bool:

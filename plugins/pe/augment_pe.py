@@ -116,11 +116,11 @@ def augmentFilePe(filePe: FilePe, matches: List[Match]) -> str:
         match.setAsmInstructions(matchAsmInstructions)
 
     # file structure
-    s = ''
-    for matchSection in filePe.peSectionsBag.sections:
-        s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
-            matchSection.name, matchSection.physaddr, matchSection.virtaddr, matchSection.size, matchSection.scan)
-    return s
+    #s = ''
+    #for matchSection in filePe.peSectionsBag.sections:
+    #    s += "{0:<16}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
+    #        matchSection.name, matchSection.physaddr, matchSection.virtaddr, matchSection.size, matchSection.scan)
+    #return s
 
 
 conv = Ansi2HTMLConverter()

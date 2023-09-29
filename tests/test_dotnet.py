@@ -116,11 +116,11 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld.dll")
         self.assertTrue(filePe.isDotNet)
 
-        section = filePe.peSectionsBag.getSectionByName('DotNet Header')
+        section = filePe.dotnetSectionsBag.getSectionByName('DotNet Header')
         self.assertEqual(section.physaddr, 512)
         self.assertEqual(section.size, 72)
 
-        section = filePe.peSectionsBag.getSectionByName('methods')
+        section = filePe.dotnetSectionsBag.getSectionByName('methods')
         self.assertEqual(section.physaddr, 584)
         self.assertEqual(section.size, 28)
 
@@ -130,7 +130,7 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld.dll")
         self.assertTrue(filePe.isDotNet)
 
-        section = filePe.regionsBag.getSectionByName('#~ Stream Header')
+        section = filePe.dotnetSectionsBag.getSectionByName('#~ Stream Header')
         self.assertEqual(section.physaddr, 644)
         self.assertEqual(section.virtaddr, 0x2084)
         self.assertEqual(section.size, 12)
@@ -191,6 +191,6 @@ class DotnetDisasmTest(unittest.TestCase):
         filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
 
         self.assertTrue(filePe.isDotNet)
-        section = filePe.peSectionsBag.getSectionByName("Signature")
+        section = filePe.dotnetSectionsBag.getSectionByName("Signature")
         self.assertEqual(section.physaddr, 2088)
         self.assertEqual(section.size, 128)

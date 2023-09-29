@@ -66,8 +66,14 @@ class SectionsBag:
             if address >= section.virtaddr and address <= section.virtaddr + section.size:
                 return section
         return None
-    
 
+    def getSectionNameByPhysAddr(self, address: int) -> Section:
+        for section in self.sections:
+            if address >= section.physaddr and address <= section.physaddr + section.size:
+                return section.name
+        return "<unknown>"
+    
+        
     def containsSectionName(self, address: int, name: str) -> bool:
         """Returns true if one of the section names of address is name"""
         for section in self.sections:
@@ -75,13 +81,6 @@ class SectionsBag:
                 if section.name == name:
                     return True
         return False
-
-
-    def getSectionNameByPhysAddr(self, address: int) -> Section:
-        for section in self.sections:
-            if address >= section.physaddr and address <= section.physaddr + section.size:
-                return section.name
-        return "<unknown>"
     
 
     def getSectionsForPhysRange(self, start: int, end: int) -> List[Section]:
