@@ -114,6 +114,9 @@ class FilePe(BaseFile):
     def physOffsetToRva(self, fileOffset: int) -> int:
         baseAddr = self.baseAddr
         matchSection = self.peSectionsBag.getSectionByPhysAddr(fileOffset)
+        if matchSection is None:
+            logging.warn("Could not find matching section for offset {}".format(fileOffset))
+            return 0
         
         # offset: of fileOffset from .text segment file offset
         offset = fileOffset - matchSection.physaddr
