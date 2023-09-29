@@ -24,9 +24,6 @@
             </tr><tr>
                 <td>MD5: </td>
                 <td>{{outcome.fileInfo.hash|hex}}</td>
-            </tr><tr>
-                <td>Scan date: </td>
-                <td>{{outcome.scanInfo.scanTime|mydate}}</td>
             </tr>
         </table>
         
@@ -45,17 +42,16 @@
                 <td>Appraisal: </td>
                 <td>{{outcome.appraisal.value}} based</td>
             </tr><tr>
-                <td>is Detected: </td>
-                <td>{{outcome.isDetected}}</td>
-            </tr><tr>
                 <td>Scan Debug: </td>
                 <td>{% if outcome.isDetected %}
                     Duration: {{outcome.scanInfo.scanDuration}}s
                     / Chunks: {{outcome.scanInfo.chunksTested}}
                     / Matches: {{outcome.scanInfo.matchesAdded}}
-                    / {{outcome.scanInfo.scanSpeed}}
                     {% endif %}
                 </td>
+            </tr><tr>
+                <td>Scan date: </td>
+                <td>{{outcome.scanInfo.scanTime|mydate}}</td>
             </tr>
         
         </table>
