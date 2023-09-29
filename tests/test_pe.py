@@ -16,6 +16,21 @@ from reducer import Reducer
 
 
 class PeTest(unittest.TestCase):
+    def test_sections(self):
+        filePe = FilePe()
+        filePe.loadFromFile("tests/data/test.exe")
+
+        scanSections = filePe.getScanSections()
+        self.assertEqual(len(scanSections), 16)
+
+        textSection = filePe.peSectionsBag.getSectionByName(".text")
+        self.assertIsNotNone(textSection)
+        self.assertEqual(textSection.scan, True)
+        self.assertEqual(textSection.physaddr, 1536)
+        self.assertEqual(textSection.size, 27648)
+        self.assertEqual(textSection.virtaddr, 4096)
+        
+
     def test_disasm(self):
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe") 
