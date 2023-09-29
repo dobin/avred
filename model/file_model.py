@@ -23,13 +23,13 @@ class BaseFile():
 
     def getScanSections(self):
         sections = []
-        sections.append(Section("all", 0, len(self.fileData), 0, True))
+        sections.append(Section("all", 0, self.fileData.getLength(), 0, True))
         return sections
     
 
     def getSections(self):
         sections = []
-        sections.append(Section("all", 0, len(self.fileData), 0, True))
+        sections.append(Section("all", 0, self.fileData.getLength(), 0, True))
         return sections
     
 
