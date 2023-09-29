@@ -9,20 +9,25 @@
     <table class="table table-bordered">
         <thead>
         <tr>
-            <th>Name <span>&uarr;</span</th>
-            {% if session['showDetails'] %}
-            <th>Type <span>&uarr;</span</th>
-            <th>Scan Details</th>
+            {% if not examples %}
+            <th>Date <span>&uarr;</span> </th>
             {% endif %}
-            <th>Appraisal <span>&uarr;</span</th>
+            <th>Name <span>&uarr;</span> </th>
+            <th>Type <span>&uarr;</span> </th>
+            <th>Appraisal <span>&uarr;</span> </th>
+
             {% if session['showDetails'] %}
-            <th>Scanner <span>&uarr;</span</th>
-            <th>Cnt <span>&uarr;</span</th>
+            <th>Scan Details</th>
+            <th>Scanner <span>&uarr;</span> </th>
+            <th>Cnt <span>&uarr;</span> </th>
             {% endif %}
         </tr>
         </thead>
         {% for outcome in outcomes %}
         <tr>
+            {% if not examples %}
+            <td>{{outcome.scanInfo.scanTime|mydate}}</td>
+            {% endif %}
             <td>
                 {% if examples %}
                 <a href="/example/{{outcome.fileInfo.name}}">
@@ -34,8 +39,14 @@
                 </a>
                 {% endif %}
             </td>
-            {% if session['showDetails'] %}
             <td style="white-space:nowrap;">{{outcome.fileInfo.ident}}</td>
+            <td style="white-space:nowrap;">{{outcome.appraisal.value}}
+                {% if outcome.outflankPatches|length > 0 %}
+                [P]
+                {% endif %}
+            </td>
+
+            {% if session['showDetails'] %}
             <td>
                 {% if outcome.isDetected %}
                 D: {{outcome.scanInfo.scanDuration}}s
@@ -43,13 +54,6 @@
                 / M: {{outcome.scanInfo.matchesAdded}}
                 {% endif %}
             </td>
-            {% endif %}
-            <td style="white-space:nowrap;">{{outcome.appraisal.value}}
-                {% if outcome.outflankPatches|length > 0 %}
-                [P]
-                {% endif %}
-            </td>
-            {% if session['showDetails'] %}
             <td>{{outcome.scanInfo.scannerName}}
                 {% if outcome.isDetected and not outcome.isOutflanked %}
                 <div class="spinner-border spinner-border-sm" role="status"></div>

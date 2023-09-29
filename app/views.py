@@ -27,7 +27,7 @@ def before_request():
     # thanks chatgpt
 
     if not 'showDetails' in session:
-        session['showDetails'] = True
+        session['showDetails'] = False
 
     if current_app.config["PASSWORD"] == "" and not current_user.is_authenticated:
         login_user(user = load_user('1'))
