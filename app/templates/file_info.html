@@ -27,16 +27,6 @@
             </tr><tr>
                 <td>Scan date: </td>
                 <td>{{outcome.scanInfo.scanTime|mydate}}</td>
-
-            <tr></tr>
-                <td>Other Scans: </td>
-                <td>
-                    {% for server in servers %}
-                        {% if server != outcome.scanInfo.scannerName %}
-                          <a href="/file/{{outcome.fileInfo.name | replace('.exe', '.' + server + '.exe')}}">{{server}}</a>
-                        {% endif %}
-                    {% endfor %}
-                </td>
             </tr>
         </table>
         
@@ -51,9 +41,6 @@
                     <div class="spinner-border spinner-border-sm" role="status"></div>
                     {% endif %}
                 </td>
-            </tr><tr>
-                <td>Scanner Info: </td>
-                <td>{{outcome.scanInfo.scannerPipe}}</td>
             </tr><tr>
                 <td>Appraisal: </td>
                 <td>{{outcome.appraisal.value}} based</td>

@@ -34,7 +34,7 @@ SectionInfo = {
 
     ".rdata": {
         "name": ".rdata",
-        "info": "(Read-Only Data Section",
+        "info": "Read-Only Data Section",
         "Purpose": "Stores read-only data, such as constants and strings.",
         "Description": "This section contains data that should not be modified during program execution. It often includes constants, strings, and other read-only data.",
     },

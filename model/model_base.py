@@ -19,7 +19,6 @@ class ScanInfo():
         self.scanSpeed: ScanSpeed = scanSpeed
         self.scanTime = datetime.datetime.now()
 
-        self.scannerPipe: str = ''
         self.scanDuration: int = 0
         self.sections: List[Section] = []
         self.chunksTested: int = 0
@@ -28,8 +27,8 @@ class ScanInfo():
 
     def __str__(self):
         s = ''
-        s += "{} {} {} {} {} {}".format(
-            self.scannerName, self.scannerPipe, self.scanTime,
+        s += "{} {} {} {} {}".format(
+            self.scannerName, self.scanTime,
             "", self.chunksTested, self.matchesAdded
         )
         return s

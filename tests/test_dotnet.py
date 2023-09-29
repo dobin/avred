@@ -5,7 +5,7 @@ from model.model_data import Match
 from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetDisassemblyHeader
 from plugins.dotnet.dotnet_data import DotnetData
 from plugins.dotnet.dncilparser import DncilParser
-from plugins.pe.file_pe import FilePe
+from plugins.dotnet.file_dotnet import FilePeDotNet
 from plugins.dotnet.outflank_dotnet import outflankDotnet
 
 
@@ -24,7 +24,7 @@ class DotnetDataTest(unittest.TestCase):
 
 class DotnetDisasmTest(unittest.TestCase):
     def test_dncilparser(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/dotnet-test.dll")
         dncilParser = DncilParser(filePe.filepath)
 
@@ -48,7 +48,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_augmentFileDotnet(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/dotnet-test.dll")
 
         """
@@ -112,9 +112,8 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetsections(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
-        self.assertTrue(filePe.isDotNet)
 
         section = filePe.dotnetSectionsBag.getSectionByName('DotNet Header')
         self.assertEqual(section.physaddr, 512)
@@ -126,9 +125,8 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnet_regions(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
-        self.assertTrue(filePe.isDotNet)
 
         section = filePe.dotnetSectionsBag.getSectionByName('#~ Stream Header')
         self.assertEqual(section.physaddr, 644)
@@ -154,7 +152,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetheaders_uidisasmlines(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
  
         #section = peSectionsBag.getSectionByName("Metadata Directory")
@@ -187,10 +185,8 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetsections_signed(self):
-        filePe = FilePe()
+        filePe = FilePeDotNet()
         filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
-
-        self.assertTrue(filePe.isDotNet)
         section = filePe.dotnetSectionsBag.getSectionByName("Signature")
         self.assertEqual(section.physaddr, 2088)
         self.assertEqual(section.size, 128)

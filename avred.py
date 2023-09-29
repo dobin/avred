@@ -49,8 +49,6 @@ def main():
     parser.add_argument("--reverify", help="Debug: Re-do the verification", default=False, action='store_true')
     parser.add_argument("--reaugment", help="Debug: Re-do the augmentation", default=False, action='store_true')
     parser.add_argument("--reoutflank", help="Debug: Re-do the Outflanking", default=False, action='store_true')
-    # analyzer options
-    parser.add_argument("--pe_isolate", help="PE: Isolate sections to be tested (null all other)", default=False,  action='store_true')
     args = parser.parse_args()
 
     # Load config
@@ -148,7 +146,7 @@ def handleFile(filename, args, serverName):
         if args.reinfo:
             fileInfo = getFileInfo(file)
             outcome.fileInfo = fileInfo
-            outcome.sections = file.peSectionsBag.sections
+            outcome.sections = file.getSections()
             outcome.regions = file.regionsBag.sections
             outcome.saveToFile(file.filepath)
     else:
@@ -160,7 +158,7 @@ def handleFile(filename, args, serverName):
 
         fileInfo = getFileInfo(file)
         outcome = Outcome.nullOutcome(fileInfo)
-        outcome.sections = file.peSectionsBag.sections
+        outcome.sections = file.getSections()
         outcome.regions = file.regionsBag.sections
 
 

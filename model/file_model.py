@@ -14,14 +14,24 @@ class BaseFile():
         self.data: Data = Data(b'')      # The data we work on
 
         self.peSectionsBag: SectionsBag = SectionsBag()  # cover complete file, saved, overlap
-        self.dotnetSectionsBag: SectionsBag = SectionsBag()  # for DotNet "sections"
-        self.scanSectionsBag: SectionsBag = SectionsBag()  # the sections to scan, not-saved, no-overlap
         self.regionsBag: SectionsBag = SectionsBag()  # more details saved, no-overlap
         
 
     def parseFile(self) -> bool:
         self.data = self.fileData  # Default: File is Data
 
+
+    def getScanSections(self):
+        sections = []
+        sections.append(Section("all", 0, len(self.fileData), 0, True))
+        return sections
+    
+
+    def getSections(self):
+        sections = []
+        sections.append(Section("all", 0, len(self.fileData), 0, True))
+        return sections
+    
 
     def Data(self) -> Data:
         return self.data
@@ -47,6 +57,7 @@ class BaseFile():
             self.fileData = Data(f.read())
 
         return self.parseFile()
+    
     
     def saveToFile(self, filepath: str):
         with open(filepath, "wb") as f:

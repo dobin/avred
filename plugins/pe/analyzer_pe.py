@@ -20,25 +20,23 @@ def analyzeFilePe(filePe: FilePe, scanner: Scanner, reducer: Reducer, analyzerOp
 
     # prepare the reducer with the file
     timeStart = time.time()
-    matches, scanPipe = scanForMatchesInPe(filePe, scanner, reducer)
+    matches = scanForMatchesInPe(filePe, scanner, reducer)
     scanInfo.scanDuration = round(time.time() - timeStart)
-    scanInfo.scannerPipe = scanPipe
     scanInfo.chunksTested = reducer.chunks_tested
     scanInfo.matchesAdded = reducer.matchesAdded
 
     return matches, scanInfo
 
 
-def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Tuple[List[Match], str]:
+def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> List[Match]:
     """Scans a PE file given with filePe with Scanner scanner. Returns all matches"""
-    scanStages = []
     matches: List[Match] = []
 
     # identify which sections get detected
-    # default is to not-isolate
+    scan_sections = filePe.getScanSections()
     detected_sections = []
     logging.info("Section Detection: Zero section (leave all others intact)")
-    detected_sections = findDetectedSections(filePe, scanner)
+    detected_sections = findDetectedSections(filePe, scan_sections, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
         logging.info(f"  section: {section.name}")
@@ -46,8 +44,6 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Tu
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:
         logging.info("Section analysis failed. Fall back to non-section-aware reducer (flat-scan)")
-        scanStages.append('scan:flat_1')
-        
         # start at .text section, which is usually the first one. Offset 512
         # this will skip scanning of PE headers, which gives unecessary false positives
         offsetStart = filePe.peSectionsBag.getSectionByName(".text").physaddr
@@ -56,7 +52,6 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Tu
         matches += moreMatches
     else:
         # analyze each detected section
-        scanStages.append('scan:by-section')
         for section in detected_sections:
             # check first if its hash based (rare)
             logging.info("Check if hash on section:{} start:{} size:{}".format(section.name, section.physaddr, section.size))
@@ -73,34 +68,25 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Tu
                 if len(moreMatches) > 0:
                     section.detected = True
 
-        # there are instances where the section-based scanning does not yield any result.
-        if len(moreMatches) == 0:
-            # do it again with a flat-scan
-            logging.info("Section based analysis failed, no matches. Fall back to non-section-aware reducer (flat-scan)")
-            scanStages.append('scan:flat_2')
-            moreMatches = reducer.scan(
-                offsetStart=filePe.peSectionsBag.getSectionByName(".text").physaddr, # start at .code, skip header(s)
-                offsetEnd=filePe.Data().getLength())
-            matches += moreMatches
-
-    return sorted(matches), " -> ".join(scanStages)
+    return sorted(matches)
 
 
-def findDetectedSections(filePe: FilePe, scanner) -> List[Section]:
+def findDetectedSections(filePe: FilePe, scan_sections: List[Section], scanner) -> List[Section]:
     """hide each section of filePe, return the ones which wont be detected anymore (have a dominant influence)"""
     detected_sections: List[Section] = []
 
-    for idx, section in enumerate(filePe.scanSectionsBag.sections):
+    for idx, section in enumerate(scan_sections):
+        if not section.scan:
+            logging.warn("Wanted to scan a scan_section, but its set to not to be scanned: {}".format(section.name))
+            continue
+
         filePeCopy = deepcopy(filePe)
         filePeCopy.hideSection(section)
         detected = scanner.scannerDetectsBytes(filePeCopy.DataAsBytes(), filePeCopy.filename)
         if not detected:
             # always store scan result
-            filePe.scanSectionsBag.sections[idx].detected = True
-
-            # only return if we should scan it
-            if section.scan:
-                detected_sections += [section]
+            section.detected = True
+            detected_sections += [section]
 
         logging.info(f"Hide: {section.name} -> Detected: {detected} (to scan: {section.scan})")
 
