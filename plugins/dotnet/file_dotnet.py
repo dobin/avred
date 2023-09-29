@@ -6,7 +6,7 @@ from dotnetfile.util import FileLocation
 from plugins.pe.file_pe import FilePe
 
 
-class FilePeDotNet(FilePe):
+class FilePeDotnet(FilePe):
     def __init__(self):
         super().__init__()
         self.dotnetSectionsBag: SectionsBag = SectionsBag()  # for DotNet "sections"

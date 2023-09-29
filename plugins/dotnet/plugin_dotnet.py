@@ -8,14 +8,14 @@ from model.file_model import BaseFile
 from plugins.pe.analyzer_pe import analyzeFilePe
 from plugins.dotnet.augment_dotnet import augmentFileDotnet
 from plugins.dotnet.outflank_dotnet import outflankDotnet
-from plugins.dotnet.file_dotnet import FilePeDotNet
+from plugins.dotnet.file_dotnet import FilePeDotnet
 from reducer import Reducer
 
 
 class PluginDotNet(Plugin):
     
     def makeFile(self, filepath: str):
-        file = FilePeDotNet()
+        file = FilePeDotnet()
         file.loadFromFile(filepath)
         return file
 

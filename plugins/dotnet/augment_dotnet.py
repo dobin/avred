@@ -2,7 +2,7 @@ from intervaltree import Interval, IntervalTree
 import logging
 from typing import List, Tuple, Set
 
-from plugins.pe.file_pe import FilePe
+from plugins.dotnet.file_dotnet import FilePeDotnet
 from plugins.dotnet.dncilparser import DncilParser, IlMethod
 from plugins.dotnet.dotnet_data import DotnetData, DotnetDataEntry
 
@@ -18,32 +18,31 @@ from model.model_data import Match
 from model.model_code import AsmInstruction, UiDisasmLine, SectionType
 
 
-def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
+def augmentFileDotnet(filePeDotnet: FilePeDotnet, matches: List[Match]) -> str:
     """Correlates file offsets in matches with the disassembles filePe methods"""
-    dncilParser = DncilParser(filePe.filepath)
-    dotNetData = DotnetData(filePe.filepath)
+    dncilParser = DncilParser(filePeDotnet.filepath)
+    dotNetData = DotnetData(filePeDotnet.filepath)
     dotNetData.init()
     
     for match in matches:
         matchDisasmLines: List[UiDisasmLine] = []
         matchAsmInstructions: List[AsmInstruction] = []
-        matchBytes: bytes = filePe.Data().getBytesRange(start=match.start(), end=match.end())
+        matchBytes: bytes = filePeDotnet.Data().getBytesRange(start=match.start(), end=match.end())
         matchHexdump = hexdmp(matchBytes, offset=match.start())
 
-        # set info: PE section name first
-        #info = matchSectionName + " "
         detail = ''
-
-        #if dotnetSectionsBag is not None:
-        # set info: .NET sections/streams name next if found
-        info = filePe.peSectionsBag.getSectionByPhysAddr(match.start()).name
-        info += " " + filePe.dotnetSectionsBag.getSectionByPhysAddr(match.start()).name
-        regions = filePe.regionsBag.getSectionsForPhysRange(match.start(), match.end())
+        info = filePeDotnet.peSectionsBag.getSectionByPhysAddr(match.start()).name  # should always work
+        # May have more information in dotnet sections
+        dotnetSection = filePeDotnet.dotnetSectionsBag.getSectionByPhysAddr(match.start())
+        if dotnetSection is not None:
+            info += " " + dotnetSection.name
+        # Even more info with regions
+        regions = filePeDotnet.regionsBag.getSectionsForPhysRange(match.start(), match.end())
         info += ' '.join(s.name for s in regions)
 
-        if filePe.peSectionsBag.containsSectionName(match.fileOffset, ".text"):
+        if filePeDotnet.peSectionsBag.containsSectionName(match.fileOffset, ".text"):
             # .text has most of DotNet, check if its methods
-            if filePe.dotnetSectionsBag.containsSectionName(match.fileOffset, "methods"):
+            if filePeDotnet.dotnetSectionsBag.containsSectionName(match.fileOffset, "methods"):
                 match.sectionType = SectionType.CODE
                 if match.size < MAX_DISASM_SIZE:
                     # only disassemble if the match is reasonably small. same for function names
@@ -66,12 +65,11 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
                     infoAdd.add(res.tableName)
                 matchDisasmLines += uidl
                 detail += " ".join(list(infoAdd))
-                    
         else:
             match.sectionType = SectionType.DATA
 
         # take dotnet section
-        relevantSection = filePe.dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
+        relevantSection = filePeDotnet.dotnetSectionsBag.getSectionByPhysAddr(match.fileOffset)
         #if relevantSection is None:
         #    # or pe section if not in dotnet section
         #    relevantSection = filePe.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
@@ -88,7 +86,7 @@ def augmentFileDotnet(filePe: FilePe, matches: List[Match]) -> str:
         match.setAsmInstructions(matchAsmInstructions)
 
     s = ''
-    for section in filePe.peSectionsBag.sections:
+    for section in filePeDotnet.peSectionsBag.sections:
         s += "{0:<24}: File Offset: {1:<7}  Virtual Addr: {2:<6}  size {3:<6}  scan:{4}\n".format(
             section.name, section.physaddr, section.virtaddr, section.size, section.scan)
     return s
@@ -166,11 +164,11 @@ def disassembleDotNet(offset: int, size: int, dncilParser: DncilParser) -> Tuple
     return asmInstructions, uiDisasmLines, methodNames
 
 
-def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[UiDisasmLine]:
+def getDotNetDisassemblyHeader(filePeDotnet: FilePeDotnet, offset: int, size: int,) -> List[UiDisasmLine]:
     uiDisasmLines: List[UiDisasmLine] = []  # all diasassmbled IL
-    dotnet_file = DotNetPE(filePe.filepath)
+    dotnet_file = DotNetPE(filePeDotnet.filepath)
 
-    textSection = filePe.peSectionsBag.getSectionByName('.text')
+    textSection = filePeDotnet.peSectionsBag.getSectionByName('.text')
     addrOffset = textSection.virtaddr - textSection.physaddr
 
     # DotNet header / CLI header / CLR header
@@ -180,7 +178,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
             text = "{:18}  CLR Header: {}: {}".format(
-                hexstr(filePe.DataAsBytes(), hdrFileOffset, hdrSize),
+                hexstr(filePeDotnet.DataAsBytes(), hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
             uiDisasmLine = UiDisasmLine(
@@ -199,7 +197,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
         hdrSize = entry.size
         if hdrFileOffset >= offset and hdrFileOffset + hdrSize <= offset + size:
             text = "{:18}  Metadata Header: {}: {}".format(
-                hexstr(filePe.DataAsBytes(), hdrFileOffset, hdrSize),
+                hexstr(filePeDotnet.DataAsBytes(), hdrFileOffset, hdrSize),
                 entry.display_name, 
                 entry.value)
             uiDisasmLine = UiDisasmLine(
@@ -222,7 +220,7 @@ def getDotNetDisassemblyHeader(filePe: FilePe, offset: int, size: int,) -> List[
             entrySize = entry.size
             if entryFileOffset >= offset and entryFileOffset + entrySize <= offset + size:
                 text = "{:18}  Stream Header: {}: {}".format(
-                    hexstr(filePe.DataAsBytes(), entryFileOffset, entrySize),
+                    hexstr(filePeDotnet.DataAsBytes(), entryFileOffset, entrySize),
                     entry.display_name, 
                     entry.value)
                 uiDisasmLine = UiDisasmLine(

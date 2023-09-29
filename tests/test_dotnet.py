@@ -5,7 +5,7 @@ from model.model_data import Match
 from plugins.dotnet.augment_dotnet import DncilParser, augmentFileDotnet, getDotNetDisassemblyHeader
 from plugins.dotnet.dotnet_data import DotnetData
 from plugins.dotnet.dncilparser import DncilParser
-from plugins.dotnet.file_dotnet import FilePeDotNet
+from plugins.dotnet.file_dotnet import FilePeDotnet
 from plugins.dotnet.outflank_dotnet import outflankDotnet
 
 
@@ -24,7 +24,7 @@ class DotnetDataTest(unittest.TestCase):
 
 class DotnetDisasmTest(unittest.TestCase):
     def test_dncilparser(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/dotnet-test.dll")
         dncilParser = DncilParser(filePe.filepath)
 
@@ -48,7 +48,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_augmentFileDotnet(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/dotnet-test.dll")
 
         """
@@ -112,7 +112,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetsections(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
 
         section = filePe.dotnetSectionsBag.getSectionByName('DotNet Header')
@@ -125,7 +125,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnet_regions(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
 
         section = filePe.dotnetSectionsBag.getSectionByName('#~ Stream Header')
@@ -152,7 +152,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetheaders_uidisasmlines(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/HelloWorld.dll")
  
         #section = peSectionsBag.getSectionByName("Metadata Directory")
@@ -185,7 +185,7 @@ class DotnetDisasmTest(unittest.TestCase):
 
 
     def test_dotnetsections_signed(self):
-        filePe = FilePeDotNet()
+        filePe = FilePeDotnet()
         filePe.loadFromFile("tests/data/HelloWorld-signed.dll")
         section = filePe.dotnetSectionsBag.getSectionByName("Signature")
         self.assertEqual(section.physaddr, 2088)
