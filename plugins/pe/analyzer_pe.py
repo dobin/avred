@@ -35,11 +35,11 @@ def scanForMatchesInPe(filePe: FilePe, scanner: Scanner, reducer: Reducer) -> Li
     # identify which sections get detected
     scan_sections = filePe.getScanSections()
     detected_sections = []
-    logging.info("Section Detection: Zero section (leave all others intact)")
+    logging.info("Find detected sections")
     detected_sections = findDetectedSections(filePe, scan_sections, scanner)
     logging.info(f"{len(detected_sections)} section(s) trigger the antivirus independantly")
     for section in detected_sections:
-        logging.info(f"  section: {section.name}")
+        logging.info(f"  section: {section.name} {section.detected}")
 
     moreMatches: List[Match] = []
     if len(detected_sections) == 0:

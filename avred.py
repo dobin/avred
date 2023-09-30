@@ -225,6 +225,8 @@ def handleFile(filename, args, serverName):
             else:
                break
 
+        # sections of file now have the "detected" attribute set. re-add to the outcome with this info
+        outcome.sections = filePlay.getSections()
 
     hashCache.save()
     #if not outcome.isMinimized:
