@@ -295,6 +295,6 @@ def date_filter(s):
 @views.app_template_filter('nicebool')
 def nicebool_filter(s):
     if s is True:
-        return "y"
+        return "x"
     else:
-        return "n"
+        return ""
