@@ -47,6 +47,8 @@ class DataReferor():
             s = i[2]
             # details of that string
             text = self.r2.cmd("axt @{}".format(s["vaddr"]))
+            if text == "":
+                text = "No references for string at this address found"
             disasmLine = UiDisasmLine(s["paddr"], s["vaddr"], True, text, text)
             matchDisasmLines.append(disasmLine)
 

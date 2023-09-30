@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import pickle
 import argparse
@@ -72,7 +74,7 @@ def printFileDataInfo(filepath, offset, size):
 
     disasmLines = dataReferor.query(offset, size)
     for disasmLine in disasmLines:
-        print(disasmLine.text)
+        print(disasmLine)
     
 
 def printperf():
