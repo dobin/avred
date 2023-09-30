@@ -40,9 +40,11 @@ def augmentFileDotnet(filePeDotnet: FilePeDotnet, matches: List[Match]) -> str:
         regions = filePeDotnet.regionsBag.getSectionsForPhysRange(match.start(), match.end())
         info += ' '.join(s.name for s in regions)
 
-        if filePeDotnet.peSectionsBag.containsSectionName(match.fileOffset, ".text"):
+        matchPeSection = filePeDotnet.peSectionsBag.getSectionByPhysAddr(match.fileOffset)
+        if matchPeSection is not None and section.name == ".text":
             # .text has most of DotNet, check if its methods
-            if filePeDotnet.dotnetSectionsBag.containsSectionName(match.fileOffset, "methods"):
+            matchDotnetSection = filePeDotnet.dotnetSectionsBag.containsSectionName(match.fileOffset)
+            if matchDotnetSection is not None and matchDotnetSection.name == "methods":
                 match.sectionType = SectionType.CODE
                 if match.size < MAX_DISASM_SIZE:
                     # only disassemble if the match is reasonably small. same for function names

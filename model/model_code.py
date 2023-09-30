@@ -42,46 +42,23 @@ class SectionsBag:
         self.sectionsByPhys.add(interval)
 
 
-    def removeSectionByName(self, sectionName: str):
-        new = []
-        for section in self.sections:
-            if section.name != sectionName:
-                new.append(section)
-        self.sections = new
-        
-
     def getSectionByName(self, sectionName: str) -> Section:
         return next((sec for sec in self.sections if sectionName in sec.name ), None)
 
 
     def getSectionByPhysAddr(self, address: int) -> Section:
         for section in self.sections:
-            if address >= section.physaddr and address <= section.physaddr + section.size:
+            if address >= section.physaddr and address < section.physaddr + section.size:
                 return section
         return None
     
     
     def getSectionByVirtAddr(self, address: int) -> Section:
         for section in self.sections:
-            if address >= section.virtaddr and address <= section.virtaddr + section.size:
+            if address >= section.virtaddr and address < section.virtaddr + section.size:
                 return section
         return None
 
-    def getSectionNameByPhysAddr(self, address: int) -> Section:
-        for section in self.sections:
-            if address >= section.physaddr and address <= section.physaddr + section.size:
-                return section.name
-        return "<unknown>"
-    
-        
-    def containsSectionName(self, address: int, name: str) -> bool:
-        """Returns true if one of the section names of address is name"""
-        for section in self.sections:
-            if address >= section.physaddr and address <= section.physaddr + section.size:
-                if section.name == name:
-                    return True
-        return False
-    
 
     def getSectionsForPhysRange(self, start: int, end: int) -> List[Section]:
         res = self.sectionsByPhys.overlap(start, end)

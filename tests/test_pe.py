@@ -17,6 +17,7 @@ from reducer import Reducer
 
 class PeTest(unittest.TestCase):
     def test_sections(self):
+        # This also tests sectionsbag
         filePe = FilePe()
         filePe.loadFromFile("tests/data/test.exe")
 
@@ -30,6 +31,53 @@ class PeTest(unittest.TestCase):
         self.assertEqual(textSection.size, 27648)
         self.assertEqual(textSection.virtaddr, 4096)
         
+        peHeader = filePe.peSectionsBag.getSectionByName("Header")
+        self.assertIsNotNone(peHeader)
+        self.assertEqual(peHeader.scan, False)
+        self.assertEqual(peHeader.physaddr, 0)
+        self.assertEqual(peHeader.size, 1536)
+        self.assertEqual(peHeader.virtaddr, 0)
+
+        section = filePe.peSectionsBag.getSectionByName("nonexistant")
+        self.assertIsNone(section)
+
+        # predefined
+        textOffset = 1536
+        textVaddr = 4096
+        dataOffset = 29184
+        dataVaddr = 32768
+
+        # .text offset
+        section = filePe.peSectionsBag.getSectionByPhysAddr(textOffset)
+        self.assertTrue(section.name == ".text")
+        section = filePe.peSectionsBag.getSectionByPhysAddr(textOffset+100)
+        self.assertTrue(section.name == ".text")
+        # .data offset
+        section = filePe.peSectionsBag.getSectionByPhysAddr(dataOffset)
+        print(section)
+        self.assertTrue(section.name == ".data")
+        section = filePe.peSectionsBag.getSectionByPhysAddr(dataOffset+100)
+        self.assertTrue(section.name == ".data")
+        # .text virt
+        section = filePe.peSectionsBag.getSectionByVirtAddr(textVaddr)
+        self.assertTrue(section.name == ".text")
+        section = filePe.peSectionsBag.getSectionByVirtAddr(textVaddr+100)
+        self.assertTrue(section.name == ".text")
+        # .data virt
+        section = filePe.peSectionsBag.getSectionByVirtAddr(dataVaddr)
+        self.assertTrue(section.name == ".data")
+        section = filePe.peSectionsBag.getSectionByVirtAddr(dataVaddr+100)
+        self.assertTrue(section.name == ".data")
+
+        section = filePe.peSectionsBag.getSectionByPhysAddr(12345678)
+        self.assertIsNone(section)
+        section = filePe.peSectionsBag.getSectionByVirtAddr(12345678)
+        self.assertIsNone(section)
+
+        sections = filePe.peSectionsBag.getSectionsForPhysRange(textOffset, dataOffset + 100)
+        self.assertEqual(sections[0].name, ".text")
+        self.assertEqual(sections[1].name, ".data")
+
 
     def test_disasm(self):
         filePe = FilePe()
