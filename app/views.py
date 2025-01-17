@@ -123,7 +123,7 @@ def fileDownloadOutflank(filename):
         io.BytesIO(fileData),
         mimetype='application/octet-stream',
         as_attachment=True,
-        attachment_filename=filename
+        download_name=filename
     )
 
 @views.route("/file/<filename>/downloadPatchMatch/<id>")
@@ -143,7 +143,7 @@ def fileDownloadPatchMatch(filename, id):
         io.BytesIO(fileData),
         mimetype='application/octet-stream',
         as_attachment=True,
-        attachment_filename=filename
+        download_name=filename
     )
 
 def getPatchMatch(filepath) -> Tuple[str, bytearray]:
@@ -181,7 +181,7 @@ def fileDownloadPatchFull(filename):
         io.BytesIO(fileData),
         mimetype='application/octet-stream',
         as_attachment=True,
-        attachment_filename=filename
+        download_name=filename
     )
 
 
@@ -248,7 +248,7 @@ def fileDownloadExamplePatchFull(filename):
         io.BytesIO(fileData),
         mimetype='application/octet-stream',
         as_attachment=True,
-        attachment_filename=filename
+        download_name=filename
     )
 
 
@@ -269,7 +269,7 @@ def fileDownloadExamplePatchMatch(filename, id):
         io.BytesIO(fileData),
         mimetype='application/octet-stream',
         as_attachment=True,
-        attachment_filename=filename
+        download_name=filename
     )
 
 ## Filters
