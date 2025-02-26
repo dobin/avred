@@ -7,7 +7,7 @@ pefile
 ansi2html
 flask
 dncil
-dnfile>=0.14.1
+dnfile==0.14.1
 olefile
 oletools
 psutil
