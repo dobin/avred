@@ -14,7 +14,7 @@ def outflankPe(
         filePe: FilePe, matches: List[Match], matchConclusion: MatchConclusion, scanner: Scanner = None
 ) -> List[OutflankPatch]:
     results: List[OutflankPatch] = []
-    useTypes = [ 'mov', 'lea', 'xor', 'and', 'inc', 'cmp' ]
+    useTypes = [ 'mov', 'lea', 'xor', 'and', 'inc', 'cmp', 'add']
     blacklist = [ 'clc' ]
 
     logging.info("-> Matches: {}   VerifyStatus: B: {}".format(len(matches), len(matchConclusion.verifyStatus)))
