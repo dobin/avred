@@ -122,6 +122,8 @@ def main():
         printFileInfo(args.file)
     elif args.command == "augment":
         printFileDataInfo(args.file, args.offset, args.size)
+    elif args.command == "outcome":
+        printoutcome(args.file)
 
 
 if __name__ == "__main__":
