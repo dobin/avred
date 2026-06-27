@@ -77,6 +77,16 @@ id:0  offset:12991  len:195
 ```
 
 
+## Screenshots
+
+![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-overview.png)
+
+![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-fileinfo.png)
+
+![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-filematches.png)
+
+
+
 ## Upgrades
 
 Note: Data is stored in pickled `.outcome` files. When i change the model, 
