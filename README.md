@@ -10,7 +10,8 @@ This includes:
 * Verification of matches
 * Augmentation of matches as disassembled code or data references
 
-It is mainly used to make it easier for RedTeamers to obfuscate their tools. 
+It is mainly used to make it easier for RedTeamers to obfuscate their tools
+against static analysis. All Antivirus are supported (AMSI is being used). 
 
 Check it out: [avred.r00ted.ch](https://avred.r00ted.ch)
 
@@ -25,6 +26,7 @@ Compared to ThreatCheck, avred has multiple features:
 * Verifies the matches to make sure they work
 * Shows more information of matches
 * Shows relevance of match, so you can target the weakest one
+* Supports all AV
 
  
 ## Background
