@@ -79,11 +79,14 @@ id:0  offset:12991  len:195
 
 ## Screenshots
 
+Fileinfo:
 ![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-overview.png)
 
+File details:
 ![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-fileinfo.png)
 
-![avred fileinfo](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-filematches.png)
+File matches:
+![avred filematches](https://raw.githubusercontent.com/dobin/avred/refs/heads/main/doc/screenshot-filematches.png)
 
 
 
